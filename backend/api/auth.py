@@ -46,9 +46,6 @@ def register():
 
     return jsonify({"error": "用户信息错误"}), 401
 
-@bp.post('/multi-register')
-def multi_register():
-    return jsonify({'success': '敬请期待'}), 200
 
 @bp.post('/login')
 def login():
@@ -141,3 +138,28 @@ def logout():
     return jsonify({'success': '注销成功'}), 200
 
 
+
+
+@bp.post('/delete_user')
+@login_required
+def delete_user():
+    """
+    批量删除
+    """
+    user_id = get_jwt_identity()
+    login_type = get_jwt()['login_type']
+    model = model_mapping[login_type]
+    user = model.query.get(user_id)
+    if not user or login_type == 2:
+        return jsonify({'error': '当前用户状态不合法'}), 403
+
+    delete_list = request.json.get('delete_list')
+    for item in delete_list:
+        if login_type == 1 and item['usertype'] != 2:
+            continue
+        model = model_mapping[item['usertype']]
+        user = model.query.filter_by(uid=item['uid']).first()
+        if user and user.id != user_id:
+            db.session.delete(user)
+    db.session.commit()
+    return jsonify({'success': '删除成功'}), 200
