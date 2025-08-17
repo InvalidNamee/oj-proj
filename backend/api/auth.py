@@ -136,7 +136,7 @@ def logout():
     user = model.query.get(user_id)
     if not user:
         return jsonify({'error': '用户不存在'}), 401
-    user.token_version = 0
+    user.token_version = "qwq"
     db.session.commit()
     return jsonify({'success': '注销成功'}), 200
 
