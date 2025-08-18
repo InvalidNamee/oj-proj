@@ -1,6 +1,7 @@
 from exts import db
 from sqlalchemy.sql import func
 from datetime import datetime
+import uuid
 
 class AdminModel(db.Model):
 	__tablename__ = 'admin'
@@ -8,7 +9,7 @@ class AdminModel(db.Model):
 	uid = db.Column(db.String(64), unique=True, nullable=False)
 	username = db.Column(db.String(100), unique=True, nullable=False)
 	password = db.Column(db.String(200), nullable=False)
-	token_version = db.Column(db.String(100), default="qwq")
+	token_version = db.Column(db.String(100), default=uuid.uuid4())
 	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
 
 	def to_dict(self):
@@ -28,7 +29,7 @@ class TeacherModel(db.Model):
 	password = db.Column(db.String(200), nullable=False)
 	school = db.Column(db.String(200), nullable=True)
 	profession = db.Column(db.String(200), nullable=True)
-	token_version = db.Column(db.String(100), default="qwq")
+	token_version = db.Column(db.String(100), default=uuid.uuid4())
 	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
 
 	courses = db.relationship(
@@ -60,7 +61,7 @@ class StudentModel(db.Model):
 	password = db.Column(db.String(200), nullable=False)
 	school = db.Column(db.String(200), nullable=True)
 	profession = db.Column(db.String(200), nullable=True)
-	token_version = db.Column(db.String(100), default="qwq")
+	token_version = db.Column(db.String(100), default=uuid.uuid4())
 	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
 
 	courses = db.relationship(

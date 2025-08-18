@@ -15,7 +15,7 @@ def login_required(f):
         if user is None:
             return jsonify({'error': '用户不存在'}), 401
         elif user.token_version != token_version:
-            return jsonify({'error': 'token 过期'}), 401
+            return jsonify({'msg': 'Token has expired'}), 401
         return f(*args, **kwargs)
     return wrap
 
@@ -37,7 +37,7 @@ def admin_required(f):
         if user is None:
             return jsonify({'error': '用户不存在'}), 401
         elif user.token_version != token_version:
-            return jsonify({'error': 'token 过期'}), 401
+            return jsonify({'msg': 'Token has expired'}), 401
 
         return f(*args, **kwargs)
     return wrap

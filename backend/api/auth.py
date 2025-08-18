@@ -38,44 +38,21 @@ def register_user(login_type, info, commit=True):
 @teacher_required
 def register():
     """
-    单独注册
+    批量注册
     """
-    user_id = get_jwt_identity()
     login_type = get_jwt()['login_type']
-    model = model_mapping[login_type]
-
-    cur_user = model.query.get(user_id)
-    if cur_user is None:
-        return jsonify({"error": "用户信息错误"}), 401
-    data = request.get_json()
-    res, code = register_user(login_type, data, commit=True)
-    return jsonify(res), code
-
-@bp.post('/quick_register')
-@teacher_required
-def quick_register():
-    """
-    快速注册
-    """
-    user_id = get_jwt_identity()
-    login_type = get_jwt()['login_type']
-    model = model_mapping[login_type]
-    cur_user = model.query.get(user_id)
-    if cur_user is None:
-        return jsonify({"error": "当前用户信息错误"}), 401
 
     user_list = request.json.get('user_list')
-    success_cnt, fail_cnt = 0, 0
+    success_cnt = 0
     fail_list = []
     for user in user_list:
         res, code = register_user(login_type, user, commit=False)
         if code != 200:
-            fail_cnt += 1
             fail_list.append({'user': user, 'error': res.get('error')})
         else:
             success_cnt += 1
     db.session.commit()
-    return jsonify({'success': success_cnt, 'fail': fail_cnt, 'fail_list': fail_list}), 200
+    return jsonify({'success': success_cnt, 'fail': len(fail_list), 'fail_list': fail_list}), 200
 
 
 @bp.post('/login')
@@ -146,10 +123,72 @@ def modify_info():
             user.school = school
             user.profession = profession
         if new_password:
-            user.token_version = "qwq" # 强制重登
+            user.token_version = uuid.uuid4() # 强制重登
             user.password = generate_password_hash(new_password)
         db.session.commit()
         return jsonify({'success': '修改成功'}), 200
+
+@bp.post('/modify_user')
+@teacher_required
+def modify_user():
+    """
+    批量修改用户信息
+    """
+    login_type = get_jwt()['login_type']
+    data_list = request.get_json().get('user_list', [])
+
+    success_cnt = 0
+    fail_list = []
+
+    for data in data_list:
+        target_id = data.get('id')
+        target_usertype = data.get('usertype')
+
+        # 确定目标模型
+        if target_usertype not in model_mapping:
+            fail_list.append({'id': target_id, 'error': '用户类型错误'})
+            continue
+        target_model = model_mapping[target_usertype]
+
+        # 检查权限
+        if login_type == 1 and target_usertype != 2:  # 教师只能改学生
+            fail_list.append({'id': target_id, 'error': '权限不足'})
+            continue
+
+        user = target_model.query.get(target_id)
+        if not user:
+            fail_list.append({'id': target_id, 'error': '目标用户不存在'})
+            continue
+
+        # 修改字段
+        username = data.get('username')
+        school = data.get('school')
+        profession = data.get('profession')
+        new_password = data.get('password')  # 重置密码
+        course_list = data.get('course_list', [])
+
+        if username:
+            user.username = username
+        if school:
+            user.school = school
+        if profession:
+            user.profession = profession
+        if new_password:
+            user.password = generate_password_hash(new_password)
+            user.token_version = str(uuid.uuid4())  # 强制过期 token
+
+        if target_usertype != 0 and course_list:
+            courses = CourseModel.query.filter(CourseModel.id.in_(course_list)).all()
+            user.courses = courses
+
+        success_cnt += 1
+
+    db.session.commit()
+    return jsonify({
+        'success': success_cnt,
+        'fail': len(fail_list),
+        'fail_list': fail_list
+    }), 200
 
 
 @bp.post('/logout')
@@ -164,34 +203,47 @@ def logout():
     user = model.query.get(user_id)
     if not user:
         return jsonify({'error': '用户不存在'}), 401
-    user.token_version = "qwq"
+    user.token_version = uuid.uuid4()
     db.session.commit()
     return jsonify({'success': '注销成功'}), 200
 
 
 @bp.post('/delete_user')
-@login_required
+@teacher_required
 def delete_user():
     """
     批量删除
     """
     user_id = get_jwt_identity()
     login_type = get_jwt()['login_type']
-    model = model_mapping[login_type]
-    user = model.query.get(user_id)
-    if not user or login_type == 2:
-        return jsonify({'error': '当前用户状态不合法'}), 403
 
     delete_list = request.json.get('delete_list')
+
+    success_cnt = 0
+    fail_list = []
+
     for item in delete_list:
         if login_type == 1 and item['usertype'] != 2:
             continue
         model = model_mapping[item['usertype']]
-        user = model.query.filter_by(uid=item['uid']).first()
-        if user and user.id != user_id:
-            db.session.delete(user)
+        user = model.query.filter_by(id=item['id']).first()
+
+        if user is None:
+            fail_list.append({'uid': item['uid'], 'error': '用户不存在'})
+            continue
+
+        if user_id == item['id']:
+            fail_list.append({'uid': item['uid'], 'error': '不能删除自己'})
+            continue
+
+        success_cnt += 1
+        db.session.delete(user)
     db.session.commit()
-    return jsonify({'success': '删除成功'}), 200
+    return jsonify({
+        'success': success_cnt,
+        'fail': len(fail_list),
+        'fail_list': fail_list
+    }), 200
 
 @bp.get('/user_info')
 @login_required
