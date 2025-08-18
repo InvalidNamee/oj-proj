@@ -1,9 +1,9 @@
 """
-和用户管理相关
+和网站授权相关
 """
 from flask import Blueprint, request, jsonify
-from decorators import login_required
-from models import model_mapping
+from decorators import login_required, teacher_required
+from models import model_mapping, CourseModel
 from exts import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
@@ -11,8 +11,31 @@ import uuid
 
 bp = Blueprint('auth', __name__, url_prefix='/api/')
 
+def register_user(login_type, info, commit=True):
+    uid = info.get('uid')
+    username = info.get('username')
+    password = generate_password_hash(info.get('password'))
+    usertype = info.get('usertype')
+    school = info.get('school')
+    profession = info.get('profession')
+
+    target_model = model_mapping[usertype]
+    if login_type == 1 and usertype != 2:
+        return {'error': '教师只能注册学生用户'}, 403
+    elif target_model.query.filter_by(uid=uid).first():
+        return {'error': '用户 ID 已存在'}, 401
+    else:
+        if usertype == 0:
+            db.session.add(target_model(uid=uid, username=username, password=password))
+        else:
+            db.session.add(
+                target_model(uid=uid, username=username, password=password, school=school, profession=profession))
+        if commit:
+            db.session.commit()
+        return {'success': '注册成功'}, 200
+
 @bp.post('/register')
-@login_required
+@teacher_required
 def register():
     """
     单独注册
@@ -22,29 +45,37 @@ def register():
     model = model_mapping[login_type]
 
     cur_user = model.query.get(user_id)
-    if cur_user and login_type in [0, 1]:
-        data = request.get_json()
-        uid = data.get('uid')
-        usertype = data.get('usertype')
-        username = data.get('username')
-        password = data.get('password')
-        school = data.get('school')
-        profession = data.get('profession')
+    if cur_user is None:
+        return jsonify({"error": "用户信息错误"}), 401
+    data = request.get_json()
+    res, code = register_user(login_type, data, commit=True)
+    return jsonify(res), code
 
-        target_model = model_mapping[usertype]
-        if login_type == 1 and usertype != 2:
-            return jsonify({'error': '教师只能注册学生用户'}), 401
-        elif target_model.query.filter_by(uid=uid).first():
-            return jsonify({'error': '用户 ID 已存在'}), 401
+@bp.post('/quick_register')
+@teacher_required
+def quick_register():
+    """
+    快速注册
+    """
+    user_id = get_jwt_identity()
+    login_type = get_jwt()['login_type']
+    model = model_mapping[login_type]
+    cur_user = model.query.get(user_id)
+    if cur_user is None:
+        return jsonify({"error": "当前用户信息错误"}), 401
+
+    user_list = request.json.get('user_list')
+    success_cnt, fail_cnt = 0, 0
+    fail_list = []
+    for user in user_list:
+        res, code = register_user(login_type, user, commit=False)
+        if code != 200:
+            fail_cnt += 1
+            fail_list.append({'user': user, 'error': res.get('error')})
         else:
-            if usertype == 0:
-                db.session.add(target_model(uid=uid, username=username, password=password))
-            else:
-                db.session.add(target_model(uid=uid, username=username, password=password, school=school, profession=profession))
-            db.session.commit()
-            return jsonify({'success': '注册成功'}), 200
-
-    return jsonify({"error": "用户信息错误"}), 401
+            success_cnt += 1
+    db.session.commit()
+    return jsonify({'success': success_cnt, 'fail': fail_cnt, 'fail_list': fail_list}), 200
 
 
 @bp.post('/login')
@@ -136,8 +167,6 @@ def logout():
     user.token_version = "qwq"
     db.session.commit()
     return jsonify({'success': '注销成功'}), 200
-
-
 
 
 @bp.post('/delete_user')
