@@ -1,0 +1,4 @@
+backend/migrations
+backend/config.py
+backend/__pycache__
+backend/api/__pycache__
