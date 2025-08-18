@@ -60,6 +60,7 @@ def course_list():
         data.append({
             'id': course.id,
             'name': course.name,
+            'timestamp': course.time_stamp,
             'teachers': [t.to_dict() for t in course.teachers],
             'students': [s.to_dict() for s in course.students]
         })

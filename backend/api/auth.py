@@ -192,3 +192,15 @@ def delete_user():
             db.session.delete(user)
     db.session.commit()
     return jsonify({'success': '删除成功'}), 200
+
+@bp.get('/user_info')
+@login_required
+def user_info():
+    data = request.get_json()
+    target_id = data.get('id')
+    target_type = data.get('usertype')
+    user = model_mapping[target_type].query.get(target_id)
+    if not user:
+        return jsonify({'error': '用户不存在'}), 401
+    return jsonify(user.to_dict()), 200
+

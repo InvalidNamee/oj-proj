@@ -1,4 +1,5 @@
 from exts import db
+from sqlalchemy.sql import func
 from datetime import datetime
 
 class AdminModel(db.Model):
@@ -8,7 +9,15 @@ class AdminModel(db.Model):
 	username = db.Column(db.String(100), unique=True, nullable=False)
 	password = db.Column(db.String(200), nullable=False)
 	token_version = db.Column(db.String(100), default="qwq")
-	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
+	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
+
+	def to_dict(self):
+		return {
+			"id": self.id,
+			"uid": self.uid,
+			"username": self.username,
+			"timestamp": self.time_stamp.strftime("%Y-%m-%d %H:%M:%S"),
+		}
 
 
 class TeacherModel(db.Model):
@@ -20,7 +29,7 @@ class TeacherModel(db.Model):
 	school = db.Column(db.String(200), nullable=True)
 	profession = db.Column(db.String(200), nullable=True)
 	token_version = db.Column(db.String(100), default="qwq")
-	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
+	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
 
 	courses = db.relationship(
 		"CourseModel",
@@ -34,6 +43,7 @@ class TeacherModel(db.Model):
 			"id": self.id,
 			"uid": self.uid,
 			"username": self.username,
+			"timestamp": self.time_stamp.strftime("%Y-%m-%d %H:%M:%S"),
 			'school': self.school,
 			"profession": self.profession,
 		}
@@ -47,7 +57,7 @@ class StudentModel(db.Model):
 	school = db.Column(db.String(200), nullable=True)
 	profession = db.Column(db.String(200), nullable=True)
 	token_version = db.Column(db.String(100), default="qwq")
-	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
+	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
 
 	courses = db.relationship(
 		"CourseModel",
@@ -61,6 +71,7 @@ class StudentModel(db.Model):
 			"id": self.id,
 			"uid": self.uid,
 			"username": self.username,
+			"timestamp": self.time_stamp.strftime("%Y-%m-%d %H:%M:%S"),
 			'school': self.school,
 			"profession": self.profession,
 		}
@@ -72,7 +83,7 @@ class CourseModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	course_name = db.Column(db.String(200), nullable=False)
 	course_description = db.Column(db.Text, nullable=False)
-	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
+	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
 
 	students = db.relationship(
 		"StudentModel",
