@@ -238,7 +238,23 @@ URL: `/api/user_info`
 ```
 
 响应（成功）
-用户对象的 `to_dict()` 返回结构（包括基本信息及课程列表，具体字段依模型实现而定）。
+用户对象的 `to_dict()` 返回结构。
+
+```python
+def to_dict(self):
+    return {
+        "id": self.id,
+        "uid": self.uid,
+        "username": self.username,
+        "timestamp": self.time_stamp.strftime("%Y-%m-%d %H:%M:%S"),
+        'school': self.school,
+        "profession": self.profession,
+        "courses": [
+            {"id": course.id, "name": course.course_name}
+            for course in self.courses
+        ]
+    }
+```
 
 失败响应
 

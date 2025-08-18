@@ -5,6 +5,7 @@ import config # 配置文件
 from flask_cors import  CORS
 from api.auth import bp as auth_bp
 from api.courses import bp as courses_bp
+from api.problemset import bp as problemset_bp
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -17,6 +18,7 @@ CORS(app, resources={r"/*": {"origins": ["http://localhost:5173"]}})
 # 注册蓝图
 app.register_blueprint(auth_bp)
 app.register_blueprint(courses_bp)
+app.register_blueprint(problemset_bp)
 
 @app.route('/')
 def hello_world():  # put application's code here
