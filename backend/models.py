@@ -35,7 +35,7 @@ class TeacherModel(db.Model):
 		"CourseModel",
 		secondary="teacher_course",
 		back_populates="teachers",
-		cascade="all, delete"
+		# cascade="all, delete"
 	)
 
 	def to_dict(self):
@@ -46,6 +46,10 @@ class TeacherModel(db.Model):
 			"timestamp": self.time_stamp.strftime("%Y-%m-%d %H:%M:%S"),
 			'school': self.school,
 			"profession": self.profession,
+			"courses": [
+				{"id": course.id, "name": course.course_name}
+				for course in self.courses
+			]
 		}
 
 class StudentModel(db.Model):
@@ -63,7 +67,7 @@ class StudentModel(db.Model):
 		"CourseModel",
 		secondary="student_course",
 		back_populates="students",
-		cascade="all, delete"
+		# cascade="all, delete"
 	)
 
 	def to_dict(self):
@@ -74,6 +78,10 @@ class StudentModel(db.Model):
 			"timestamp": self.time_stamp.strftime("%Y-%m-%d %H:%M:%S"),
 			'school': self.school,
 			"profession": self.profession,
+			"courses": [
+				{"id": course.id, "name": course.course_name}
+				for course in self.courses
+			]
 		}
 
 model_mapping = {0 : AdminModel, 1 : TeacherModel, 2 : StudentModel}
@@ -82,7 +90,7 @@ class CourseModel(db.Model):
 	__tablename__ = 'course'
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	course_name = db.Column(db.String(200), nullable=False)
-	course_description = db.Column(db.Text, nullable=False)
+	course_description = db.Column(db.Text)
 	time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
 
 	students = db.relationship(
