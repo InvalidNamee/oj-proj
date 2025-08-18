@@ -36,21 +36,21 @@ def course_list():
     - 管理员：可查看所有课程
     - 教师/学生：只能查看与自己相关的课程
     """
-    user_id = get_jwt_identity()
-    login_type = get_jwt()['login_type']
+    user_id = request.args.get('id', type=int)
+    user_type = request.args.get('usertype', type=int)
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
     query = CourseModel.query
 
-    if login_type != 0:  # 非管理员
-        user = model_mapping[login_type].query.get(user_id)
-        if user is None:
-            return jsonify({"error": "用户不存在"}), 404
+    user = model_mapping[user_type].query.get(user_id)
+    if user is None:
+        return jsonify({"error": "用户不存在"}), 404
 
-        if login_type == 1:  # 教师
+    if user_type != 0:  # 非管理员
+        if user_type == 1:  # 教师
             query = query.join(CourseModel.teachers).filter_by(id=user.id)
-        elif login_type == 2:  # 学生
+        elif user_type == 2:  # 学生
             query = query.join(CourseModel.students).filter_by(id=user.id)
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -60,9 +60,10 @@ def course_list():
         data.append({
             'id': course.id,
             'name': course.name,
+            'description': course.course_description,
             'timestamp': course.time_stamp,
             'teachers': [t.to_dict() for t in course.teachers],
-            'students': [s.to_dict() for s in course.students]
+            'student_cnt': len(course.students)
         })
 
     return jsonify({
@@ -84,6 +85,7 @@ def course_info():
     students = course.students
     return jsonify({
         'course_name': course.course_name,
+        'description': course.course_description,
         'teachers': [teacher.to_dict() for teacher in teachers],
         'students': [student.to_dict() for student in students]
     }), 200
