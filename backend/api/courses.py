@@ -10,7 +10,7 @@ from exts import db
 bp = Blueprint("course", __name__, url_prefix="/api")
 
 @bp.post('/user_list')
-# @role_required(ROLE_TEACHER)
+@role_required(ROLE_TEACHER)
 def user_list():
     """
     获取用户列表（JSON 请求体）
