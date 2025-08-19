@@ -69,7 +69,6 @@ class StudentModel(db.Model):
         "CourseModel",
         secondary="student_course",
         back_populates="students",
-        # cascade="all, delete"
     )
 
     def to_dict(self):
