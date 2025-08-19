@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
 from models import CourseModel, LegacyProblemModel, CodingProblemModel, ProblemSetModel, SubmissionModel, SubmissionStatus
-from decorators import teacher_required, login_required
+from decorators import role_required, ROLE_ADMIN, ROLE_TEACHER
 
 bp = Blueprint('problemset', __name__, url_prefix='/api')
 
@@ -31,7 +31,7 @@ def legacy_judger(problem_type, answers, user_answers):
 
 
 @bp.post('/import_legacy_problems')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def import_legacy_problems():
     problem_list = request.get_json().get('problem_list')
     for problem in problem_list:
@@ -45,7 +45,7 @@ def import_legacy_problems():
     return jsonify({'success': '成功'}), 200
 
 @bp.post('/delete_legacy_problems')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def delete_legacy_problems():
     """
     批量删除
@@ -66,7 +66,7 @@ def delete_legacy_problems():
 
 
 @bp.post('/modify_problemset')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def modify_problemset():
     """
     新建 / 更新题单
@@ -114,7 +114,7 @@ def modify_problemset():
     return jsonify({'legacy': len(legacy_problems), 'coding': len(coding_problems)}), 200
 
 @bp.get('/problemset_info')
-@teacher_required
+@role_required()
 def problemset_info():
     """
     查询题单信息
@@ -144,7 +144,7 @@ def problemset_info():
     })
 
 @bp.post('/delete_problemset')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def delete_problemset():
     """
     批量删除
@@ -165,7 +165,7 @@ def delete_problemset():
 
 
 @bp.post('/judge_legacy')
-@login_required
+@role_required()
 def judge_legacy():
     """
     判 Legacy 题

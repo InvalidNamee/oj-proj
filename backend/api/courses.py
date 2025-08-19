@@ -3,19 +3,19 @@
 """
 from flask import Blueprint, request, jsonify, session
 from flask_jwt_extended import get_jwt_identity, get_jwt
-from decorators import login_required, admin_required, teacher_required
-from models import StudentModel, TeacherModel, CourseModel, model_mapping
+from decorators import role_required, ROLE_TEACHER, ROLE_ADMIN
+from models import UserModel, CourseModel
 from exts import db
 
 bp = Blueprint("course", __name__, url_prefix="/api")
 
-@bp.get('/user_list')
-@teacher_required
+@bp.post('/user_list')
+# @role_required(ROLE_TEACHER)
 def user_list():
     """
     获取用户列表（JSON 请求体）
     支持查询：
-    - usertype: 1=教师, 2=学生
+    - usertype: teacher=教师, student=学生
     - uid: 学号/工号关键字
     - username: 用户名关键字
     - school / profession
@@ -33,31 +33,27 @@ def user_list():
     page = data.get('page', 1)
     per_page = data.get('per_page', 20)
 
-    # 选择模型
-    if usertype == 1:
-        model = TeacherModel
-    elif usertype == 2:
-        model = StudentModel
-    else:
-        return jsonify({'error': 'usertype 参数错误'}), 400
+    query = UserModel.query
 
-    query = model.query
+    # 查询用户类别
+    if usertype:
+        query = query.filter(UserModel.usertype == usertype)
 
     # 模糊查询 uid / username
     if uid_keyword:
-        query = query.filter(model.uid.like(f"%{uid_keyword}%"))
+        query = query.filter(UserModel.uid.like(f"%{uid_keyword}%"))
     if username_keyword:
-        query = query.filter(model.username.like(f"%{username_keyword}%"))
+        query = query.filter(UserModel.username.like(f"%{username_keyword}%"))
 
     # 学校/专业（学生）
     if school and usertype == 2:
-        query = query.filter(model.school.like(f"%{school}%"))
+        query = query.filter(UserModel.school.like(f"%{school}%"))
     if profession and usertype == 2:
-        query = query.filter(model.profession.like(f"%{profession}%"))
+        query = query.filter(UserModel.profession.like(f"%{profession}%"))
 
     # 筛选课程
     if course_ids:
-        query = query.join(model.courses).filter(CourseModel.id.in_(course_ids))
+        query = query.join(UserModel.courses).filter(CourseModel.id.in_(course_ids))
 
     # 分页
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -73,7 +69,7 @@ def user_list():
 
 
 @bp.post('/modify_course')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def modify_course():
     """
     添加 or 大改课程
@@ -84,8 +80,10 @@ def modify_course():
     data = request.get_json()
     course_name = data.get('course_name')
     course_description = data.get('course_description')
-    teachers_uid = data.get('teachers')
-    students_uid = data.get('students')
+    teacher_ids = data.get('teacher_ids', [])
+    student_ids = data.get('student_ids', [])
+
+    user_ids = teacher_ids + student_ids
 
     if cid:
         # 修改已有课程
@@ -99,24 +97,22 @@ def modify_course():
         course.course_name = course_name
         course.course_description = course_description
         # 清空已有关系再添加新关系
-        course.teachers = TeacherModel.query.filter(TeacherModel.uid.in_(teachers_uid)).all()
-        course.students = StudentModel.query.filter(StudentModel.uid.in_(students_uid)).all()
+        course.users = UserModel.query.filter(UserModel.id.in_(user_ids)).all()
         action = "修改"
     else:
-        if login_type != 0:
+        if login_type != 'admin':
             return jsonify({'error': '需要管理员权限'}), 403
         # 添加新课程
         course = CourseModel(course_name=course_name, course_description=course_description)
         db.session.add(course)
-        course.teachers = TeacherModel.query.filter(TeacherModel.uid.in_(teachers_uid)).all()
-        course.students = StudentModel.query.filter(StudentModel.uid.in_(students_uid)).all()
+        course.users = UserModel.query.filter(UserModel.id.in_(user_ids)).all()
         action = "添加"
 
     db.session.commit()
     return jsonify({'success': f'成功{action} 1 个课程'}), 200
 
 @bp.get('/course_list')
-@login_required
+@role_required()
 def course_list():
     """
     获取课程列表（分页）
@@ -124,21 +120,17 @@ def course_list():
     - 教师/学生：只能查看与自己相关的课程
     """
     user_id = request.args.get('id', type=int)
-    user_type = request.args.get('usertype', type=int)
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
     query = CourseModel.query
 
-    user = model_mapping[user_type].query.get(user_id)
+    user = UserModel.get(user_id)
     if user is None:
         return jsonify({"error": "用户不存在"}), 404
 
-    if user_type != 0:  # 非管理员
-        if user_type == 1:  # 教师
-            query = query.join(CourseModel.teachers).filter_by(id=user.id)
-        elif user_type == 2:  # 学生
-            query = query.join(CourseModel.students).filter_by(id=user.id)
+    if user.usertype != 'admin':  # 非管理员
+        query = query.join(CourseModel.users).filter_by(id=user.id)
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
@@ -149,8 +141,7 @@ def course_list():
             'name': course.name,
             'description': course.course_description,
             'timestamp': course.time_stamp,
-            'teachers': [t.to_dict() for t in course.teachers],
-            'student_cnt': len(course.students)
+            'teachers': [t.to_dict() for t in course.users if t.usertype == 'teacher'],
         })
 
     return jsonify({
@@ -162,7 +153,7 @@ def course_list():
     }), 200
 
 @bp.get('/course_info')
-@login_required
+@role_required()
 def course_info():
     course_id = request.args.get('id')
     if not course_id:
@@ -170,17 +161,18 @@ def course_info():
     course = CourseModel.query.get(course_id)
     if not course:
         return jsonify({'error': '课程不存在'}), 404
-    teachers = course.teachers
-    students = course.students
+    users = course.users
+    teachers = [user.to_dict() for user in users if user.usertype == 'teacher']
+    students = [user.to_dict() for user in users if user.usertype == 'student']
     return jsonify({
         'course_name': course.course_name,
         'description': course.course_description,
-        'teachers': [teacher.to_dict() for teacher in teachers],
-        'students': [student.to_dict() for student in students]
+        'teachers': teachers,
+        'students': students
     }), 200
 
 @bp.post('/delete_course')
-@admin_required
+@role_required(ROLE_ADMIN)
 def delete_course():
     course_ids = request.get_json().get('courses')
     success, fail = 0, 0

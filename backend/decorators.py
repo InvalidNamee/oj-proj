@@ -1,66 +1,37 @@
-from models import model_mapping
+from models import UserModel
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from flask import jsonify
 from functools import wraps
 
-def login_required(f):
-    @wraps(f)
-    @jwt_required()
-    def wrap(*args, **kwargs):
-        identity = get_jwt_identity()
-        login_type = get_jwt()['login_type']
-        token_version = get_jwt()['token_version']
-        model = model_mapping[login_type]
-        user = model.query.get(identity)
-        if user is None:
-            return jsonify({'error': '用户不存在'}), 401
-        elif user.token_version != token_version:
-            return jsonify({'msg': 'Token has expired'}), 401
-        return f(*args, **kwargs)
-    return wrap
+ROLE_ADMIN = 0
+ROLE_TEACHER = 1
+ROLE_STUDENT = 2
 
-def admin_required(f):
-    @wraps(f)
-    @jwt_required()
-    def wrap(*args, **kwargs):
-        identity = get_jwt_identity()
-        claims = get_jwt()
-        login_type = claims['login_type']
-        token_version = claims['token_version']
+role_val = {
+    'studment': ROLE_STUDENT,
+    'teacher': ROLE_TEACHER,
+    'admin': ROLE_ADMIN,
+}
 
-        # 不是管理员
-        if login_type != 0:
-            return jsonify({'error': '无权限，管理员才能访问'}), 403
+def role_required(min_role=ROLE_STUDENT):
+    """要求用户至少具有 min_role 的权限"""
+    def decorator(f):
+        @wraps(f)
+        @jwt_required()
+        def wrapper(*args, **kwargs):
+            identity = get_jwt_identity()
+            claims = get_jwt()
+            token_version = claims['token_version']
+            user = UserModel.query.get(identity)
+            if user is None:
+                return jsonify({'error': '用户不存在'}), 401
+            elif user.token_version != token_version:
+                return jsonify({'error': 'Token has expired'}), 401
 
-        model = model_mapping[login_type]
-        user = model.query.get(identity)
-        if user is None:
-            return jsonify({'error': '用户不存在'}), 401
-        elif user.token_version != token_version:
-            return jsonify({'msg': 'Token has expired'}), 401
+            # 权限不足
+            if role_val[user.usertype] > min_role:
+                return jsonify({'error': '无权限访问'}), 403
 
-        return f(*args, **kwargs)
-    return wrap
-
-def teacher_required(f):
-    @wraps(f)
-    @jwt_required()
-    def wrap(*args, **kwargs):
-        identity = get_jwt_identity()
-        claims = get_jwt()
-        login_type = claims['login_type']
-        token_version = claims['token_version']
-
-        # 是学生
-        if login_type == 2:
-            return jsonify({'error': '无权限，教师或更高权限才能访问'}), 403
-
-        model = model_mapping[login_type]
-        user = model.query.get(identity)
-        if user is None:
-            return jsonify({'error': '用户不存在'}), 401
-        elif user.token_version != token_version:
-            return jsonify({'error': 'Token Expired'}), 401
-
-        return f(*args, **kwargs)
-    return wrap
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator

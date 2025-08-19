@@ -2,8 +2,8 @@
 和网站授权相关
 """
 from flask import Blueprint, request, jsonify
-from decorators import login_required, teacher_required
-from models import model_mapping, CourseModel
+from decorators import role_required, ROLE_ADMIN, ROLE_TEACHER
+from models import UserModel, CourseModel
 from exts import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
@@ -19,29 +19,24 @@ def register_user(login_type, info, commit=True):
     school = info.get('school')
     profession = info.get('profession')
 
-    target_model = model_mapping[usertype]
-    if login_type == 1 and usertype != 2:
+    if login_type == 'teacher' and usertype != 'student':
         return {'error': '教师只能注册学生用户'}, 403
-    elif target_model.query.filter_by(uid=uid).first():
-        return {'error': '用户 ID 已存在'}, 401
+    elif UserModel.query.filter_by(uid=uid, usertype=usertype).first():
+        return {'error': '用户 UID 已存在'}, 401
     else:
-        if usertype == 0:
-            db.session.add(target_model(uid=uid, username=username, password=password))
-        else:
-            db.session.add(
-                target_model(uid=uid, username=username, password=password, school=school, profession=profession))
+        db.session.add(
+            UserModel(uid=uid, usertype=usertype, username=username, password=password, school=school, profession=profession))
         if commit:
             db.session.commit()
         return {'success': '注册成功'}, 200
 
 @bp.post('/register')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def register():
     """
     批量注册
     """
     login_type = get_jwt()['login_type']
-
     user_list = request.json.get('user_list')
     success_cnt = 0
     fail_list = []
@@ -65,20 +60,20 @@ def login():
     password = data.get('password')
     login_type = data.get('login_type')
     # 检查用户是否存在
-    model = model_mapping[login_type]
-    user = model.query.filter_by(uid=uid).first()
+    user = UserModel.query.filter_by(uid=uid, usertype=login_type).first()
+
     if not user or not check_password_hash(user.password, password):
         return jsonify({'error': '用户名或密码错误'}), 401
-    else:
-        # 把用户信息加到 token 里面
-        token_version = uuid.uuid4()
-        # 更新 token_version
-        user.token_version = token_version
-        db.session.commit()
-        additional_claims = {'login_type': login_type, 'token_version': token_version, 'uid': user.uid, 'username': user.username}
-        access_token = create_access_token(identity=str(user.id), additional_claims=additional_claims)
-        refresh_token = create_refresh_token(identity=str(user.id), additional_claims=additional_claims)
-        return jsonify(access_token=access_token, refresh_token=refresh_token), 200
+
+    # 把用户信息加到 token 里面
+    token_version = uuid.uuid4()
+    # 更新 token_version
+    user.token_version = token_version
+    db.session.commit()
+    additional_claims = {'login_type': login_type, 'token_version': token_version, 'uid': user.uid, 'username': user.username}
+    access_token = create_access_token(identity=str(user.id), additional_claims=additional_claims)
+    refresh_token = create_refresh_token(identity=str(user.id), additional_claims=additional_claims)
+    return jsonify(access_token=access_token, refresh_token=refresh_token), 200
 
 
 @bp.post('/refresh')
@@ -101,27 +96,24 @@ def refresh():
 
 
 @bp.post('/modify_info')
-@login_required
+@role_required(ROLE_TEACHER)
 def modify_info():
     """
     修改用户名和密码
     """
     user_id = get_jwt_identity()
-    login_type = get_jwt()['login_type']
     username = request.json.get('username')
     password = request.json.get('password')
     school = request.json.get('school')
     profession = request.json.get('profession')
     new_password = request.json.get('new_password')
-    model = model_mapping[login_type]
-    user = model.query.get(user_id)
+    user = UserModel.query.get(user_id)
     if not user or not check_password_hash(user.password, password):
         return jsonify({'error': '用户不存在或密码错误'}), 401
     else:
         user.username = username
-        if get_jwt()['login_type'] != 0:
-            user.school = school
-            user.profession = profession
+        user.school = school
+        user.profession = profession
         if new_password:
             user.token_version = uuid.uuid4() # 强制重登
             user.password = generate_password_hash(new_password)
@@ -129,7 +121,7 @@ def modify_info():
         return jsonify({'success': '修改成功'}), 200
 
 @bp.post('/modify_user')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def modify_user():
     """
     批量修改用户信息
@@ -142,23 +134,17 @@ def modify_user():
 
     for data in data_list:
         target_id = data.get('id')
-        target_usertype = data.get('usertype')
 
-        # 确定目标模型
-        if target_usertype not in model_mapping:
-            fail_list.append({'id': target_id, 'error': '用户类型错误'})
-            continue
-        target_model = model_mapping[target_usertype]
-
-        # 检查权限
-        if login_type == 1 and target_usertype != 2:  # 教师只能改学生
-            fail_list.append({'id': target_id, 'error': '权限不足'})
-            continue
-
-        user = target_model.query.get(target_id)
+        user = UserModel.query.get(target_id)
         if not user:
             fail_list.append({'id': target_id, 'error': '目标用户不存在'})
             continue
+
+        # 检查权限
+        if login_type == 'teacher' and user.usertype != 'student':  # 教师只能改学生
+            fail_list.append({'id': user.id, 'username': user.username, 'error': '权限不足'})
+            continue
+
 
         # 修改字段
         username = data.get('username')
@@ -177,7 +163,7 @@ def modify_user():
             user.password = generate_password_hash(new_password)
             user.token_version = str(uuid.uuid4())  # 强制过期 token
 
-        if target_usertype != 0 and course_list:
+        if user.usertype != 'admin':
             courses = CourseModel.query.filter(CourseModel.id.in_(course_list)).all()
             user.courses = courses
 
@@ -192,15 +178,13 @@ def modify_user():
 
 
 @bp.post('/logout')
-@login_required
+@role_required()
 def logout():
     """
     处理退出登录
     """
     user_id = get_jwt_identity()
-    login_type = get_jwt()['login_type']
-    model = model_mapping[login_type]
-    user = model.query.get(user_id)
+    user = UserModel.query.get(user_id)
     if not user:
         return jsonify({'error': '用户不存在'}), 401
     user.token_version = uuid.uuid4()
@@ -209,7 +193,7 @@ def logout():
 
 
 @bp.post('/delete_user')
-@teacher_required
+@role_required(ROLE_TEACHER)
 def delete_user():
     """
     批量删除
@@ -222,19 +206,19 @@ def delete_user():
     success_cnt = 0
     fail_list = []
 
-    for item in delete_list:
-        if login_type == 1 and item['usertype'] != 2:
-            continue
-        model = model_mapping[item['usertype']]
-        user = model.query.filter_by(id=item['id']).first()
+    for target_id in delete_list:
+        user = UserModel.query.get(target_id)
 
         if user is None:
-            fail_list.append({'uid': item['uid'], 'error': '用户不存在'})
+            fail_list.append({'id': target_id, 'error': '用户不存在'})
             continue
 
-        if user_id == item['id']:
-            fail_list.append({'uid': item['uid'], 'error': '不能删除自己'})
+        if user_id == target_id:
+            fail_list.append({'id': target_id, 'error': '不能删除自己'})
             continue
+
+        if login_type == 'teacher' and user.usertype != 'student':
+            fail_list.append({'id': target_id, 'error': '越权删除'})
 
         success_cnt += 1
         db.session.delete(user)
@@ -246,12 +230,10 @@ def delete_user():
     }), 200
 
 @bp.get('/user_info')
-@login_required
+@role_required()
 def user_info():
-    data = request.get_json()
-    target_id = data.get('id')
-    target_type = data.get('usertype')
-    user = model_mapping[target_type].query.get(target_id)
+    user_id = request.args.get('id')
+    user = UserModel.query.get(user_id)
     if not user:
         return jsonify({'error': '用户不存在'}), 401
     return jsonify(user.to_dict()), 200
