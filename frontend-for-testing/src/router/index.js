@@ -10,6 +10,18 @@ const router = createRouter({
       meta: { title: '首页' }
     },
     {
+      path: '/auth-test',
+      name: 'auth-test',
+      component: () => import('@/views/AuthTesting.vue'),
+      meta: { title: '认证测试'}
+    },
+    {
+      path: '/user-test',
+      name: 'user-test',
+      component: () => import('@/views/UserTesting.vue'),
+      meta: { title: '用户功能测试' }
+    },
+    {
       path: '/test',
       name: 'test',
       component: () => import('@/views/test.vue'),

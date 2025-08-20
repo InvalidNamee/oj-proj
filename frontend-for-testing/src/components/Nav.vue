@@ -4,6 +4,8 @@ import { reactive } from 'vue';
 import LoginButton from './LoginButton.vue';
 const views = reactive([
   { name: 'Home', path: '/' },
+  { name: 'Auth', path: '/auth-test'},
+  { name: 'User', path: '/user-test'},
   { name: 'Problemset', path: '/problemset-test'},
   { name: 'Test', path: '/test' },
   { name: 'Coding', path: '/coding-test'},

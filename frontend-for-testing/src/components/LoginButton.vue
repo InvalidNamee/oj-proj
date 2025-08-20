@@ -7,9 +7,9 @@ const loginStatus = ref('');
 
 const login = async () => {
   try {
-    const res = await axios.post('/login', {
+    const res = await axios.post('/auth/login', {
       uid: '2407040129',        // 写死用户名
-      password: '123123',   // 写死密码
+      password: 'QWQQWQ',   // 写死密码
       login_type: 'admin'    // 或者 student/admin
     });
 

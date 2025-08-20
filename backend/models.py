@@ -1,14 +1,14 @@
 from exts import db
 from sqlalchemy.sql import func
 from datetime import datetime
-from enum import Enum
+from enum import Enum, unique
 import uuid
 
 
 class UserModel(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True) # 主键
-    uid = db.Column(db.String(64), nullable=False) # 用户 UID
+    uid = db.Column(db.String(64), unique=True, nullable=False) # 用户 UID
     usertype = db.Column(db.Enum('admin', 'teacher', 'student'), nullable=False, default='student')
     username = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(200), nullable=False)
