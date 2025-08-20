@@ -108,6 +108,8 @@ class CodingProblemModel(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
+    test_cases = db.Column(db.JSON)
+    limitations = db.Column(db.JSON)
 
     problemsets = db.relationship(
         "ProblemSetModel",
