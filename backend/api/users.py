@@ -3,7 +3,7 @@
 """
 from flask import Blueprint, request, jsonify
 from decorators import role_required, ROLE_ADMIN, ROLE_TEACHER
-from models import UserModel, CourseModel
+from models import UserModel, CourseModel, UserCourse
 from exts import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import get_jwt, get_jwt_identity
@@ -203,3 +203,91 @@ def get_user(user_id):
     if not user:
         return jsonify({'error': 'User not found'}), 404
     return jsonify(user.to_dict()), 200
+
+
+@bp.get('/')
+@role_required()
+def get_users():
+    """
+    分页 + 条件筛选用户
+    - 普通用户：只能看到和自己有公共课程的用户
+    - 管理员（没有绑定课程但有全局权限的角色）：可以看到所有用户
+    - 可以通过传入 course_id 筛选某个课程下的用户（前提是有权限）
+    """
+    # 分页参数
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
+    # 当前登录用户
+    user_id = get_jwt_identity()
+    user = UserModel.query.get(user_id)
+
+    # 当前用户的课程 id 列表
+    my_courses = [
+        uc.course_id for uc in UserCourse.query.filter_by(user_id=user.id).all()
+    ]
+
+    # 基础查询
+    query = UserModel.query
+
+    # 是否要求筛选某个课程
+    course_id = request.args.get('course_id')
+    if course_id:
+        # 检查权限：只有当用户在该课程里，或者是全局管理员，才能查
+        if course_id not in my_courses and user.usertype != 'admin':
+            return jsonify({'error': 'No permission to view this course users'}), 403
+
+        query = (
+            query.join(UserCourse, UserModel.id == UserCourse.user_id)
+            .filter(UserCourse.course_id == course_id)
+        )
+
+    else:
+        # 没指定 course_id
+        if not my_courses and user.usertype == 'admin':
+            # 管理员，没绑定课程，也能看所有人
+            pass
+        else:
+            # 普通用户，只能看有交集课程的人
+            sub_courses = (
+                db.session.query(UserCourse.course_id)
+                .filter(UserCourse.user_id == user.id)
+                .subquery()
+            )
+            query = (
+                query.join(UserCourse, UserModel.id == UserCourse.user_id)
+                .filter(UserCourse.course_id.in_(sub_courses))
+                .distinct()
+            )
+
+    username = request.args.get('username')
+    usertype = request.args.get('usertype')
+    school = request.args.get('school')
+    profession = request.args.get('profession')
+
+    # 条件筛选
+    if username:
+        query = query.filter(UserModel.username.ilike(f"%{username}%"))
+
+    if usertype:
+        query = query.filter(UserModel.usertype == usertype)
+
+    if school:
+        query = query.filter(UserModel.school.ilike(f"%{school}%"))
+
+    if profession:
+        query = query.filter(UserModel.profession.ilike(f"%{profession}%"))
+
+    # 分页
+    pagination = query.order_by(UserModel.time_stamp.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    users = [u.to_dict() for u in pagination.items]
+
+    return jsonify({
+        "total": pagination.total,
+        "page": page,
+        "per_page": per_page,
+        "users": users
+    })

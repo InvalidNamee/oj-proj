@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
-from models import CourseModel, LegacyProblemModel, CodingProblemModel, ProblemSetModel, SubmissionModel
+from models import CourseModel, LegacyProblemModel, CodingProblemModel, ProblemSetModel, SubmissionModel, UserModel
 from decorators import role_required, ROLE_TEACHER
 
 bp = Blueprint('problemsets', __name__, url_prefix='/api/problemsets')
@@ -185,7 +185,10 @@ def delete_problemsets():
 def get_problemsets():
     """
     获取题单列表
-    支持分页和可选课程过滤
+    权限：
+    - 普通用户：只能看到和自己有课程关联的题单
+    - 管理员（没有绑定课程但有全局权限）：可以看到所有题单
+    - 可以传入 course_id 筛选，但必须有权限访问该课程
     query 参数:
         page: 页码，默认 1
         per_page: 每页条数，默认 20
@@ -193,13 +196,35 @@ def get_problemsets():
     """
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
-    course_id = request.args.get('course_id')
+    course_id = request.args.get('course_id', type=int)
+
+    # 当前用户
+    user_id = get_jwt_identity()
+    user = UserModel.query.get(user_id)
+
+    # 当前用户的课程 id 列表
+    course_ids = [course.id for course in user.courses]
 
     query = ProblemSetModel.query
-    if course_id:
-        query = query.filter_by(course_id=course_id)
 
-    pagination = query.order_by(ProblemSetModel.time_stamp.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    if course_id:
+        # 检查权限
+        if course_id not in course_ids and user.usertype != 'admin':
+            return jsonify({'error': 'No permission to view this course problemsets'}), 403
+        query = query.filter(ProblemSetModel.course_id == course_id)
+    else:
+        # 没有指定课程
+        if not course_ids and user.usertype == 'admin':
+            # 管理员，无绑定课程，可以看全部
+            pass
+        else:
+            # 普通用户：只能看自己课程下的题单
+            query = query.filter(ProblemSetModel.course_id.in_(course_ids))
+
+    # 分页
+    pagination = query.order_by(ProblemSetModel.time_stamp.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
 
     problemsets_list = []
     for ps in pagination.items:
