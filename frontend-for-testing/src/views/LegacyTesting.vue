@@ -5,15 +5,29 @@ import axios from 'axios';
 const legacyProblems = ref([]);
 const selectedProblem = ref(null);
 const pidToDelete = ref('');
-const updateData = ref({ title: '', description: '', options: '', answers: '' });
-const importData = ref('[{"problem_type":"choice","title":"示例题","description":"题目描述","options":["A","B","C"],"answers":["A"]}]');
+const updateData = ref({ 
+  title: '', 
+  description: '', 
+  options: '', 
+  answers: '', 
+  course_id: '' 
+});
+const importData = ref(`[
+  {
+    "problem_type": "choice",
+    "title": "示例题",
+    "description": "题目描述",
+    "options": ["A","B","C"],
+    "answers": ["A"],
+    "course_id": 1
+  }
+]`);
 
-// 获取所有题目列表
+// 获取题目列表
 const fetchLegacyProblems = async () => {
   try {
     const res = await axios.get('/legacy_problems/');
     legacyProblems.value = res.data.legacy_problems;
-    console.log(legacyProblems)
   } catch (err) {
     console.error('获取失败', err);
   }
@@ -26,10 +40,10 @@ const fetchProblem = async (pid) => {
     selectedProblem.value = res.data;
     updateData.value = { 
       title: res.data.title, 
-      type: res.data.problem_type,
       description: res.data.description, 
       options: res.data.options || '', 
-      answers: '' 
+      answers: res.data.answers || '', 
+      course_id: res.data.course_id || '' 
     };
   } catch (err) {
     console.error('查询失败', err);
@@ -91,6 +105,7 @@ onMounted(fetchLegacyProblems);
       <textarea v-model="updateData.description" placeholder="描述"></textarea>
       <input v-model="updateData.options" placeholder="选项 (JSON)" />
       <input v-model="updateData.answers" placeholder="答案" />
+      <input v-model="updateData.course_id" placeholder="课程ID" />
       <button @click="updateProblem(selectedProblem.id)">更新题目</button>
     </div>
 

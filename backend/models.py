@@ -60,6 +60,10 @@ class CourseModel(db.Model):
         back_populates="courses"
     )
 
+    # 题目和课程绑死
+    legacy_problems = db.relationship("LegacyProblemModel", back_populates="course")
+    coding_problems = db.relationship("CodingProblemModel", back_populates="course")
+
 class GroupModel(db.Model):
     __tablename__ = 'group'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -125,6 +129,8 @@ class LegacyProblemModel(db.Model):
     options = db.Column(db.JSON)
     answers = db.Column(db.JSON)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
+    course = db.relationship('CourseModel', back_populates='legacy_problems')
+    course_id = db.Column(db.Integer, db.ForeignKey("course.id"), nullable=False)
 
     problemsets = db.relationship(
         "ProblemSetModel",
@@ -141,6 +147,8 @@ class CodingProblemModel(db.Model):
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
     test_cases = db.Column(db.JSON)
     limitations = db.Column(db.JSON)
+    course = db.relationship('CourseModel', back_populates='coding_problems')
+    course_id = db.Column(db.Integer, db.ForeignKey("course.id"), nullable=False)
 
     problemsets = db.relationship(
         "ProblemSetModel",
