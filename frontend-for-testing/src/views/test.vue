@@ -8,7 +8,7 @@ const codingProblems = ref([]);
 const fetchProblems = async () => {
   try {
     const res = await axios.get('/coding_problems/', {
-      params: problemSetId.value ? { problem_set_id: problemSetId.value } : {},
+      params: problemSetId.value ? { psid: problemSetId.value } : {},
     });
     codingProblems.value = res.data.coding_problems;
   } catch (err) {

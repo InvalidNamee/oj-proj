@@ -11,6 +11,7 @@ const timeLimit = ref('');
 const memoryLimit = ref('');
 const file = ref(null);
 const createStatus = ref('');
+const course_id = ref('')
 
 // 题目信息获取/测试用例相关
 const infoPid = ref(1); // 用于获取/操作题目的 pid
@@ -37,6 +38,7 @@ const handleSubmit = async (e) => {
   const meta = {
     title: title.value,
     description: description.value,
+    course_id: course_id.value,
     limitations
   };
 
@@ -51,7 +53,7 @@ const handleSubmit = async (e) => {
       });
       createStatus.value = '修改成功';
     } else {
-      const res = await axios.post('/coding_problems', formData, {
+      const res = await axios.post('/coding_problems/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       createStatus.value = '创建成功';
@@ -115,6 +117,7 @@ const addTestCases = async () => {
     <h3>创建/修改题目</h3>
     <form @submit="handleSubmit">
       <input type="text" v-model="pid" placeholder="题目 id (留空为创建)" id="pid" />
+      <input type="text" v-model="course_id" placeholder="课程 id 不能留空" id="course_id">
       <input type="text" v-model="title" placeholder="题目名称" id="title" />
       <textarea name="描述" v-model="description" id="description"></textarea>
       <input type="text" v-model="timeLimit" placeholder="时间限制" id="timeLimit" />
