@@ -1,13 +1,13 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, get_jwt
-from models import db, CourseModel, UserModel, UserCourse
+from models import db, CourseModel, UserModel
 from decorators import role_required, ROLE_ADMIN, ROLE_TEACHER
 
 bp = Blueprint("course", __name__, url_prefix="/api/courses")
 
 
 @bp.get("")
-@role_required(ROLE_TEACHER)
+@role_required()
 def list_courses():
     """
     获取课程列表（分页）
@@ -51,6 +51,10 @@ def get_course(course_id):
     """
     获取课程详情
     """
+    user = UserModel.query.get(get_jwt_identity())
+    if user.usertype != "admin" and course_id not in [course.id for course in user.courses]:
+        return jsonify({'error': 'Permission Denied'}), 403
+
     course = CourseModel.query.get(course_id)
     if not course:
         return jsonify({'error': '课程不存在'}), 404
@@ -93,7 +97,7 @@ def update_course(course_id):
     """
     修改课程（管理员 / 授课教师）
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     login_type = get_jwt().get('login_type')
 
     course = CourseModel.query.get(course_id)
@@ -101,7 +105,8 @@ def update_course(course_id):
         return jsonify({'error': 'Course not found'}), 404
 
     # 不是管理员且不是该课程教师，禁止修改
-    if login_type != 'admin' and user_id not in [t.id for t in course.teachers]:
+    if login_type != 'admin' and user_id not in [t.id for t in course.users]:
+        # print(login_type, user_id, [t.id for t in course.users])
         return jsonify({'error': 'Permission denied'}), 403
 
     data = request.get_json()
@@ -140,7 +145,7 @@ def delete_courses():
     批量删除课程（管理员）
     body: { "courses": [1, 2, 3] }
     """
-    course_ids = request.get_json().get('courses', [])
+    course_ids = request.get_json().get('course_ids', [])
     success, fail, fail_list = 0, 0, []
 
     for cid in course_ids:

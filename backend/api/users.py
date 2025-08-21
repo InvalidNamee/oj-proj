@@ -3,7 +3,7 @@
 """
 from flask import Blueprint, request, jsonify
 from decorators import role_required, ROLE_ADMIN, ROLE_TEACHER
-from models import UserModel, CourseModel, UserCourse
+from models import UserModel, CourseModel
 from exts import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import get_jwt, get_jwt_identity
@@ -34,17 +34,7 @@ def register_user(login_type, info, commit=True):
     # 查询是否存在
     user = UserModel.query.filter_by(uid=uid).first()
 
-    if user:
-        # 已存在则更新信息
-        if username:
-            user.username = username
-        if password:
-            user.password = password
-            user.token_version = str(uuid.uuid4())  # 强制过期 token
-        user.school = school
-        user.profession = profession
-
-    else:
+    if not user:
         # 不存在则创建
         user = UserModel(
             uid=uid,
@@ -106,7 +96,7 @@ def import_users():
     }), http_status
 
 
-@bp.post('/')
+@bp.post('')
 @role_required(ROLE_TEACHER)
 def create_user():
     """
@@ -124,7 +114,52 @@ def create_user():
         return jsonify({'status': 'fail', 'user': data, 'error': res.get('error')}), 400
 
 
-@bp.patch('/')
+@bp.put('/<int:user_id>')
+@role_required()
+def update_user(user_id):
+    """
+    修改用户信息，包括课程
+    - 教师只能修改自己课程内的学生
+    - 管理员可修改所有用户
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    current_user = UserModel.query.get(get_jwt_identity())
+    user = UserModel.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # 权限判断
+    if current_user.usertype == 'teacher':
+        if user.usertype != 'student':
+            return jsonify({"error": "Teachers can only modify students"}), 403
+        shared_course_ids = {c.id for c in current_user.courses} & {c.id for c in user.courses}
+        if not shared_course_ids:
+            return jsonify({"error": "No shared course with this student"}), 403
+    elif current_user.usertype != 'admin':
+        return jsonify({"error": "Permission denied"}), 403
+
+    # 可修改字段
+    updatable_fields = ['username', 'school', 'profession', 'password']
+    for field in updatable_fields:
+        if field in data:
+            if field == 'password':
+                user.password = generate_password_hash(data['password'])
+                user.token_version = str(uuid.uuid4())
+            else:
+                setattr(user, field, data[field])
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "user": user.to_dict()
+    }), 200
+
+
+@bp.patch('')
 @role_required()
 def change_password():
     """
@@ -149,14 +184,70 @@ def change_password():
     return jsonify({'success': True}), 200
 
 
-@bp.delete('/')
+@bp.patch('/<int:user_id>/courses')
+@role_required()
+def modify_user_courses(user_id):
+    """
+    修改用户课程
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    new_course_ids = set(data.get("course_ids", []))
+
+    current_user = UserModel.query.get(get_jwt_identity())
+    target_user = UserModel.query.get(user_id)
+
+    if not target_user:
+        return jsonify({"error": "User not found"}), 404
+
+    # 权限判断
+    if current_user.usertype == 'teacher':
+        if target_user.usertype != 'student':
+            return jsonify({"error": "Teachers can only modify students"}), 403
+        # 教师可操作课程是目标学生课程和自己课程的交集
+        allowed_course_ids = {c.id for c in target_user.courses} & {c.id for c in current_user.courses}
+    elif current_user.usertype == 'admin':
+        # 管理员可以操作所有课程
+        allowed_course_ids = {c.id for c in target_user.courses}
+    else:
+        return jsonify({"error": "Permission denied"}), 403
+
+    # 新增课程只保留允许范围内
+    if current_user.usertype == 'teacher':
+        # 教师只能添加自己的课程
+        new_course_ids &= {c.id for c in current_user.courses}
+
+    # 查找 CourseModel 对象
+    new_courses = CourseModel.query.filter(CourseModel.id.in_(new_course_ids)).all()
+
+    # 被移除的课程 = 目标学生原课程中允许被操作的 - 新课程列表
+    original_courses = {c.id: c for c in target_user.courses}
+    removed_courses = [original_courses[cid].course_name for cid in allowed_course_ids if cid not in new_course_ids]
+
+    # 最终课程 = 剩下不能操作的 + 新课程列表
+    remaining_courses = [c for c in target_user.courses if c.id not in allowed_course_ids] + new_courses
+    target_user.courses = remaining_courses
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "user_id": target_user.id,
+        "updated_courses": [{"id": c.id, "name": c.course_name} for c in target_user.courses],
+        "removed_courses": removed_courses
+    }), 200
+
+
+@bp.delete('')
 @role_required(ROLE_ADMIN)
 def delete_users():
     """
     Batch delete users.
     Request JSON: { "user_ids": [1,2,3,...] }
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     login_type = get_jwt()['login_type']
     user_ids = request.json.get('user_ids', [])
 
@@ -166,22 +257,22 @@ def delete_users():
     results = []
     success_cnt = 0
 
-    for uid in user_ids:
-        user = UserModel.query.get(uid)
+    for id in user_ids:
+        user = UserModel.query.get(id)
         if not user:
-            results.append({'id': uid, 'status': 'fail', 'error': 'User not found'})
+            results.append({'id': id, 'status': 'fail', 'error': 'User not found'})
             continue
 
-        if uid == current_user_id:
-            results.append({'id': uid, 'status': 'fail', 'error': 'Cannot delete yourself'})
+        if id == current_user_id:
+            results.append({'id': id, 'status': 'fail', 'error': 'Cannot delete yourself'})
             continue
 
         if login_type == 'teacher' and user.usertype != 'student':
-            results.append({'id': uid, 'status': 'fail', 'error': 'Insufficient permissions'})
+            results.append({'id': id, 'status': 'fail', 'error': 'Insufficient permissions'})
             continue
 
         db.session.delete(user)
-        results.append({'id': uid, 'status': 'success'})
+        results.append({'id': id, 'status': 'success'})
         success_cnt += 1
 
     db.session.commit()
@@ -205,7 +296,7 @@ def get_user(user_id):
     return jsonify(user.to_dict()), 200
 
 
-@bp.get('/')
+@bp.get('')
 @role_required()
 def get_users():
     """
@@ -222,59 +313,41 @@ def get_users():
     user_id = get_jwt_identity()
     user = UserModel.query.get(user_id)
 
-    # 当前用户的课程 id 列表
-    my_courses = [
-        uc.course_id for uc in UserCourse.query.filter_by(user_id=user.id).all()
-    ]
+    # 当前用户关联的课程 id 列表
+    course_ids = [course.id for course in user.courses]
 
     # 基础查询
     query = UserModel.query
 
-    # 是否要求筛选某个课程
-    course_id = request.args.get('course_id')
+    # 是否筛选特定课程
+    course_id = request.args.get('course_id', type=int)
     if course_id:
-        # 检查权限：只有当用户在该课程里，或者是全局管理员，才能查
-        if course_id not in my_courses and user.usertype != 'admin':
+        # 权限检查：普通用户必须属于该课程
+        if course_id not in course_ids and user.usertype != 'admin':
             return jsonify({'error': 'No permission to view this course users'}), 403
-
-        query = (
-            query.join(UserCourse, UserModel.id == UserCourse.user_id)
-            .filter(UserCourse.course_id == course_id)
-        )
-
+        query = query.join(UserModel.courses).filter(CourseModel.id == course_id)
     else:
         # 没指定 course_id
-        if not my_courses and user.usertype == 'admin':
-            # 管理员，没绑定课程，也能看所有人
-            pass
-        else:
+        if user.usertype != 'admin':
             # 普通用户，只能看有交集课程的人
-            sub_courses = (
-                db.session.query(UserCourse.course_id)
-                .filter(UserCourse.user_id == user.id)
-                .subquery()
-            )
-            query = (
-                query.join(UserCourse, UserModel.id == UserCourse.user_id)
-                .filter(UserCourse.course_id.in_(sub_courses))
-                .distinct()
-            )
+            if course_ids:
+                query = query.join(UserModel.courses).filter(CourseModel.id.in_(course_ids)).distinct()
+            else:
+                # 普通用户没有课程，返回空
+                return jsonify({"total": 0, "page": page, "per_page": per_page, "users": []})
 
+    # 条件筛选
     username = request.args.get('username')
     usertype = request.args.get('usertype')
     school = request.args.get('school')
     profession = request.args.get('profession')
 
-    # 条件筛选
     if username:
         query = query.filter(UserModel.username.ilike(f"%{username}%"))
-
     if usertype:
         query = query.filter(UserModel.usertype == usertype)
-
     if school:
         query = query.filter(UserModel.school.ilike(f"%{school}%"))
-
     if profession:
         query = query.filter(UserModel.profession.ilike(f"%{profession}%"))
 

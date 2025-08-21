@@ -23,6 +23,12 @@ class UserModel(db.Model):
         back_populates="users",
     )
 
+    groups = db.relationship(
+        "GroupModel",
+        secondary="group_student",
+        back_populates="students"
+    )
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -46,6 +52,7 @@ class CourseModel(db.Model):
     course_description = db.Column(db.Text)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
     problemsets = db.relationship('ProblemSetModel', back_populates='course')
+    groups = db.relationship('GroupModel', back_populates='course')
 
     users = db.relationship(
         "UserModel",
@@ -53,26 +60,50 @@ class CourseModel(db.Model):
         back_populates="courses"
     )
 
-
-# 关联表
-class UserCourse(db.Model):
-    __tablename__ = 'user_course'
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), primary_key=True)
-    role = db.Column(db.Enum('teacher', 'student'), nullable=False, default='student')
+class GroupModel(db.Model):
+    __tablename__ = 'group'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    group_name = db.Column(db.String(200), nullable=False)
+    group_description = db.Column(db.Text)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    course = db.relationship('CourseModel', back_populates='groups')
+    problemsets = db.relationship('ProblemSetModel', back_populates='group')
 
+    students = db.relationship(
+        "UserModel",
+        secondary="group_student",
+        back_populates="groups"
+    )
+
+
+group_student = db.Table(
+    "group_student",
+    db.Column("group_id", db.Integer, db.ForeignKey("group.id"), primary_key=True),
+    db.Column("student_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
+)
+
+
+user_course = db.Table(
+    "user_course",
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
+    db.Column("course_id", db.Integer, db.ForeignKey("course.id"), primary_key=True),
+)
 
 class ProblemSetModel(db.Model):
     __tablename__ = 'problemset'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
-
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
+    # 绑定课程
     course = db.relationship('CourseModel', back_populates='problemsets')
-    course_id = db.Column(db.Integer, db.ForeignKey("course.id"))
+    course_id = db.Column(db.Integer, db.ForeignKey("course.id"), nullable=False)
+    # 绑定分组
+    group = db.relationship('GroupModel', back_populates='problemsets')
+    group_id = db.Column(db.Integer, db.ForeignKey("group.id"))
 
+    # 绑定题目
     legacy_problems = db.relationship(
         "LegacyProblemModel",
         secondary="problemset_legacyproblem",

@@ -7,6 +7,7 @@ const views = reactive([
   { name: 'Auth', path: '/auth-test'},
   { name: 'User', path: '/user-test'},
   { name: 'Course', path: '/course-test'},
+  { name: 'Group', path: '/group-test'},
   { name: 'Problemset', path: '/problemset-test'},
   { name: 'Test', path: '/test' },
   { name: 'Coding', path: '/coding-test'},

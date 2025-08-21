@@ -8,7 +8,7 @@ ROLE_TEACHER = 1
 ROLE_STUDENT = 2
 
 role_val = {
-    'studment': ROLE_STUDENT,
+    'student': ROLE_STUDENT,
     'teacher': ROLE_TEACHER,
     'admin': ROLE_ADMIN,
 }

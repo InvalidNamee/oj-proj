@@ -34,6 +34,12 @@ const router = createRouter({
       meta: {title: '课程测试'}
     },
     {
+      path: '/group-test',
+      name: 'group-test',
+      component: () => import('@/views/GroupTesting.vue'),
+      meta: {title: '分组测试'}
+    },
+    {
       path: '/coding-test',
       name: 'coding-test',
       component: () => import('@/views/CodingTesting.vue'),
