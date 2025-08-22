@@ -18,3 +18,4 @@ DEFAULT_OUTPUT_LIMIT_KB = int(os.getenv("DEFAULT_OUTPUT_LIMIT_KB", "4096"))  # i
 # 题目数据目录
 PROJECT_ROOT = os.path.dirname(os.getcwd())
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+

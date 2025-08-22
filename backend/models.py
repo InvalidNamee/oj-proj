@@ -176,14 +176,16 @@ class SubmissionModel(db.Model):
     problem_id = db.Column(db.Integer, nullable=False)  # LegacyProblem 或 CodingProblem 的 ID
     problem_type = db.Column(db.Enum('legacy', 'coding'), nullable=False)
     user_answer = db.Column(db.JSON)  # 用户答案，Legacy题可以直接存选择，Coding题存代码
+    language = db.Column(db.Enum('python', 'cpp'))
     score = db.Column(db.Float)  # 判题结果得分
     status = db.Column(db.Enum(SubmissionStatus), default='pending')
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
+    extra = db.Column(db.JSON)
 
     # 关联用户
     user = db.relationship("UserModel", backref=db.backref("submissions", lazy=True))
     # 关联题单
-    problem_set = db.relationship("ProblemSetModel", backref=db.backref("submissions", lazy=True))
+    problemset = db.relationship("ProblemSetModel", backref=db.backref("submissions", lazy=True))
 
 
 # 题集和题目的多对多

@@ -1,15 +1,16 @@
+# app.py
 from flask import Flask, request, jsonify
 from redis import Redis
-import uuid
-import json
+import requests, json, time
 from datetime import datetime
 from config import REDIS_URL, QUEUE_KEY, SUB_HASH_PREFIX
 
 app = Flask(__name__)
 rds = Redis.from_url(REDIS_URL, decode_responses=True)
 
-@app.post("/submissions")
-def create_submission():
+
+@app.post("/judger/<submission_id>")
+def create_submission(submission_id):
     """
     提交代码（异步）
     body JSON:
@@ -17,6 +18,8 @@ def create_submission():
       language: "python" | "cpp"
       source_code: string
       limitations?: { maxTime, maxMemory(MB), maxOutput(KB) }
+      callback_url?: string
+      callback_token?: string
     return:
       { submission_id }
     """
@@ -25,17 +28,20 @@ def create_submission():
     language = data.get("language")
     source_code = data.get("source_code")
     limitations = data.get("limitations") or {}
+    callback_url = data.get("callback_url")
+    callback_token = data.get("callback_token")
 
     if not problem_id or not language or not source_code:
         return jsonify({"error": "missing problem_id / language / source_code"}), 400
 
-    submission_id = str(uuid.uuid4())
     job = {
         "submission_id": submission_id,
         "problem_id": int(problem_id),
         "language": language,
         "source_code": source_code,
         "limitations": limitations,
+        "callback_url": callback_url,
+        "callback_token": callback_token,
         "created_at": datetime.now().isoformat()
     }
 
@@ -51,34 +57,5 @@ def create_submission():
     rds.rpush(QUEUE_KEY, json.dumps(job))
     return jsonify({"submission_id": submission_id}), 202
 
-
-@app.get("/submissions/<submission_id>")
-def get_submission(submission_id):
-    """
-    查询提交状态
-    """
-    sub_key = SUB_HASH_PREFIX + submission_id
-    if not rds.exists(sub_key):
-        return jsonify({"error": "submission not found"}), 404
-
-    data = rds.hgetall(sub_key)
-    # 尝试把 result 从 JSON 还原
-    result = data.get("result")
-    try:
-        result = json.loads(result) if result else None
-    except Exception:
-        pass
-
-    return jsonify({
-        "submission_id": submission_id,
-        "status": data.get("status"),
-        "score": float(data.get("score", "0")),
-        "result": result,
-        "created_at": data.get("created_at"),
-        "finished_at": data.get("finished_at")
-    }), 200
-
-
 if __name__ == "__main__":
-    # 仅测试用途：生产建议走 WSGI（gunicorn/uwsgi 等）
     app.run(host="0.0.0.0", port=8000, debug=True)
