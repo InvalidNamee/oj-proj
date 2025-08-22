@@ -9,7 +9,8 @@ def process_test_cases(pid: str, uploaded_file):
     uploaded_file: Flask request.files['test_cases.zip'] 对象
     """
     project_root = os.getcwd()
-    base_dir = os.path.join(project_root, 'data', str(pid))
+    parent_root = os.path.dirname(project_root)   # 上一级目录
+    base_dir = os.path.join(parent_root, 'data', str(pid))
     os.makedirs(base_dir, exist_ok=True)
 
     # 1. 从内存读取 ZIP 并解压
@@ -46,9 +47,9 @@ def process_test_cases(pid: str, uploaded_file):
             shutil.move(fpath, new_in)
             shutil.move(out_path, new_out)
 
-            # 相对项目目录的路径
-            rel_in = os.path.relpath(new_in, project_root)
-            rel_out = os.path.relpath(new_out, project_root)
+            # 相对父目录的路径（因为已经换了 base_dir）
+            rel_in = os.path.relpath(new_in, parent_root)
+            rel_out = os.path.relpath(new_out, parent_root)
 
             test_cases.append({
                 'name': name,
@@ -78,27 +79,18 @@ def process_test_cases(pid: str, uploaded_file):
 def remove_test_cases(pid: str, test_cases_dict: dict):
     """
     删除指定 pid 的测试用例文件。
-
-    :param pid: 项目/题目 id，对应 data 目录下的子目录
-    :param test_cases_dict: 测试用例字典，例如：
-        {
-            "cases": [
-                {"in": "data/3/2.in", "out": "data/3/2.out", "name": "2"},
-                ...
-            ],
-            "num_cases": 7
-        }
     """
+    parent_root = os.path.dirname(os.getcwd())
+    base_dir = os.path.join(parent_root, 'data', str(pid))
     cases = test_cases_dict.get('cases', [])
-    base_dir = os.path.join('data', str(pid))
-    deleted_dirs = set()
 
     for case in cases:
         for key in ['in', 'out']:
             fpath = case.get(key)
-            if fpath and os.path.isfile(fpath):
-                os.remove(fpath)
-                deleted_dirs.add(os.path.dirname(fpath))
+            if fpath:
+                abs_path = os.path.join(parent_root, fpath)
+                if os.path.isfile(abs_path):
+                    os.remove(abs_path)
 
     # 删除空目录
     if os.path.isdir(base_dir) and not os.listdir(base_dir):

@@ -38,6 +38,7 @@ def worker_loop(worker_idx: int):
                 "finished_at": result.get("finished_at", "")
             })
         except Exception as e:
+            print(str(e))
             rds.hset(sub_key, mapping={
                 "status": "system_error",
                 "score": "0",

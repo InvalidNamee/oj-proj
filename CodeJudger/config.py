@@ -13,8 +13,8 @@ BOX_ID_START = int(os.getenv("BOX_ID_START", "100"))         # isolate box-id �
 # 判题限制（可在题目 limitations 里覆盖）
 DEFAULT_TIME_LIMIT = float(os.getenv("DEFAULT_TIME_LIMIT", "2.0"))    # seconds
 DEFAULT_MEM_LIMIT_MB = int(os.getenv("DEFAULT_MEM_LIMIT_MB", "256"))  # MB
-DEFAULT_OUTPUT_LIMIT_KB = int(os.getenv("DEFAULT_OUTPUT_LIMIT_KB", "512"))  # isolate write-fs 上限
+DEFAULT_OUTPUT_LIMIT_KB = int(os.getenv("DEFAULT_OUTPUT_LIMIT_KB", "4096"))  # isolate write-fs 上限
 
 # 题目数据目录
-PROJECT_ROOT = os.getcwd()
+PROJECT_ROOT = os.path.dirname(os.getcwd())
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")

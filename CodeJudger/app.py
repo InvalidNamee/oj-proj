@@ -36,7 +36,7 @@ def create_submission():
         "language": language,
         "source_code": source_code,
         "limitations": limitations,
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now().isoformat()
     }
 
     # 初始状态

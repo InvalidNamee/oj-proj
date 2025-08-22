@@ -13,58 +13,65 @@ class JudgeError(Exception):
 def _run_cmd(cmd: List[str]) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-def _ensure_box(box_id: int) -> str:
-    # 初始化/获取 box 目录
-    init = _run_cmd(["isolate", f"--box-id={box_id}", "--init"])
-    # isolate 把路径写在 stderr（部分版本），也可能没有；但即使没有，我们仍可直接运行 --run。
-    # 这里返回空字符串无伤大雅。
-    return init.stderr.strip()
+def _ensure_box(box_id: int) -> None:
+    _run_cmd(["isolate", f"--box-id={box_id}", "--init", "--cg"])
 
-def _cleanup_box(box_id: int):
-    _run_cmd(["isolate", f"--box-id={box_id}", "--cleanup"])
-
-def _copyin(box_id: int, src: str, dst: str):
-    # 把 src 拷贝进沙箱内的 dst
-    cp = _run_cmd(["isolate", f"--box-id={box_id}", "--silent",
-                   "--copyin", src, dst])
-    if cp.returncode != 0:
-        raise JudgeError(f"copyin failed: {cp.stderr}")
+def _cleanup_box(box_id: int) -> None:
+    _run_cmd(["isolate", f"--box-id={box_id}", "--cleanup", "--cg"])
 
 def _run_in_isolate(
     box_id: int,
     run_cmd: List[str],
+    workdir: str,
     time_limit: float,
     mem_limit_mb: int,
+    datadir: str = None,
     stdin_file: str = None,
     stdout_file: str = "stdout.txt",
     stderr_file: str = "stderr.txt",
     fsize_kb: int = DEFAULT_OUTPUT_LIMIT_KB
-) -> Tuple[int, str, str, str]:
-    """
-    返回 (exit_code, meta, stdout, stderr)
-    meta 是 isolate 产生的 JSON-like 在 meta 文件里（用 --meta 获取）。
-    """
+) -> Tuple[int, str, str, str] | None:
+
     with tempfile.NamedTemporaryFile(prefix="iso_meta_", delete=False) as meta_tmp:
         meta_path = meta_tmp.name
+
     args = [
-        "isolate", f"--box-id={box_id}", "--run",
+        "isolate",
+        f"--box-id={box_id}",
+        "--run",
+        "--cg",
         f"--time={time_limit}",
-        f"--mem={mem_limit_mb * 1024}",  # KB
+        f"--mem={mem_limit_mb * 1024}",
         f"--fsize={fsize_kb}",
-        "--stdout", stdout_file,
-        "--stderr", stderr_file,
         "--meta", meta_path,
+        "--cg-mem", str(mem_limit_mb * 1024),
+        "-p",
+        "-E", "PATH=/usr/bin:/bin",
+        "-o", stdout_file,
+        "-r", stderr_file,
+        "-k", "65536",
         "--"
     ] + run_cmd
 
+    # stdin/stdout/stderr 使用沙箱路径
+    if datadir:
+        args.insert(3, f"--dir=/data={datadir}",)
     if stdin_file:
-        # stdin_file 已经在 box 里（通过 copyin），这里只告诉 isolate 用哪个
-        args.insert(3, f"--stdin={stdin_file}")
+        args.insert(3, f"--stdin=/data/{stdin_file}")
 
     proc = _run_cmd(args)
-    # 读取 stdout/stderr 文件
-    out = _run_cmd(["isolate", f"--box-id={box_id}", "--cat", stdout_file])
-    err = _run_cmd(["isolate", f"--box-id={box_id}", "--cat", stderr_file])
+
+    # 宿主机上的对应文件路径
+    stdout_path = os.path.join(workdir, stdout_file)
+    stderr_path = os.path.join(workdir, stderr_file)
+
+    out, err = "", ""
+    if os.path.exists(stdout_path):
+        with open(stdout_path, "r", encoding="utf-8", errors="ignore") as f:
+            out = f.read()
+    if os.path.exists(stderr_path):
+        with open(stderr_path, "r", encoding="utf-8", errors="ignore") as f:
+            err = f.read()
 
     # 读取 meta
     meta = ""
@@ -74,7 +81,8 @@ def _run_in_isolate(
     finally:
         os.unlink(meta_path)
 
-    return proc.returncode, meta, out.stdout, err.stdout
+    return proc.returncode, meta, out, err
+
 
 def _load_testcases(problem_id: int):
     base = os.path.join(DATA_DIR, str(problem_id))
@@ -84,11 +92,11 @@ def _load_testcases(problem_id: int):
         name = os.path.splitext(os.path.basename(in_path))[0]
         out_path = os.path.join(base, f"{name}.out")
         if os.path.exists(out_path):
-            dataset.append((name, in_path, out_path))
-    return dataset
+            # 保存相对路径
+            dataset.append((name, os.path.basename(in_path), out_path))
+    return dataset, base
 
 def _normalize(s: str) -> str:
-    # 常见比较方式：去除尾随空白，逐行对比
     return "\n".join([line.rstrip() for line in s.rstrip().splitlines()])
 
 def judge_submission(
@@ -98,119 +106,101 @@ def judge_submission(
     source_code: str,
     limitations: dict
 ):
-    """
-    返回 dict:
-      {
-        "status": "accepted" | "rejected" | "runtime_error" | "time_limit_exceeded" | ...,
-        "score": float,
-        "cases": [{name, status, time, message}]
-      }
-    """
     time_limit = float(limitations.get("maxTime", DEFAULT_TIME_LIMIT))
     mem_mb = int(limitations.get("maxMemory", DEFAULT_MEM_LIMIT_MB))
 
-    tests = _load_testcases(problem_id)
+    tests, datadir = _load_testcases(problem_id)
     if not tests:
-        return {"status": "rejected", "score": 0, "cases": [], "message": "No testcases"}
+        return {"status": "internal_error", "score": 0, "cases": [], "message": "No testcases"}
 
-    # 准备 isolate
+    box_dir = f"/var/lib/isolate/{box_id}/box"  # box 的根目录
+
+    _cleanup_box(box_id)  # 清理 box，保证干净
     _ensure_box(box_id)
 
-    # 为每次提交创建临时源文件名
-    with tempfile.TemporaryDirectory(prefix=f"judge_{problem_id}_") as tmpdir:
-        if language == "python":
-            src_host = os.path.join(tmpdir, "main.py")
-            with open(src_host, "w") as f:
-                f.write(source_code)
-            _copyin(box_id, src_host, "main.py")
-            run_cmd = ["python3", "main.py"]
-
-        elif language == "cpp":
-            # 写源码
-            src_host = os.path.join(tmpdir, "main.cpp")
-            with open(src_host, "w") as f:
-                f.write(source_code)
-            _copyin(box_id, src_host, "main.cpp")
-            # 在沙箱内编译
-            code, meta, out, err = _run_in_isolate(
-                box_id,
-                run_cmd=["/bin/sh", "-lc", "g++ -O2 -std=c++17 -o main main.cpp"],
-                time_limit=10.0, mem_limit_mb=512
-            )
-            if code != 0:
-                _cleanup_box(box_id)
-                return {"status": "compile_error", "score": 0, "cases": [], "message": err or out}
-
-            run_cmd = ["./main"]
-
-        else:
+    # 写入源文件到 box
+    if language == "python":
+        src_path = os.path.join(box_dir, "main.py")
+        with open(src_path, "w") as f:
+            f.write(source_code)
+        run_cmd = ["/usr/bin/python3", "main.py"]
+    elif language == "cpp":
+        src_path = os.path.join(box_dir, "main.cpp")
+        with open(src_path, "w") as f:
+            f.write(source_code)
+        code, meta, out, err = _run_in_isolate(
+            box_id,
+            ["/usr/bin/g++", "-o2", "-std=c++17", "-o", "main", "main.cpp"],
+            workdir=box_dir,
+            time_limit=10.0,
+            mem_limit_mb=1024
+        )
+        if code != 0:
             _cleanup_box(box_id)
-            return {"status": "rejected", "score": 0, "cases": [], "message": f"Unsupported language: {language}"}
+            return {"status": "compile_error", "score": 0, "cases": [], "message": err or out}
+        run_cmd = ["./main"]
+    else:
+        _cleanup_box(box_id)
+        return {"status": "internal_error", "score": 0, "cases": [], "message": f"Unsupported language: {language}"}
 
-        # 拷贝所有输入文件（便于 --stdin 使用）
-        # 注意：只需要把 .in 拷进去，.out 在宿主读对照即可
-        for _, in_path, _ in tests:
-            _copyin(box_id, in_path, os.path.basename(in_path))
+    results = []
+    passed = 0
 
-        results = []
-        passed = 0
+    for name, in_file, out_path in tests:
+        code, meta, out, err = _run_in_isolate(
+            box_id,
+            run_cmd=run_cmd,
+            workdir=box_dir,
+            datadir=datadir,
+            time_limit=time_limit,
+            mem_limit_mb=mem_mb,
+            stdin_file=in_file,  # 相对路径
+            stdout_file=f"{name}.stdout",
+            stderr_file=f"{name}.stderr",
+        )
 
-        for name, in_path, out_path in tests:
-            stdin_name = os.path.basename(in_path)
-            code, meta, out, err = _run_in_isolate(
-                box_id,
-                run_cmd=run_cmd,
-                time_limit=time_limit,
-                mem_limit_mb=mem_mb,
-                stdin_file=stdin_name,
-                stdout_file=f"{name}.stdout",
-                stderr_file=f"{name}.stderr",
-            )
+        with open(out_path, "r", encoding="utf-8", errors="ignore") as fexp:
+            expected = fexp.read()
 
-            # 读取期望输出
-            with open(out_path, "r", encoding="utf-8", errors="ignore") as fexp:
-                expected = fexp.read()
+        time_used = None
+        peek_memory = None
+        try:
+            meta_lines = {kv.split(":", 1)[0].strip(): kv.split(":", 1)[1].strip()
+                          for kv in meta.splitlines() if ":" in kv}
+            time_used = float(meta_lines.get("time", "0"))
+            peek_memory = float(meta_lines.get("max-rss", "0")) / 1024
+            status_meta = meta_lines.get("status", "")
+        except Exception:
+            status_meta = ""
 
-            # 解析 meta 里的时间/内存（不同 isolate 版本格式略有不同，这里做个弱解析）
-            time_used = None
-            try:
-                meta_lines = {kv.split(":", 1)[0].strip(): kv.split(":", 1)[1].strip()
-                              for kv in meta.splitlines() if ":" in kv}
-                time_used = float(meta_lines.get("time", "0"))
-                status_meta = meta_lines.get("status", "")
-            except Exception:
-                status_meta = ""
+        if status_meta in ("TO", "TL"):
+            case_status = "time_limit_exceeded"
+        elif status_meta in ("RE", "SG"):
+            case_status = "runtime_error"
+        elif code != 0:
+            case_status = "runtime_error"
+        else:
+            ok = _normalize(out) == _normalize(expected)
+            case_status = "accepted" if ok else "wrong_answer"
 
-            if status_meta in ("TO", "TL"):  # 超时
-                case_status = "time_limit_exceeded"
-            elif status_meta in ("RE", "SG"):  # 运行时错误/信号
-                case_status = "runtime_error"
-            elif code != 0:
-                case_status = "runtime_error"
-            else:
-                # 比对输出
-                ok = _normalize(out) == _normalize(expected)
-                case_status = "accepted" if ok else "wrong_answer"
+        if case_status == "accepted":
+            passed += 1
 
-            if case_status == "accepted":
-                passed += 1
+        results.append({
+            "name": name,
+            "status": case_status,
+            "time": time_used,
+            "memory": peek_memory,
+            "message": err.strip() if err else ""
+        })
 
-            results.append({
-                "name": name,
-                "status": case_status,
-                "time": time_used,
-                "message": err.strip() if err else ""
-            })
+    overall = "accepted" if passed == len(results) else "wrong_answer"
+    score = round(100.0 * passed / max(1, len(results)), 2)
 
-        overall = "accepted" if passed == len(results) else "rejected"
-        score = round(100.0 * passed / max(1, len(results)), 2)
-
-    # 清理 box
     _cleanup_box(box_id)
-
     return {
         "status": overall,
         "score": score,
         "cases": results,
-        "finished_at": datetime.utcnow().isoformat()
+        "finished_at": datetime.now().isoformat()
     }
