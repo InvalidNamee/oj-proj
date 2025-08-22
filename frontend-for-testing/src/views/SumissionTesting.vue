@@ -69,7 +69,7 @@ async function submitCode() {
     let finished = false;
     while (!finished) {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const pollResp = await axios.get(`/submissions/${submissionId.value}`);
+      const pollResp = await axios.get(`/submissions/${submissionId.value}/status`);
       const pollData = pollResp.data;
 
       status.value = pollData.status;

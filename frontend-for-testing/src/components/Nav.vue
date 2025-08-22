@@ -12,7 +12,8 @@ const views = reactive([
   { name: 'Test', path: '/test' },
   { name: 'Coding', path: '/coding-test'},
   { name: 'Legacy', path: '/legacy-test'},
-  { name: "Submit", path: '/submission-test'}
+  { name: "Submit", path: '/submission-test'},
+  { name: 'Records', path: '/record-test'}
 ]);
 </script>
 

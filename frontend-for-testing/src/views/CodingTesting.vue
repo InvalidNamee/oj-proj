@@ -44,6 +44,8 @@ const handleSubmit = async (e) => {
 
   const formData = new FormData();
   formData.append('meta', JSON.stringify(meta));
+  console.log(formData);
+  
   if (file.value) formData.append('test_cases.zip', file.value);
 
   try {

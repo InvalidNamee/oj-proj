@@ -62,6 +62,12 @@ const router = createRouter({
       name: 'submission-test',
       component: () => import('@/views/SumissionTesting.vue'),
       meta: { title: '提交代码测试' }
+    },
+    {
+      path: '/record-test',
+      name: 'record-test',
+      component: () => import('@/views/RecordTesting.vue'),
+      meta: { title: '提交记录 && 传统题' }
     }
   ],
 })
