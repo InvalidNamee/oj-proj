@@ -1,7 +1,6 @@
-# app.py
 from flask import Flask, request, jsonify
 from redis import Redis
-import requests, json, time
+import requests, json
 from datetime import datetime
 from config import REDIS_URL, QUEUE_KEY, SUB_HASH_PREFIX
 
@@ -58,4 +57,4 @@ def create_submission(submission_id):
     return jsonify({"submission_id": submission_id}), 202
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8000)

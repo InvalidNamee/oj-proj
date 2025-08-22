@@ -23,6 +23,21 @@ def worker_loop(worker_idx: int):
         limitations = task.get("limitations", {})
 
         print(f"[Worker {worker_idx}] Judging submission {submission_id}")
+        
+        callback_payload = {
+            "status": "Judging",
+            "score": 0,
+            "detail": [],
+            "finished_at": None,
+            "callback_token": task.get("callback_token")
+        }
+        # 回调 Web
+        try:
+            resp = requests.put(task["callback_url"], json=callback_payload, timeout=10)
+            resp.raise_for_status()
+            print(f"[Worker {worker_idx}] Submission {submission_id} updated successfully")
+        except Exception as e:
+            print(f"[Worker {worker_idx}] Failed to update submission {submission_id}: {e}")
 
         try:
             result = judge_submission(

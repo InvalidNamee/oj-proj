@@ -30,6 +30,7 @@
 
 <script setup>
 import { ref } from "vue";
+import axios from "axios";
 
 const problemId = ref(1002);
 const language = ref("cpp");
@@ -55,28 +56,22 @@ async function submitCode() {
 
   try {
     // 1. 提交代码
-    const resp = await fetch(`http://121.249.151.214/submissions/coding/${problemId.value}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        language: language.value,
-        source_code: sourceCode.value,
-      }),
+    const { data } = await axios.post(`/submissions/coding/${problemId.value}`, {
+      language: language.value,
+      source_code: sourceCode.value,
     });
 
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || "提交失败");
     submissionId.value = data.submission_id;
-
-    status.value = "排队中";
+    status.value = "Pending";
     appendLog(`提交成功, Submission ID: ${submissionId.value}`);
 
-    // 2. 轮询
+    // 2. 轮询判题状态
     let finished = false;
     while (!finished) {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 秒轮询
-      const pollResp = await fetch(`http://121.249.151.214/submissions/${submissionId.value}`);
-      const pollData = await pollResp.json();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const pollResp = await axios.get(`/submissions/${submissionId.value}`);
+      const pollData = pollResp.data;
+
       status.value = pollData.status;
       if (pollData.extra) {
         try {
@@ -86,12 +81,13 @@ async function submitCode() {
           appendLog(pollData.extra);
         }
       }
-      finished = !["queued", "running"].includes(pollData.status);
+
+      finished = !["Pending", "Judging"].includes(pollData.status);
     }
 
     appendLog("判题完成");
   } catch (e) {
-    appendLog(`错误: ${e.message}`);
+    appendLog(`错误: ${e.response?.data?.error || e.message}`);
     status.value = "提交失败";
   } finally {
     submitting.value = false;

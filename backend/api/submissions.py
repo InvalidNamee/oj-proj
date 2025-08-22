@@ -2,7 +2,7 @@ import os, json, time, hmac, base64, hashlib, threading, requests
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
-from models import LegacyProblemModel, CodingProblemModel, ProblemSetModel, SubmissionModel, SubmissionStatus
+from models import LegacyProblemModel, CodingProblemModel, ProblemSetModel, SubmissionModel
 from decorators import role_required, ROLE_TEACHER
 from modules.legacy_judger import legacy_judger
 
@@ -37,8 +37,8 @@ def submit_legacy(problem_id):
         problem_id=problem_id,
         problem_type='legacy',
         user_answer=user_answers,
-        score=score,
-        status=status.value
+        score=score, # type: ignore
+        status=status # pyright: ignore[reportCallIssue]
     )
     db.session.add(submission)
     db.session.commit()
@@ -47,16 +47,13 @@ def submit_legacy(problem_id):
         'problem_id': problem_id,
         'problem_set_id': problem_set_id,
         'score': score,
-        'status': status.value
+        'status': status
     }), 201
 
 
 JUDGE_SERVER = "http://127.0.0.1:8000"  # 判题机地址
-PUBLIC_BASE_URL = "http://127.0.0.1:5000"
+PUBLIC_BASE_URL = "http://127.0.0.1:5000/api"
 CALLBACK_SECRET = os.getenv("JUDGE_CALLBACK_SECRET", "change-me")
-SUBMISSION_STATUSES = ("queued", "running", "accepted", "wrong_answer",
-                       "compile_error", "runtime_error", "time_limit_exceeded",
-                       "memory_limit_exceeded", "system_error")
 
 def _make_callback_token(submission_id: int, ttl_sec: int = 3600) -> str:
     ts = str(int(time.time()))
@@ -121,13 +118,13 @@ def submit_coding(problem_id):
         problem_type="coding",
         user_answer=source_code,
         score=0,
-        status="queued",
+        status="Pending",
     )
     db.session.add(submission)
     db.session.commit()
 
     # 2) 异步通知判题机
-    callback_url = f"{PUBLIC_BASE_URL}/submissions/coding/{submission.id}"
+    callback_url = f"{PUBLIC_BASE_URL}/submissions/{submission.id}"
     callback_token = _make_callback_token(submission.id)
 
     judge_payload = {
@@ -162,7 +159,7 @@ def get_submission(submission_id):
         "status": s.status,
         "score": s.score,
         "extra": s.extra
-    })
+    }), 200
 
 
 @bp.put("/<int:submission_id>")
@@ -193,7 +190,7 @@ def judge_callback(submission_id):
     if detail is not None:
         # 建议把 detail 存成 JSON 字符串
         try:
-            s.extra = json.dumps(detail, ensure_ascii=False)
+            s.extra = detail
         except Exception:
             s.extra = str(detail)
 

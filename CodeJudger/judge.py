@@ -25,8 +25,8 @@ def _run_in_isolate(
     workdir: str,
     time_limit: float,
     mem_limit_mb: int,
-    datadir: str = None,
-    stdin_file: str = None,
+    datadir: str = '',
+    stdin_file: str = '',
     stdout_file: str = "stdout.txt",
     stderr_file: str = "stderr.txt",
     fsize_kb: int = DEFAULT_OUTPUT_LIMIT_KB
@@ -111,7 +111,7 @@ def judge_submission(
 
     tests, datadir = _load_testcases(problem_id)
     if not tests:
-        return {"status": "internal_error", "score": 0, "cases": [], "message": "No testcases"}
+        return {"status": "InternalError", "score": 0, "cases": [], "message": "No testcases"}
 
     box_dir = f"/var/lib/isolate/{box_id}/box"  # box 的根目录
 
@@ -137,11 +137,11 @@ def judge_submission(
         )
         if code != 0:
             _cleanup_box(box_id)
-            return {"status": "compile_error", "score": 0, "cases": [], "message": err or out}
+            return {"status": "CE", "score": 0, "cases": [], "message": err or out}
         run_cmd = ["./main"]
     else:
         _cleanup_box(box_id)
-        return {"status": "internal_error", "score": 0, "cases": [], "message": f"Unsupported language: {language}"}
+        return {"status": "InternalError", "score": 0, "cases": [], "message": f"Unsupported language: {language}"}
 
     results = []
     passed = 0
@@ -158,6 +158,7 @@ def judge_submission(
             stdout_file=f"{name}.stdout",
             stderr_file=f"{name}.stderr",
         )
+        # print(code, meta)
 
         with open(out_path, "r", encoding="utf-8", errors="ignore") as fexp:
             expected = fexp.read()
@@ -174,16 +175,21 @@ def judge_submission(
             status_meta = ""
 
         if status_meta in ("TO", "TL"):
-            case_status = "time_limit_exceeded"
+            case_status = "TLE"
         elif status_meta in ("RE", "SG"):
-            case_status = "runtime_error"
+            if meta_lines.get("exitsig") == "25":
+                case_status = "OLE"
+            elif meta_lines.get("exitsig") == "11":
+                case_status = "MLE"
+            else:
+                case_status = "RE"
         elif code != 0:
-            case_status = "runtime_error"
+            case_status = "RE"
         else:
             ok = _normalize(out) == _normalize(expected)
-            case_status = "accepted" if ok else "wrong_answer"
+            case_status = "AC" if ok else "WA"
 
-        if case_status == "accepted":
+        if case_status == "AC":
             passed += 1
 
         results.append({
@@ -194,7 +200,21 @@ def judge_submission(
             "message": err.strip() if err else ""
         })
 
-    overall = "accepted" if passed == len(results) else "wrong_answer"
+    status_list = [result.get("status") for result in results]
+    overall = "WA"
+    if passed == len(status_list):
+        overall = "AC"
+    elif "RE" in status_list:
+        overall = "RE"
+    elif "MLE" in status_list:
+        overall = "MLE"
+    elif "OLE" in status_list:
+        overall = "OLE"
+    elif "WA" in status_list:
+        overall = "WA"
+    elif "TLE" in status_list:
+        overall = "TLE"
+        
     score = round(100.0 * passed / max(1, len(results)), 2)
 
     _cleanup_box(box_id)

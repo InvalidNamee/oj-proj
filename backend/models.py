@@ -1,7 +1,6 @@
 from exts import db
 from sqlalchemy.sql import func
 from datetime import datetime
-from enum import Enum, unique
 import uuid
 
 
@@ -156,29 +155,18 @@ class CodingProblemModel(db.Model):
         back_populates="coding_problems"
     )
 
-class SubmissionStatus(Enum):
-    Pending = "Pending"           # 刚提交，还未判
-    Judging = "Judging"           # 判题中（主要用于 Coding）
-    AC = "AC"                     # AC
-    WA = "WA"                     # WA
-    CE = "CE"                     # 编译错误（Coding 特有）
-    TLE = "TLE"                   # TLE
-    MLE = "MLE"                   # MLE
-    RE = "RE"                     # RE (99.9% Segmentation Fault)
-    WrongFormat = "WrongFormat"   # 格式错误
-    OLE = "OLE"                   # 输出超限
 
 class SubmissionModel(db.Model):
     __tablename__ = "submission"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    problem_set_id = db.Column(db.Integer, db.ForeignKey("problemset.id"), nullable=False)
+    problem_set_id = db.Column(db.Integer, db.ForeignKey("problemset.id"))
     problem_id = db.Column(db.Integer, nullable=False)  # LegacyProblem 或 CodingProblem 的 ID
     problem_type = db.Column(db.Enum('legacy', 'coding'), nullable=False)
     user_answer = db.Column(db.JSON)  # 用户答案，Legacy题可以直接存选择，Coding题存代码
     language = db.Column(db.Enum('python', 'cpp'))
     score = db.Column(db.Float)  # 判题结果得分
-    status = db.Column(db.Enum(SubmissionStatus), default='pending')
+    status = db.Column(db.Enum('Pending', 'Judging', 'AC', 'WA', 'TLE', 'MLE', 'OLE', 'CE', 'RE', 'InvernalError'), default='pending')
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
     extra = db.Column(db.JSON)
 
