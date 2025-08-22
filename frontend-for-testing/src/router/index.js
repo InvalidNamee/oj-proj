@@ -10,6 +10,12 @@ const router = createRouter({
       meta: { title: '首页' }
     },
     {
+      path: '/submission-test',
+      name: 'submission-test',
+      component: () => import('@/views/SumissionTesting.vue'),
+      meta: { title: '提交代码测试' }
+    },
+    {
       path: '/auth-test',
       name: 'auth-test',
       component: () => import('@/views/AuthTesting.vue'),
