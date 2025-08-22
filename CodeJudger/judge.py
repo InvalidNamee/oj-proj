@@ -158,7 +158,6 @@ def judge_submission(
             stdout_file=f"{name}.stdout",
             stderr_file=f"{name}.stderr",
         )
-        # print(code, meta)
 
         with open(out_path, "r", encoding="utf-8", errors="ignore") as fexp:
             expected = fexp.read()
