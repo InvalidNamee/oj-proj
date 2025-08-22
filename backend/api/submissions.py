@@ -17,11 +17,11 @@ def submit_legacy(problem_id):
     user_id = get_jwt_identity()
     data = request.get_json()
 
-    problem_set_id = data.get('problem_set_id')
-    user_answers = data.get('user_answers')
+    problem_set_id = data.get('problem_set_id') or None
+    user_answers = data.get('user_answer')
 
     if not problem_id or user_answers is None:
-        return jsonify({'error': 'Missing problem_id or user_answers'}), 400
+        return jsonify({'error': 'Missing problem_id or user_answer'}), 400
 
     problem = LegacyProblemModel.query.get(problem_id)
     if not problem:
@@ -144,12 +144,26 @@ def submit_coding(problem_id):
         "status": submission.status
     }), 201
 
+@bp.get("/<int:submission_id>/status")
+@role_required()
+def get_submission_status(submission_id):
+    """
+    轮询查看判题进度/结果（轻量）
+    """
+    s = SubmissionModel.query.get_or_404(submission_id)
+    return jsonify({
+        "submission_id": s.id,
+        "problem_id": s.problem_id,
+        "status": s.status,
+        "score": s.score
+    }), 200
+    
 
 @bp.get("/<int:submission_id>")
 @role_required()
 def get_submission(submission_id):
     """
-    提供给前端轮询查看当前判题进度/结果
+    详情页
     """
     s = SubmissionModel.query.get_or_404(submission_id)
     return jsonify({
@@ -157,6 +171,7 @@ def get_submission(submission_id):
         "problem_id": s.problem_id,
         "problem_set_id": s.problem_set_id,
         "status": s.status,
+        "user_answer": s.user_answer,
         "score": s.score,
         "extra": s.extra
     }), 200
@@ -178,10 +193,10 @@ def judge_callback(submission_id):
     s = SubmissionModel.query.get_or_404(submission_id)
 
     # 允许局部更新
-    new_status = data.get("status")            # e.g., "running", "compile_error", "accepted", ...
-    new_score = data.get("score")              # 0~100
-    detail = data.get("detail")                # 字典：编译日志、样例结果、时间内存……
-    finished_at = data.get("finished_at")      # 可选，ISO 时间串
+    new_status = data.get("status")
+    new_score = data.get("score")
+    detail = data.get("detail")
+    finished_at = data.get("finished_at")
 
     if new_status:
         s.status = new_status
@@ -196,3 +211,62 @@ def judge_callback(submission_id):
 
     db.session.commit()
     return jsonify({"ok": True})
+
+
+@bp.get("/")
+@role_required()
+def list_submissions():
+    """
+    获取提交记录列表
+    可选参数：
+        user_id: 用户ID（不传则为当前用户，管理员可看所有）
+        problem_id: 题目ID
+        problem_set_id: 题集ID
+        page: 页码（默认1）
+        per_page: 每页条数（默认20）
+    """
+    # current_user_id = get_jwt_identity()
+    # user = UserModel.query.get(current_user_id)
+
+    # 过滤条件
+    query = SubmissionModel.query
+
+    # 普通用户只能查看自己的提交
+    # if not user.is_admin:
+    #     query = query.filter_by(user_id=current_user_id)
+    # else:
+        # 管理员可以加上 user_id 过滤
+    user_id = request.args.get("user_id", type=int)
+    if user_id:
+        query = query.filter_by(user_id=user_id)
+
+    problem_id = request.args.get("problem_id", type=int)
+    if problem_id:
+        query = query.filter_by(problem_id=problem_id)
+
+    problem_set_id = request.args.get("problem_set_id", type=int)
+    if problem_set_id:
+        query = query.filter_by(problem_set_id=problem_set_id)
+
+    # 分页
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 20, type=int)
+    pagination = query.order_by(SubmissionModel.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify({
+        "items": [
+            {
+                "submission_id": s.id,
+                "problem_id": s.problem_id,
+                "problem_set_id": s.problem_set_id,
+                "problem_type": s.problem_type,
+                "status": s.status,
+                "score": s.score,
+                "time_stamp": s.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
+            } for s in pagination.items
+        ],
+        "total": pagination.total,
+        "page": pagination.page,
+        "pages": pagination.pages,
+        "per_page": pagination.per_page
+    })

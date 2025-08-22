@@ -476,7 +476,7 @@ Content-Type: application/json
 
 ---
 
-## Courses 相关接口 (`/api/courses`)
+## Courses 相关接口 (`/api/courses.py`)
 
 ### 1. 获取课程列表
 
@@ -633,7 +633,7 @@ Content-Type: application/json
 
 ---
 
-## Groups 相关接口 (`/api/groups`)
+## Groups 相关接口 (`/api/groups.py`)
 
 ### 1. 创建组
 
@@ -905,7 +905,7 @@ Content-Type: application/json
 
 ---
 
-## Legacy_problems 相关接口 (`/api/legacy_problems`)
+## Legacy_problems 相关接口 (`/api/legacy_problems.py`)
 
 ### 1. 导入 Legacy 题目
 
@@ -1046,7 +1046,7 @@ Content-Type: application/json
 
 ---
 
-## Coding_problems 相关接口 (`/api/coding_problems`)
+## Coding_problems 相关接口 (`/api/coding_problems.py`)
 
 ### 1. 创建 Coding Problem
 
@@ -1216,5 +1216,192 @@ Content-Type: application/json
 {
   "success": true,
   "test_cases": {"num_cases": 5, "cases": [...]}
+}
+```
+
+# Submissions 相关接口 (`/api/submissions.py`)
+
+### 1. 提交 Legacy 题目答案并判分
+
+**URL:** `POST /api/submissions/legacy/<problem_id>`
+**权限:** 学生/教师
+**请求体 (JSON)：**
+
+```json
+{
+  "problem_set_id": 10,
+  "user_answer": ["A", "B"]
+}
+```
+
+**响应示例：**
+
+```json
+{
+  "problem_id": 1,
+  "problem_set_id": 10,
+  "score": 100,
+  "status": "AC"
+}
+```
+
+---
+
+### 2. 提交 Coding 题目
+
+**URL:** `POST /api/submissions/coding/<problem_id>`
+**权限:** 学生/教师
+**请求体 (JSON)：**
+
+```json
+{
+  "language": "python",
+  "source_code": "print('Hello')",
+  "problem_set_id": 5
+}
+```
+
+**响应示例：**
+
+```json
+{
+  "submission_id": 123,
+  "status": "Pending"
+}
+```
+
+**说明：**
+
+* 会立即返回 `submission_id`，前端可用该 ID 轮询判题进度。
+* 判题任务后台异步发送到判题机，结果回调更新。
+* 可选语言有 `python` 和 `cpp`，其他语言会报内部错误 (InternalError)
+
+---
+
+### 3. 查询提交状态（轻量，用于前端轮询提交结果）
+
+**URL:** `GET /api/submissions/<submission_id>/status`
+**权限:** 学生/教师
+**响应示例：**
+
+```json
+{
+  "submission_id": 123,
+  "problem_id": 1,
+  "status": "Judging",
+  "score": 0
+}
+```
+
+**说明：**
+
+* status 有以下几种，轮询直到既不是 Pending 也不是 Judging 即可。
+
+  | status | 解释 |
+  | --- | --- |
+  | Pending | 正在排队 |
+  | Judging | 正在判题 |
+  | AC | 正确 |
+  | WA | 答案错误 |
+  | TLE | 时间超限 |
+  | MLE | 内存超限 |
+  | OLE | 输出超限 |
+  | CE | 编译错误 |
+  | InternalError | 服务器内部错误 |
+
+---
+
+### 4. 获取提交详情
+
+**URL:** `GET /api/submissions/<submission_id>`
+**权限:** 学生/教师
+**响应示例：**
+
+```json
+{
+  "submission_id": 123,
+  "problem_id": 1,
+  "problem_set_id": 5,
+  "status": "Accepted",
+  "user_answer": "print('Hello')",
+  "score": 100,
+  "extra":
+    [
+      {
+          "name": "1",
+          "time": 0.002,
+          "memory": 1.6015625,
+          "status": "accepted",
+          "message": ""
+      },
+      {
+          "name": "2",
+          "time": 0.55,
+          "memory": 14.3515625,
+          "status": "accepted",
+          "message": ""
+      },
+      {
+          "name": "3",
+          "time": 0.109,
+          "memory": 6.47265625,
+          "status": "accepted",
+          "message": ""
+      },
+      {
+          "name": "4",
+          "time": 0.394,
+          "memory": 6.4765625,
+          "status": "accepted",
+          "message": ""
+      }
+  ]
+}
+```
+
+---
+
+### 5. 判题机回调（内部接口，前端可忽略）
+
+**URL:** `PUT /api/submissions/<submission_id>`
+**权限:** 判题机（带 callback\_token）
+
+### 6. 获取提交列表（分页）
+
+**URL:** `GET /api/submissions/`
+**权限:** 登录（亟待修改）
+
+<!-- * 普通用户：只能查看自己的提交
+* 管理员：可查看所有提交 -->
+
+**查询参数 (Query)：**
+
+| 参数               | 类型  | 描述           |
+| ---------------- | --- | ------------ |
+| user\_id         | int | 用户 ID（管理员可用） |
+| problem\_id      | int | 题目 ID        |
+| problem\_set\_id | int | 题集 ID        |
+| page             | int | 页码（默认 1）     |
+| per\_page        | int | 每页数量（默认 20）  |
+
+**响应示例：**
+
+```json
+{
+  "items": [
+    {
+      "submission_id": 123,
+      "problem_type": "coding",
+      "problem_id": 1,
+      "problem_set_id": 5,
+      "status": "Accepted",
+      "score": 100,
+      "time_stamp": "2025-08-22 13:00:00"
+    }
+  ],
+  "total": 15,
+  "page": 1,
+  "pages": 2,
+  "per_page": 20
 }
 ```
