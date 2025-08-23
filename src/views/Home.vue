@@ -1,7 +1,8 @@
 <script setup>
-import CodeMirrorEditor from '@/components/CodemirrorEditor.vue';
 </script>
 
 <template>
-  <CodeMirrorEditor />
+  <h1 class="text-2xl font-bold underline">
+    欢迎使用 DawOJ-v2
+  </h1>
 </template>
