@@ -21,7 +21,7 @@ const selectedIds = ref([...props.modelValue]);
 
 // 获取当前课程的题单
 const fetchProblemSets = async () => {
-  const res = await axios.get("/api/problemsets", {
+  const res = await axios.get("/api/problemsets/", {
     params: { course_id: props.currentCourseId },
   });
   problemsets.value = res.data.problemsets || [];

@@ -38,19 +38,19 @@ const router = createRouter({
           path: 'register',
           name: 'Register',
           component: () => import('@/views/users/Register.vue'),
-          meta: { title: '单用户注册', requiresAuth: true }
+          meta: { title: '单用户注册', requiresAuth: true, requiresTeacher: true }
         },
         {
           path: 'edit/:id',
           name: 'EditUser',
           component: () => import('@/views/users/EditUser.vue'),
-          meta: { title: '编辑用户', requiresAuth: true }
+          meta: { title: '编辑用户', requiresAuth: true, requiresTeacher: true }
         },
         {
           path: 'import',
           name: 'ImportUsers',
           component: () => import('@/views/users/Import.vue'),
-          meta: { title: '批量导入用户', requiresAuth: true }
+          meta: { title: '批量导入用户', requiresAuth: true, requiresTeacher: true }
         }
       ]
     },
@@ -211,44 +211,9 @@ router.beforeEach(async (to, from, next) => {
   const requiresTeacher = to.matched.some(record => record.meta.requiresTeacher);
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
   const userStore = useUserStore();
-  const accessToken = userStore.accessToken;
-  const refreshToken = userStore.refreshToken;
-
-  const isTokenExpired = async (token) => {
-    if (!token) return true;
-      try {
-        await axios.get('/api/auth/check_token', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        return false; // 没报错，token 有效
-      } catch (err) {
-        if (err.response?.status === 403 || err.response?.status === 401) {
-          return true; // 报错，token 过期
-        }
-        // 其他错误也视为过期
-        return true;
-      }
-    };
-
   if (requiresAuth) {
-    if (await isTokenExpired(accessToken)) {
-      if (refreshToken) {
-        try {
-          const res = await axios.post('/api/auth/refresh', {}, {
-            headers: { Authorization: `Bearer ${refreshToken}` }
-          });
-          const newAccessToken = res.data.access_token
-          userStore.accessToken = newAccessToken
-          axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-        } catch (err) {
-          console.error('Refresh token failed', err)
-          userStore.clearUser()
-          return next('/login')
-        }
-      } else {
-        userStore.clearUser()
-        return next('/login')
-      }
+    if (!userStore.id) {
+      return next('/login')
     }
 
     if (requiresTeacher && userStore.usertype !== 'teacher' && userStore.usertype !== 'admin') {

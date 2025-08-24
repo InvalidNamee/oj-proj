@@ -20,8 +20,11 @@ export const useUserStore = defineStore('user', {
       this.usertype = user.usertype;
       this.accessToken = accessToken;
       this.refreshToken = refreshToken;
-      this.courses = user.courses || []; // 存 courses
-      this.currentCourseId = user.usertype === 'admin' ? null : (user.courses.length > 0 ? user.courses[0].id : null); // 设置当前课程
+      this.courses = user.courses || [];
+      this.currentCourseId = user.usertype === 'admin'
+        ? null
+        : (user.courses?.length > 0 ? user.courses[0].id : null);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`;
     },
 
     setCurrentCourse(courseId) {

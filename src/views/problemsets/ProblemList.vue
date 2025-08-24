@@ -5,8 +5,8 @@ import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 
 const userStore = useUserStore();
-const problems = ref([]);
 const router = useRouter();
+const problems = ref([]);
 const selected = ref([]); // 选中的 pid
 const selectMode = ref(false); // 是否进入选择模式
 
@@ -36,11 +36,9 @@ const fetchProblems = async () => {
 };
 
 const goDetail = (id) => {
-  router.push(`/problems/${id}`);
+  if (!selectMode.value) router.push(`/problems/${id}`);
 };
-const goEdit = (id) => {
-  router.push(`/problems/${id}/edit`);
-};
+const goEdit = (id) => router.push(`/problems/${id}/edit`);
 
 // 单个删除
 const deleteOne = async (id) => {
@@ -75,13 +73,12 @@ const deleteBatch = async () => {
   }
 };
 
-// 全选/全不选
-const toggleAll = (e) => {
-  if (e.target.checked) {
-    selected.value = problems.value.map(p => p.id);
-  } else {
-    selected.value = [];
-  }
+// 点击行选择
+const toggleSelect = (id) => {
+  if (!selectMode.value) return;
+  const idx = selected.value.indexOf(id);
+  if (idx >= 0) selected.value.splice(idx, 1);
+  else selected.value.push(id);
 };
 
 const changePage = (p) => {
@@ -100,49 +97,18 @@ onMounted(fetchProblems);
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold">题目列表</h2>
       <div class="flex space-x-2">
-        <!-- 搜索 -->
         <input
           v-model="keyword"
           @keyup.enter="page = 1; fetchProblems()"
           placeholder="搜索题目标题"
           class="border rounded px-2 py-1"
         />
-        <button
-          @click="page = 1; fetchProblems()"
-          class="px-3 py-1 bg-gray-200 rounded"
-        >
-          搜索
-        </button>
-
-        <!-- 新建 -->
-        <button
-          @click="$router.push('/problems/add')"
-          class="px-4 py-2 bg-blue-500 text-white rounded shadow"
-        >
-          新建题目
-        </button>
-
-        <!-- 切换选择模式 -->
-        <button
-          v-if="!selectMode"
-          @click="selectMode = true"
-          class="px-4 py-2 bg-gray-500 text-white rounded shadow"
-        >
-          选择
-        </button>
+        <button @click="page=1; fetchProblems()" class="px-3 py-1 bg-gray-200 rounded">搜索</button>
+        <button @click="$router.push('/problems/add')" class="px-4 py-2 bg-blue-500 text-white rounded shadow">新建题目</button>
+        <button v-if="!selectMode" @click="selectMode=true" class="px-4 py-2 bg-gray-500 text-white rounded shadow">选择</button>
         <div v-else class="flex space-x-2">
-          <button
-            @click="deleteBatch"
-            class="px-4 py-2 bg-red-500 text-white rounded shadow"
-          >
-            批量删除
-          </button>
-          <button
-            @click="selectMode = false; selected = []"
-            class="px-4 py-2 bg-gray-400 text-white rounded shadow"
-          >
-            取消
-          </button>
+          <button @click="deleteBatch" class="px-4 py-2 bg-red-500 text-white rounded shadow">批量删除</button>
+          <button @click="selectMode=false; selected=[]" class="px-4 py-2 bg-gray-400 text-white rounded shadow">取消</button>
         </div>
       </div>
     </div>
@@ -152,9 +118,7 @@ onMounted(fetchProblems);
       <table class="w-full text-left text-sm">
         <thead class="bg-gray-50 text-gray-700">
           <tr>
-            <th class="p-3" v-if="selectMode">
-              <input type="checkbox" @change="toggleAll" />
-            </th>
+            <th class="p-3" v-if="selectMode"></th>
             <th class="p-3">ID</th>
             <th class="p-3">标题</th>
             <th class="p-3">所属课程</th>
@@ -167,25 +131,20 @@ onMounted(fetchProblems);
           <tr
             v-for="p in problems"
             :key="p.id"
-            class="hover:bg-gray-50 transition"
+            @click="toggleSelect(p.id)"
+            :class="['hover:bg-gray-50 transition', selectMode && selected.includes(p.id) ? 'bg-blue-100' : '']"
           >
             <td class="p-3" v-if="selectMode">
-              <input
-                type="checkbox"
-                :value="p.id"
-                v-model="selected"
-              />
+              <input type="checkbox" :value="p.id" v-model="selected" @click.stop/>
             </td>
             <td class="p-3">{{ p.id }}</td>
-            <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click="goDetail(p.id)">
-              {{ p.title }}
-            </td>
+            <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click.stop="goDetail(p.id)">{{ p.title }}</td>
             <td class="p-3">{{ p.course.name }}</td>
             <td class="p-3">{{ p.num_test_cases }}</td>
             <td class="p-3">{{ p.timestamp }}</td>
             <td class="p-3 space-x-3">
-              <button class="text-blue-500 hover:underline" @click="goEdit(p.id)">编辑</button>
-              <button class="text-red-500 hover:underline" @click="deleteOne(p.id)">删除</button>
+              <button class="text-blue-500 hover:underline" @click.stop="goEdit(p.id)">编辑</button>
+              <button class="text-red-500 hover:underline" @click.stop="deleteOne(p.id)">删除</button>
             </td>
           </tr>
         </tbody>
@@ -194,21 +153,9 @@ onMounted(fetchProblems);
 
     <!-- 分页器 -->
     <div class="flex justify-center items-center mt-4 space-x-2">
-      <button
-        @click="changePage(page - 1)"
-        :disabled="page === 1"
-        class="px-3 py-1 border rounded disabled:opacity-50"
-      >
-        上一页
-      </button>
+      <button @click="changePage(page-1)" :disabled="page===1" class="px-3 py-1 border rounded disabled:opacity-50">上一页</button>
       <span>第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
-      <button
-        @click="changePage(page + 1)"
-        :disabled="page === pages"
-        class="px-3 py-1 border rounded disabled:opacity-50"
-      >
-        下一页
-      </button>
+      <button @click="changePage(page+1)" :disabled="page===pages" class="px-3 py-1 border rounded disabled:opacity-50">下一页</button>
     </div>
   </div>
 </template>
