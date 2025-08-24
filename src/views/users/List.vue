@@ -137,7 +137,7 @@ const removeCourse = async (userId, courseId) => {
     <div class="space-y-4">
       <div v-for="user in users" :key="user.id"
         class="bg-white shadow-md rounded-xl px-6 py-4 grid grid-cols-6 gap-4 items-center hover:shadow-lg transition border border-gray-200">
-        <div class="font-medium text-gray-800">
+        <div class="font-medium text-gray-800" @click="router.push(`/users/${user.id}`)" style="cursor: pointer;">
           {{ user.username }}
           <span class="text-gray-400 text-xs ml-1">#{{ user?.uid }}</span>
         </div>

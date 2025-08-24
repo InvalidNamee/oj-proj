@@ -9,7 +9,7 @@ import axios from 'axios'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { useUserStore } from './stores/user.js'
 
-axios.defaults.baseURL = 'http://127.0.0.1:5000'
+axios.defaults.baseURL = 'http://121.249.151.214:5000'
 
 const app = createApp(App)
 
@@ -31,9 +31,15 @@ app.use(VueCodemirror, {
 app.mount('#app')
 
 axios.interceptors.request.use(config => {
-  const userStore = useUserStore()
-  if (userStore.accessToken) {
-    config.headers.Authorization = 'Bearer ' + userStore.accessToken
+  const userStore = useUserStore();
+  if (config.url && config.url.includes('/api/auth/refresh')) {
+    if (userStore.refreshToken) {
+      config.headers.Authorization = 'Bearer ' + userStore.refreshToken;
+    }
+  } else {
+    if (userStore.accessToken) {
+      config.headers.Authorization = 'Bearer ' + userStore.accessToken;
+    }
   }
-  return config
-}, error => Promise.reject(error))
+  return config;
+}, error => Promise.reject(error));

@@ -1,8 +1,8 @@
 <script setup>
+import { useUserStore } from '@/stores/user';
+const userStore = useUserStore();
 </script>
 
 <template>
-  <h1 class="text-2xl font-bold underline">
-    欢迎使用 DawOJ-v2
-  </h1>
+  <h1>这里是 DawOj 的首页</h1>
 </template>

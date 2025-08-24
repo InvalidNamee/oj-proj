@@ -11,7 +11,9 @@ const views = ref([
   { name: '主页', path: '/' },
   { name: '用户', path: '/users' },
   { name: '课程', path: '/courses' },
-  { name: '题单', path: '/problemsets' }
+  { name: '题单', path: '/problemsets' },
+  { name: '分组', path: '/groups' },
+  { name: '提交记录', path: '/submissions' }
 ]);
 
 const dropdownOpen = ref(false);

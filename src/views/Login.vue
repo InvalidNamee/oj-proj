@@ -21,6 +21,7 @@ const handleLogin = async () => {
     const { access_token, refresh_token, user } = response.data;
     userStore.setUser(user, access_token, refresh_token);
     console.log('登录成功:', user);
+    console.log('User Store after login:', userStore);
     router.push('/');
     window.location.reload();
   } catch (error) {

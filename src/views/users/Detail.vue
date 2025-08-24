@@ -89,7 +89,7 @@ const goToCourse = (courseId) => {
 
     <!-- 新增课程展示区 -->
     <div v-if="courses.length" class="mt-6">
-      <h3 class="text-lg font-semibold mb-2 text-gray-800">我的课程</h3>
+      <h3 class="text-lg font-semibold mb-2 text-gray-800">{{ userId === userData?.id ? "我的课程" : "ta 的课程" }}</h3>
       <ul class="space-y-1">
         <li v-for="course in courses" :key="course.id">
           <button

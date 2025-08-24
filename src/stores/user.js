@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia';
-import { useRouter } from 'vue-router';
 import axios from 'axios';
-
-const router = useRouter();
 
 export const useUserStore = defineStore('user', {
   state: () => ({

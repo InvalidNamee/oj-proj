@@ -4,11 +4,8 @@ import Sidebar from '@/components/Sidebar.vue';
 import { ref } from 'vue';
 
 const views = ref([
-    { name: '题单列表', path: '/problemsets'},
-    { name: '题目列表', path: '/problems' },
-    { name: '创建题单', path: '/problemsets/add'},
-    { name: '新建题目', path: '/problems/add' },
-    // { name: '新建传统题目', path: '/problemsets/legacy/add' },
+  { name: '分组列表', path: '/groups'},
+  { name: '创建分组', path: '/groups/add' }
 ])
 </script>
 
@@ -19,5 +16,4 @@ const views = ref([
       <RouterView />
     </main>
   </div>
-  <!-- <RouterView /> -->
 </template>
