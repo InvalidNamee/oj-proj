@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity
 from exts import db
-from models import CodingProblemModel, ProblemSetModel, CourseModel, UserModel
+from models import CodingProblemModel, ProblemSetModel, CourseModel, UserModel, SubmissionModel
 from decorators import role_required, ROLE_TEACHER
 from modules.coding_problem_processing import process_test_cases, remove_test_cases
-from modules.verify import is_admin
+from modules.verify import is_admin, is_related
 import json
 
 bp = Blueprint('coding_problems', __name__, url_prefix='/api/coding_problems')
@@ -14,12 +14,13 @@ bp = Blueprint('coding_problems', __name__, url_prefix='/api/coding_problems')
 @role_required(ROLE_TEACHER)
 def create_coding_problem():
     """
-    新建题目
+    新建题目，只接受 JSON
     """
-    data = json.loads(request.form['meta'])
-    test_cases_zip = request.files.get('test_cases.zip')
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid JSON'}), 400
 
-    course_id = int(data.get('course_id'))
+    course_id = int(data.get('course_id', 0))
     if not course_id:
         return jsonify({'error': 'course_id is required'}), 400
 
@@ -39,7 +40,9 @@ def create_coding_problem():
     db.session.add(problem)
     db.session.flush()
 
-    problem.test_cases = process_test_cases(problem.id, test_cases_zip)
+    problem.test_cases = {
+        "cases": [], "num_cases": 0
+    }
     db.session.commit()
 
     return jsonify({'success': 'Problem created successfully', 'id': problem.id}), 201
@@ -129,6 +132,11 @@ def get_coding_problem(pid):
         return jsonify({'error': 'Problem not found'}), 404
     if not is_admin() and problem.course_id not in [c.id for c in user.courses]:
         return jsonify({'error': 'Permission denied'}), 403
+    
+    submission = SubmissionModel.query.filter_by(user_id=user.id, problem_id=pid).order_by(SubmissionModel.time_stamp.desc()).first()
+    user_answer = submission.user_answer if submission else ''
+    language = submission.language if submission else ''
+        
 
     return jsonify({
         'id': problem.id,
@@ -137,47 +145,66 @@ def get_coding_problem(pid):
         'limitations': problem.limitations,
         'test_cases': problem.test_cases,
         'course_id': problem.course_id,
+        'user_answer': user_answer,
+        'language': language,
         'timestamp': problem.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
     }), 200
 
 
 @bp.get('/')
-@role_required()
+@role_required(ROLE_TEACHER)
 def get_coding_problems():
     """
-    列表所有 Coding Problem，可根据题单筛选
+    列表所有 Coding Problem，可根据题单或课程筛选
     Query 参数：
         problem_set_id: 可选，题单 ID
+        course_id: 可选，课程 ID
+        page: 可选，页码（默认 1）
+        per_page: 可选，每页数量（默认 10）
     """
-    problem_set_id = request.args.get('psid', type=int)
+    problem_set_id = request.args.get('problem_set_id', type=int)
+    course_id = request.args.get('course_id', type=int)
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
     user = UserModel.query.get(get_jwt_identity())
 
+    query = CodingProblemModel.query
+
     if problem_set_id:
-        problem_set = ProblemSetModel.query.get(problem_set_id)
-        if not problem_set:
-            return jsonify({'error': 'ProblemSet not found'}), 404
-        coding_problems = problem_set.coding_problems
-    else:
-        if is_admin():
-            coding_problems = CodingProblemModel.query.all()
-        else:
-            course_ids = [c.id for c in user.courses]
-            coding_problems = CodingProblemModel.query.filter(
-                CodingProblemModel.course_id.in_(course_ids)
-            ).all()
+        problem_set = ProblemSetModel.query.get_or_404(problem_set_id)
+        query = query.filter(CodingProblemModel.problem_sets.contains(problem_set))
+    elif course_id:
+        if not is_admin() and not is_related(user, course_id):
+            return jsonify({'error': 'Permission denied'}), 403
+        query = query.filter_by(course_id=course_id)
+    elif not is_admin():
+        return jsonify({'error': 'Permission denied'}), 403
+
+    pagination = query.order_by(CodingProblemModel.time_stamp.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
 
     problems_list = []
-    for problem in coding_problems:
+    for problem in pagination.items:
         problems_list.append({
             'id': problem.id,
             'title': problem.title,
             'description': problem.description,
-            'course_id': problem.course_id,
+            'course': {
+                'id': problem.course.id,
+                'name': problem.course.course_name,
+            },
             'timestamp': problem.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
             'num_test_cases': problem.test_cases['num_cases'] if problem.test_cases else 0
         })
 
-    return jsonify({'coding_problems': problems_list}), 200
+    return jsonify({
+        'coding_problems': problems_list,
+        'total': pagination.total,
+        'page': pagination.page,
+        'pages': pagination.pages
+    }), 200
 
 @bp.patch('/<int:pid>/test_cases/delete')
 @role_required(ROLE_TEACHER)

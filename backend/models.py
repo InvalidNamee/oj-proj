@@ -166,7 +166,9 @@ class SubmissionModel(db.Model):
     user_answer = db.Column(db.JSON)  # 用户答案，Legacy题可以直接存选择，Coding题存代码
     language = db.Column(db.Enum('python', 'cpp'))
     score = db.Column(db.Float)  # 判题结果得分
-    status = db.Column(db.Enum('Pending', 'Judging', 'AC', 'WA', 'TLE', 'MLE', 'OLE', 'CE', 'RE', 'InvernalError'), default='pending')
+    status = db.Column(db.Enum('Pending', 'Judging', 'AC', 'WA', 'TLE', 'MLE', 'OLE', 'CE', 'RE', 'IE'), default='pending')
+    max_time = db.Column(db.Integer)
+    max_memory = db.Column(db.Integer)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
     extra = db.Column(db.JSON)
 

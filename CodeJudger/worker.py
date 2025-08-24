@@ -49,17 +49,19 @@ def worker_loop(worker_idx: int):
             )
         except Exception as e:
             result = {
-                "status": "system_error",
+                "status": "IE",
                 "score": 0,
                 "cases": [],
                 "finished_at": "",
-                "message": str(e)
+                "extra": str(e)
             }
 
         # 组装回调数据
         callback_payload = {
             "status": result.get("status", "error"),
             "score": result.get("score", 0),
+            "max_time": result.get("max_time", 0),
+            "max_memory": result.get("max_memory", 0),
             "detail": result.get("cases", []),
             "finished_at": result.get("finished_at"),
             "callback_token": task.get("callback_token")  # 如果需要鉴权

@@ -7,6 +7,8 @@ from models import UserModel, CourseModel
 from exts import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import get_jwt, get_jwt_identity
+from modules.verify import is_admin
+import pandas as pd
 import uuid
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
@@ -47,7 +49,7 @@ def register_user(login_type, info, commit=True):
         db.session.add(user)
 
     # 添加课程
-    if usertype != 'admin' and course_list:
+    if user.usertype != 'admin' and course_list:
         if login_type == 'teacher':
             # 教师只能选择自己有权限的课程
             teacher = UserModel.query.get(get_jwt_identity())
@@ -65,36 +67,77 @@ def register_user(login_type, info, commit=True):
     return {'status': 'success', 'uid': user.uid}, 200
 
 
-@bp.post('/import')
+@bp.post("/import")
 @role_required(ROLE_TEACHER)
 def import_users():
     """
     批量注册用户
+    支持可选 course_id 参数和上传 xlsx 文件
     """
+    # 获取 course_id，可为空
+    course_id = request.form.get("course_id", type=int)
+    
+    if not course_id and not is_admin():
+        return jsonify({'error': 'Permission denied'}), 403
+
+    # 获取上传文件
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "Upload file is required"}), 400
+
+    try:
+        dtype = {
+            "uid": str,
+            "username": str,
+            "usertype": str,
+            "password": str,   # 关键：强制密码列为 str
+            "school": str,
+            "profession": str
+        }
+        # 读取 Excel 文件
+        data = pd.read_excel(file, dtype=dtype)
+    except Exception as e:
+        return jsonify({"error": f"Failed while reading Excel: {str(e)}"}), 400
+
+    # 检查是否有必需列
+    required_columns = ["uid", "usertype", "username", "password", "school", "profession"]
+    missing_columns = [c for c in required_columns if c not in data.columns]
+    if missing_columns:
+        return jsonify({"error": f"Columns are missed: {', '.join(missing_columns)}"}), 400
+
     login_type = get_jwt()['login_type']
-    user_list = request.json.get('user_list', [])
 
     results = []
     success_cnt = 0
 
-    for user in user_list:
-        res, code = register_user(login_type, user, commit=False)
+    # 遍历 Excel 行
+    for _, row in data.iterrows():
+        user_data = {
+            "uid": row["uid"],
+            "usertype": row["usertype"],
+            "username": row["username"],
+            "password": row["password"],
+            "school": row["school"],
+            "profession": row["profession"],
+            "course_list": [course_id]
+        }
+
+        res, code = register_user(login_type, user_data, commit=False)
         if code == 200:
-            results.append({'status': 'success', 'user': user})
+            results.append({"status": "success", "user": user_data})
             success_cnt += 1
         else:
-            results.append({'status': 'fail', 'user': user, 'error': res.get('error')})
+            results.append({"status": "fail", "user": user_data, "error": res.get("error")})
 
     db.session.commit()
 
-    http_status = 201 if success_cnt == len(user_list) else 207
+    http_status = 201 if success_cnt == len(data) else 207
 
     return jsonify({
-        'success_count': success_cnt,
-        'fail_count': len(user_list) - success_cnt,
-        'results': results
+        "success": success_cnt,
+        "fail": len(data) - success_cnt,
+        "results": results
     }), http_status
-
 
 @bp.post('')
 @role_required(ROLE_TEACHER)
@@ -290,9 +333,7 @@ def delete_users():
 @bp.get('/<int:user_id>')
 @role_required()
 def get_user(user_id):
-    user = UserModel.query.get(user_id)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    user = UserModel.query.get_or_404(user_id)
     return jsonify(user.to_dict()), 200
 
 

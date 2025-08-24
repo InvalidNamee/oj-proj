@@ -130,7 +130,7 @@ def get_problemset(psid):
         result['legacy_problems'].append({
             'id': problem.id,
             'title': problem.title,
-            'status': submission.status.value if submission else None,
+            'status': submission.status if submission else None,
             'score': submission.score if submission else None
         })
 
@@ -139,12 +139,13 @@ def get_problemset(psid):
             user_id=user_id,
             problem_id=problem.id,
             problem_set_id=problem_set.id
-        ).first()
+        ).order_by(SubmissionModel.time_stamp.desc()).first()
         result['coding_problems'].append({
             'id': problem.id,
             'title': problem.title,
-            'status': submission.status.value if submission else None,
-            'score': submission.score if submission else None
+            'status': submission.status if submission else None,
+            'score': submission.score if submission else None,
+            'submission_id': submission.id if submission else None
         })
 
     return jsonify(result), 200
@@ -185,43 +186,37 @@ def delete_problemsets():
 def get_problemsets():
     """
     获取题单列表
-    权限：
-    - 普通用户：只能看到和自己有课程关联的题单
-    - 管理员（没有绑定课程但有全局权限）：可以看到所有题单
-    - 可以传入 course_id 筛选，但必须有权限访问该课程
     query 参数:
         page: 页码，默认 1
         per_page: 每页条数，默认 20
         course_id: 可选，过滤特定课程
+        keyword: 可选，筛选题单标题包含该关键字
     """
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
     course_id = request.args.get('course_id', type=int)
+    keyword = request.args.get('keyword', type=str)
 
-    # 当前用户
     user_id = get_jwt_identity()
     user = UserModel.query.get(user_id)
-
-    # 当前用户的课程 id 列表
     course_ids = [course.id for course in user.courses]
 
     query = ProblemSetModel.query
 
     if course_id:
-        # 检查权限
         if course_id not in course_ids and user.usertype != 'admin':
             return jsonify({'error': 'No permission to view this course problemsets'}), 403
         query = query.filter(ProblemSetModel.course_id == course_id)
     else:
-        # 没有指定课程
         if not course_ids and user.usertype == 'admin':
-            # 管理员，无绑定课程，可以看全部
-            pass
+            pass  # 管理员可以查看所有题单
         else:
-            # 普通用户：只能看自己课程下的题单
             query = query.filter(ProblemSetModel.course_id.in_(course_ids))
 
-    # 分页
+    # 按关键字过滤
+    if keyword:
+        query = query.filter(ProblemSetModel.title.ilike(f'%{keyword}%'))
+
     pagination = query.order_by(ProblemSetModel.time_stamp.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
@@ -242,8 +237,9 @@ def get_problemsets():
         })
 
     return jsonify({
-        'total': pagination.total,
+        'problemsets': problemsets_list,
         'page': pagination.page,
         'per_page': pagination.per_page,
-        'problemsets': problemsets_list
+        'total': pagination.total,
+        'total_pages': pagination.pages
     }), 200

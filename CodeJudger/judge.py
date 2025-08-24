@@ -111,7 +111,7 @@ def judge_submission(
 
     tests, datadir = _load_testcases(problem_id)
     if not tests:
-        return {"status": "InternalError", "score": 0, "cases": [], "message": "No testcases"}
+        return {"status": "IE", "score": 0, "cases": [], "extra": "No testcases"}
 
     box_dir = f"/var/lib/isolate/{box_id}/box"  # box 的根目录
 
@@ -141,10 +141,12 @@ def judge_submission(
         run_cmd = ["./main"]
     else:
         _cleanup_box(box_id)
-        return {"status": "InternalError", "score": 0, "cases": [], "message": f"Unsupported language: {language}"}
+        return {"status": "IE", "score": 0, "cases": [], "message": f"Unsupported language: {language}"}
 
     results = []
     passed = 0
+    max_time = 0.0
+    max_memory = 0.0
 
     for name, in_file, out_path in tests:
         code, meta, out, err = _run_in_isolate(
@@ -167,8 +169,8 @@ def judge_submission(
         try:
             meta_lines = {kv.split(":", 1)[0].strip(): kv.split(":", 1)[1].strip()
                           for kv in meta.splitlines() if ":" in kv}
-            time_used = float(meta_lines.get("time", "0"))
-            peek_memory = float(meta_lines.get("max-rss", "0")) / 1024
+            time_used = float(meta_lines.get("time", "0")) * 1000
+            peek_memory = float(meta_lines.get("max-rss", "0"))
             status_meta = meta_lines.get("status", "")
         except Exception:
             status_meta = ""
@@ -191,6 +193,9 @@ def judge_submission(
         if case_status == "AC":
             passed += 1
 
+        max_time = max(max_time, time_used)
+        max_memory = max(max_memory, peek_memory)
+        
         results.append({
             "name": name,
             "status": case_status,
@@ -220,6 +225,8 @@ def judge_submission(
     return {
         "status": overall,
         "score": score,
+        "max_time": max_time,
+        "max_memory": max_memory,
         "cases": results,
         "finished_at": datetime.now().isoformat()
     }

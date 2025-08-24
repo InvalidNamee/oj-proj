@@ -3,13 +3,9 @@ from flask_jwt_extended import get_jwt_identity
 from decorators import ROLE_TEACHER, role_required
 from exts import db
 from models import UserModel, GroupModel, ProblemSetModel
+from modules.verify import is_admin, is_related
 
 bp = Blueprint("groups", __name__, url_prefix="/api/groups")
-
-
-def is_related(user, course_id):
-    """判断用户是否和课程相关"""
-    return any(c.id == course_id for c in user.courses)
 
 
 @bp.post("")
@@ -79,17 +75,20 @@ def delete_groups():
 def update_group(group_id):
     """教师给组分配学生和题单"""
     data = request.get_json()
+    group_name = data.get("name")
+    description = data.get("description")
     student_ids = data.get("student_ids", [])
     problemset_ids = data.get("problemset_ids", [])  # 新增字段：要绑定的题单
 
-    group = GroupModel.query.get(group_id)
-    if not group:
-        return jsonify({"error": "Group not found"}), 404
-
+    group = GroupModel.query.get_or_404(group_id)
     user = UserModel.query.get(get_jwt_identity())
     if not is_related(user, group.course_id):
         return jsonify({"error": "Permission denied"}), 403
 
+    if group_name:
+        group.name = group_name
+    if description:
+        group.description = description
     # 分配学生
     if student_ids:
         students = UserModel.query.filter(
@@ -126,14 +125,16 @@ def get_groups():
         # 教师可以看到自己授课的课程下的所有组
         course_ids = [c.id for c in user.courses]
         query = GroupModel.query.filter(GroupModel.course_id.in_(course_ids))
-    else:
+    elif user.usertype == "student":
         # 学生只能看到自己加入的组
         query = GroupModel.query.join(GroupModel.students).filter(UserModel.id == user.id)
+    else:
+        query = GroupModel.query
 
     if course_id:
         if user.usertype == "teacher" and course_id not in course_ids:
             return jsonify({"error": "Permission denied"}), 403
-        elif user.usertype != "teacher" and not any(g.course_id == course_id for g in user.groups):
+        elif user.usertype == "student" and not any(g.course_id == course_id for g in user.groups):
             return jsonify({"error": "Permission denied"}), 403
         query = query.filter(GroupModel.course_id == course_id)
 
@@ -144,8 +145,12 @@ def get_groups():
                 "id": g.id,
                 "name": g.group_name,
                 "description": g.group_description,
-                "course_id": g.course_id,
-                "students": len(g.students)
+                "course": {
+                    "id": g.course_id,
+                    "name": g.course.course_name,  
+                },
+                "student_cnt": len(g.students),
+                "problemset_cnt": len(g.problemsets)
             } for g in groups
         ]
     })
@@ -161,13 +166,13 @@ def get_group(group_id):
 
     user = UserModel.query.get(get_jwt_identity())
 
-    if user.usertype == "teacher":
-        # 教师需要和课程相关
-        if not is_related(user, group.course_id):
-            return jsonify({"error": "Permission denied"}), 403
-    else:
+    if user.usertype == 'student':
         # 学生必须属于该组
         if group not in user.groups:
+            return jsonify({"error": "Permission denied"}), 403
+    else:
+        # 教师需要和课程相关
+        if not is_related(user, group.course_id):
             return jsonify({"error": "Permission denied"}), 403
 
     return jsonify({

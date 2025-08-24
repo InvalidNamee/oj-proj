@@ -117,6 +117,7 @@ def submit_coding(problem_id):
         problem_id=problem_id,
         problem_type="coding",
         user_answer=source_code,
+        language=language,
         score=0,
         status="Pending",
     )
@@ -152,8 +153,8 @@ def get_submission_status(submission_id):
     """
     s = SubmissionModel.query.get_or_404(submission_id)
     return jsonify({
-        "submission_id": s.id,
-        "problem_id": s.problem_id,
+        # "submission_id": s.id,
+        # "problem_id": s.problem_id,
         "status": s.status,
         "score": s.score
     }), 200
@@ -168,12 +169,21 @@ def get_submission(submission_id):
     s = SubmissionModel.query.get_or_404(submission_id)
     return jsonify({
         "submission_id": s.id,
+        "user": {
+            "id": s.user.id,
+            "username": s.user.username,  
+        },
         "problem_id": s.problem_id,
         "problem_set_id": s.problem_set_id,
+        "problem_type": s.problem_type,
+        "language": s.language,
+        "max_time": s.max_time,
+        "max_memory": s.max_memory,
         "status": s.status,
         "user_answer": s.user_answer,
         "score": s.score,
-        "extra": s.extra
+        "extra": s.extra,
+        "time_stamp": s.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
     }), 200
 
 
@@ -195,11 +205,17 @@ def judge_callback(submission_id):
     # 允许局部更新
     new_status = data.get("status")
     new_score = data.get("score")
+    max_time = data.get("max_time")
+    max_memory = data.get("max_memory")
     detail = data.get("detail")
     finished_at = data.get("finished_at")
 
     if new_status:
         s.status = new_status
+    if max_time:
+        s.max_time = max_time
+    if max_memory:
+        s.max_memory = max_memory
     if isinstance(new_score, (int, float)):
         s.score = float(new_score)
     if detail is not None:
@@ -225,17 +241,10 @@ def list_submissions():
         page: 页码（默认1）
         per_page: 每页条数（默认20）
     """
-    # current_user_id = get_jwt_identity()
-    # user = UserModel.query.get(current_user_id)
 
     # 过滤条件
     query = SubmissionModel.query
 
-    # 普通用户只能查看自己的提交
-    # if not user.is_admin:
-    #     query = query.filter_by(user_id=current_user_id)
-    # else:
-        # 管理员可以加上 user_id 过滤
     user_id = request.args.get("user_id", type=int)
     if user_id:
         query = query.filter_by(user_id=user_id)
@@ -257,9 +266,16 @@ def list_submissions():
         "items": [
             {
                 "submission_id": s.id,
+                "user": {
+                  "id": s.user.id,
+                  "username": s.user.username,  
+                },
                 "problem_id": s.problem_id,
                 "problem_set_id": s.problem_set_id,
                 "problem_type": s.problem_type,
+                "language": s.language,
+                "max_time": s.max_time,
+                "max_memory": s.max_memory,
                 "status": s.status,
                 "score": s.score,
                 "time_stamp": s.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),

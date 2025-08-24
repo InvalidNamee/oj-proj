@@ -3,7 +3,7 @@
 """
 from flask import Blueprint, request, jsonify
 from decorators import role_required
-from models import UserModel
+from models import UserModel, CourseModel
 from exts import db
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
@@ -34,14 +34,13 @@ def login():
     additional_claims = {'login_type': login_type, 'token_version': token_version}
     access_token = create_access_token(identity=str(user.id), additional_claims=additional_claims)
     refresh_token = create_refresh_token(identity=str(user.id), additional_claims=additional_claims)
+    user_dic = user.to_dict()
+    if user.usertype == "admin":
+        user_dic["courses"] = [{"id": c.id, "name": c.course_name} for c in CourseModel.query.all()]
     return jsonify({
         'access_token': access_token,
         'refresh_token': refresh_token,
-        'user': {
-            'uid': user.uid,
-            'usertype': user.usertype,
-            'username': user.username
-        }
+        'user': user_dic
     }), 200
 
 
@@ -53,7 +52,9 @@ def refresh():
     """
     identity = get_jwt_identity()  # 获取 refresh_token 中的用户 id
     claims = get_jwt()  # 获取 refresh_token 中的 claims
-
+    user = UserModel.query.get_or_404(identity)
+    if user.token_version != claims.get("token_version"):
+        return jsonify({"error": "Token has expired"}), 401
     additional_claims = {
         'login_type': claims.get('login_type'),
         'token_version': claims.get('token_version')
@@ -70,10 +71,22 @@ def logout():
     处理退出登录
     """
     user_id = get_jwt_identity()
-    user = UserModel.query.get(user_id)
-    if not user:
-        return jsonify({'error': '用户不存在'}), 401
+    user = UserModel.query.get_or_404(user_id)
     user.token_version = uuid.uuid4()
     db.session.commit()
     return jsonify({'success': '注销成功'}), 200
 
+
+@bp.get('/check_token')
+@jwt_required()
+def check_token():
+    """
+    检查 token
+    """
+    user_id = get_jwt_identity()
+    user = UserModel.query.get(user_id)
+    
+    if user and user.token_version == get_jwt()['token_version']:
+        return jsonify({'valid': True}), 200
+    else:
+        return jsonify({'msg': 'Token has expired'}), 401
