@@ -77,16 +77,3 @@ def logout():
     return jsonify({'success': '注销成功'}), 200
 
 
-@bp.get('/check_token')
-@jwt_required()
-def check_token():
-    """
-    检查 token
-    """
-    user_id = get_jwt_identity()
-    user = UserModel.query.get(user_id)
-    
-    if user and user.token_version == get_jwt()['token_version']:
-        return jsonify({'valid': True}), 200
-    else:
-        return jsonify({'msg': 'Token has expired'}), 401
