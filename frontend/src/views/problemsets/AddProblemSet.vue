@@ -10,7 +10,7 @@ const userStore = useUserStore();
 
 const title = ref("");
 const description = ref("");
-const codingSelected = ref([]);
+const Selected = ref([]);
 
 // 当前课程
 const courseId = computed(() => userStore.currentCourseId);
@@ -28,7 +28,7 @@ const submit = async () => {
     title: title.value,
     description: description.value,
     course_id: courseId.value,
-    coding_problem_ids: codingSelected.value,
+    problem_ids: Selected.value,
   });
   router.push("/problemsets");
 };
@@ -67,7 +67,7 @@ const submit = async () => {
       <!-- 题目选择器 -->
       <div>
         <label class="block mb-1 text-gray-700">选择代码题</label>
-        <ProblemSelector v-model="codingSelected" />
+        <ProblemSelector v-model="Selected" />
       </div>
 
       <button

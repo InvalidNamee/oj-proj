@@ -59,6 +59,8 @@ def update_problemset(psid):
     course_id = data.get('course_id')
     description = data.get('description')
     problem_ids = data.get('problem_ids')
+    
+    print(data)
 
     # 更新基础信息
     problemset.title = title

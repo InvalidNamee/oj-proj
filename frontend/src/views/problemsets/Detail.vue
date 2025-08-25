@@ -65,7 +65,7 @@ onMounted(fetchProblemset)
         </thead>
         <tbody>
           <tr
-            v-for="problem in problemset.coding_problems"
+            v-for="problem in problemset.problems"
             :key="problem.id"
             class="hover:bg-gray-50 border-b border-gray-200 transition"
           >

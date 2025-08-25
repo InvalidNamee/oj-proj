@@ -127,7 +127,7 @@ const changePage = (p) => {
           <h3 @click.stop="goDetail(ps.id)" class="font-semibold text-lg">{{ ps.title }}</h3>
           <p class="text-sm text-gray-500">{{ ps.description }}</p>
           <p class="text-xs text-gray-400">
-            课程: {{ ps.course?.title || '无' }} | 题目数: {{ ps.num_legacy_problems }} + {{ ps.num_coding_problems }}
+            课程: {{ ps.course?.title || '无' }} | 题目数: {{ ps.num_problems }}
           </p>
         </div>
         <div class="space-x-2 flex items-center">
