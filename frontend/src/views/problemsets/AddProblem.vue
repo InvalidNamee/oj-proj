@@ -1,0 +1,39 @@
+
+<script setup>
+import { ref } from "vue";
+import AddLegacyProblem from "@/views/problemsets/AddLegacyProblem.vue";
+import AddCodingProblem from "@/views/problemsets/AddCodingProblem.vue";
+import { useUserStore } from "@/stores/user";
+
+const userStore = useUserStore();
+const courseId = userStore.currentCourseId;
+const problemType = ref("coding");
+</script>
+
+<template>
+  <div class="max-w-2xl mx-auto mt-12 p-6 rounded-xl bg-white shadow">
+    <h2 class="text-2xl font-bold mb-6">新建题目</h2>
+    <!-- 题目类型选择器（只在外层） -->
+    <div class="mb-6">
+      <label class="mr-2">题目类型:</label>
+      <select v-model="problemType" class="border p-2 rounded border-gray-300">
+        <option value="coding">编程题</option>
+        <option value="single">单选题</option>
+        <option value="multiple">多选题</option>
+        <option value="fill">填空题</option>
+        <option value="subjective">主观题</option>
+      </select>
+    </div>
+    
+    <!-- 统一渲染表单 -->
+    <AddLegacyProblem
+      v-if="['single','multiple','fill','subjective'].includes(problemType)"
+      :problem-type="problemType"
+      :course-id="courseId"
+    />
+    <AddCodingProblem
+      v-else
+      :course-id="courseId"
+    />
+  </div>
+</template>
