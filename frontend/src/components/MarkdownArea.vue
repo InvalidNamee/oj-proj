@@ -1,5 +1,5 @@
 <template>
-  <div class="prose" v-html="markdownContent" />
+  <div v-html="markdownContent" />
 </template>
 
 <script>
@@ -8,7 +8,7 @@ import katex from "katex";
 import "katex/dist/katex.min.css";
 
 import hljs from "highlight.js";
-import "highlight.js/styles/github-dark.css"; // 可以换你喜欢的主题
+import "highlight.js/styles/github-dark.css";
 
 export default {
   name: "MarkdownArea",

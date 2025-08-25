@@ -27,13 +27,8 @@
     "highlight.js": "^11.11.1",
     "katex": "^0.16.22",
     "markdown-it": "^14.1.0",
-    "markdown-it-highlightjs": "^4.2.0",
-    "markdown-it-katex": "^2.0.3",
-    "markdown-it-mathjax3": "^4.3.2",
-    "markdown-it-texmath": "^1.0.0",
     "marked": "^16.2.0",
     "marked-highlight": "^2.2.2",
-    "mathjax": "^4.0.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
     "postcss": "^8.5.6",
@@ -43,7 +38,6 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.16",
     "@vitejs/plugin-vue": "^6.0.1",
     "less": "^4.4.1",
     "vite": "^7.0.6",
