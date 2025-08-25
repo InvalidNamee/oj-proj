@@ -19,10 +19,10 @@ const search = ref("");
 // 获取课程下的代码题
 const fetchProblems = async () => {
   if (!userStore.currentCourseId) return;
-  const res = await axios.get("/api/coding_problems/", {
+  const res = await axios.get("/api/problems/", {
     params: { course_id: userStore.currentCourseId },
   });
-  problems.value = res.data.coding_problems || [];
+  problems.value = res.data.problems || [];
 };
 
 onMounted(fetchProblems);

@@ -60,8 +60,7 @@ class CourseModel(db.Model):
     )
 
     # 题目和课程绑死
-    legacy_problems = db.relationship("LegacyProblemModel", back_populates="course")
-    coding_problems = db.relationship("CodingProblemModel", back_populates="course")
+    problems = db.relationship("ProblemModel", back_populates="course")
 
 class GroupModel(db.Model):
     __tablename__ = 'group'
@@ -107,52 +106,28 @@ class ProblemSetModel(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey("group.id"))
 
     # 绑定题目
-    legacy_problems = db.relationship(
-        "LegacyProblemModel",
-        secondary="problemset_legacyproblem",
-        back_populates="problemsets"
-    )
-    coding_problems = db.relationship(
-        "CodingProblemModel",
-        secondary="problemset_codingproblem",
+    problems = db.relationship(
+        "ProblemModel",
+        secondary="problemset_problem",
         back_populates="problemsets"
     )
 
-
-class LegacyProblemModel(db.Model):
-    __tablename__ = 'legacy_problem'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    problem_type = db.Column(db.Enum('single', 'multiple', 'fill', 'subjective'), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text)
-    options = db.Column(db.JSON)
-    answers = db.Column(db.JSON)
-    time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
-    course = db.relationship('CourseModel', back_populates='legacy_problems')
-    course_id = db.Column(db.Integer, db.ForeignKey("course.id"), nullable=False)
-
-    problemsets = db.relationship(
-        "ProblemSetModel",
-        secondary="problemset_legacyproblem",
-        back_populates="legacy_problems"
-    )
-
-
-class CodingProblemModel(db.Model):
-    __tablename__ = 'coding_problem'
+class ProblemModel(db.Model):
+    __tablename__ = 'problem'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
+    type = db.Column(db.Enum('single', 'multiple', 'fill', 'subjective', 'coding'), nullable=False)
     description = db.Column(db.Text)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
     test_cases = db.Column(db.JSON)
     limitations = db.Column(db.JSON)
-    course = db.relationship('CourseModel', back_populates='coding_problems')
+    course = db.relationship('CourseModel', back_populates='problems')
     course_id = db.Column(db.Integer, db.ForeignKey("course.id"), nullable=False)
 
     problemsets = db.relationship(
         "ProblemSetModel",
-        secondary="problemset_codingproblem",
-        back_populates="coding_problems"
+        secondary="problemset_problem",
+        back_populates="problems"
     )
 
 
@@ -161,11 +136,11 @@ class SubmissionModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     problem_set_id = db.Column(db.Integer, db.ForeignKey("problemset.id"))
-    problem_id = db.Column(db.Integer, nullable=False)  # LegacyProblem 或 CodingProblem 的 ID
-    problem_type = db.Column(db.Enum('legacy', 'coding'), nullable=False)
-    user_answer = db.Column(db.JSON)  # 用户答案，Legacy题可以直接存选择，Coding题存代码
+    problem_id = db.Column(db.Integer, nullable=False)
+    problem_type = db.Column(db.Enum('single', 'multiple', 'fill', 'subjective', 'coding'), nullable=True)
+    user_answer = db.Column(db.JSON)
     language = db.Column(db.Enum('python', 'cpp'))
-    score = db.Column(db.Float)  # 判题结果得分
+    score = db.Column(db.Float)
     status = db.Column(db.Enum('Pending', 'Judging', 'AC', 'WA', 'TLE', 'MLE', 'OLE', 'CE', 'RE', 'IE'), default='pending')
     max_time = db.Column(db.Integer)
     max_memory = db.Column(db.Integer)
@@ -179,14 +154,8 @@ class SubmissionModel(db.Model):
 
 
 # 题集和题目的多对多
-problemset_legacyproblem = db.Table(
-    "problemset_legacyproblem",
+problemset_problem = db.Table(
+    "problemset_problem",
     db.Column("problemset_id", db.Integer, db.ForeignKey("problemset.id"), primary_key=True),
-    db.Column("legacy_problem_id", db.Integer, db.ForeignKey("legacy_problem.id"), primary_key=True)
-)
-
-problemset_codingproblem = db.Table(
-    "problemset_codingproblem",
-    db.Column("problemset_id", db.Integer, db.ForeignKey("problemset.id"), primary_key=True),
-    db.Column("coding_problem_id", db.Integer, db.ForeignKey("coding_problem.id"), primary_key=True)
+    db.Column("problem_id", db.Integer, db.ForeignKey("problem.id"), primary_key=True)
 )

@@ -8,10 +8,9 @@ import './assets/main.css'
 import axios from 'axios'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { useUserStore } from './stores/user.js'
-// import "@/utils/MathJax";
-// import "mathjax/es5/tex-svg";
 
-axios.defaults.baseURL = 'http://121.249.151.214:5000'
+// axios.defaults.baseURL = 'http://121.249.151.214:5000'
+axios.defaults.baseURL = 'http://127.0.0.1:5000'
 
 const app = createApp(App)
 

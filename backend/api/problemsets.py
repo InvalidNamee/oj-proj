@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
-from models import CourseModel, LegacyProblemModel, CodingProblemModel, ProblemSetModel, SubmissionModel, UserModel
+from models import CourseModel, ProblemModel, ProblemSetModel, SubmissionModel, UserModel
 from decorators import role_required, ROLE_TEACHER
 
 bp = Blueprint('problemsets', __name__, url_prefix='/api/problemsets')
@@ -16,8 +16,7 @@ def create_problemset():
     title = data.get('title')
     course_id = data.get('course_id')
     description = data.get('description')
-    legacy_problem_ids = data.get('legacy_problem_ids', [])
-    coding_problem_ids = data.get('coding_problem_ids', [])
+    problem_ids = data.get('problem_ids')
 
     course = None
     if course_id:
@@ -32,14 +31,9 @@ def create_problemset():
     )
 
     # 关联题目
-    if legacy_problem_ids:
-        problem_set.legacy_problems = LegacyProblemModel.query.filter(
-            LegacyProblemModel.id.in_(legacy_problem_ids)
-        ).all()
-
-    if coding_problem_ids:
-        problem_set.coding_problems = CodingProblemModel.query.filter(
-            CodingProblemModel.id.in_(coding_problem_ids)
+    if problem_ids:
+        problem_set.problems = ProblemModel.query.filter(
+            ProblemModel.id.in_(problem_ids)
         ).all()
 
     db.session.add(problem_set)
@@ -47,8 +41,7 @@ def create_problemset():
 
     return jsonify({
         'id': problem_set.id,
-        'legacy': len(problem_set.legacy_problems),
-        'coding': len(problem_set.coding_problems)
+        # todo 不知道写什么
     }), 201
 
 
@@ -58,40 +51,31 @@ def update_problemset(psid):
     """
     更新题单
     """
-    problem_set = ProblemSetModel.query.get(psid)
-    if not problem_set:
-        return jsonify({'error': 'ProblemSet not found'}), 404
+    problemset = ProblemSetModel.query.get_or_404(psid)
 
     data = request.get_json()
     title = data.get('title')
     course_id = data.get('course_id')
     description = data.get('description')
-    legacy_problem_ids = data.get('legacy_problem_ids', [])
-    coding_problem_ids = data.get('coding_problem_ids', [])
+    problem_ids = data.get('problem_ids')
 
     # 更新基础信息
-    problem_set.title = title
-    problem_set.description = description
+    problemset.title = title
+    problemset.description = description
     if course_id:
-        course = CourseModel.query.get(course_id)
-        if not course:
-            return jsonify({'error': 'Course not found'}), 400
-        problem_set.course = course
+        course = CourseModel.query.get_or_404(course_id)
+        problemset.course = course
 
     # 更新关联题目
-    problem_set.legacy_problems = LegacyProblemModel.query.filter(
-        LegacyProblemModel.id.in_(legacy_problem_ids)
-    ).all() if legacy_problem_ids else []
-
-    problem_set.coding_problems = CodingProblemModel.query.filter(
-        CodingProblemModel.id.in_(coding_problem_ids)
-    ).all() if coding_problem_ids else []
+    problemset.problems = ProblemModel.query.filter(
+        ProblemModel.id.in_(problem_ids)
+    ).all() if problem_ids else []
 
     db.session.commit()
     return jsonify({
-        'id': problem_set.id,
-        'legacy': len(problem_set.legacy_problems),
-        'coding': len(problem_set.coding_problems)
+        'id': problemset.id,
+        # 'legacy': len(problem_set.legacy_problems),
+        # 'coding': len(problem_set.problems)
     }), 200
 
 
@@ -116,31 +100,17 @@ def get_problemset(psid):
             'id': problem_set.course.id,
             'title': problem_set.course.course_name
         } if problem_set.course else {},
-        'legacy_problems': [],
-        'coding_problems': []
+        'problems': []
     }
 
     # 题目列表及用户提交状态
-    for problem in problem_set.legacy_problems:
-        submission = SubmissionModel.query.filter_by(
-            user_id=user_id,
-            problem_id=problem.id,
-            problem_set_id=problem_set.id
-        ).first()
-        result['legacy_problems'].append({
-            'id': problem.id,
-            'title': problem.title,
-            'status': submission.status if submission else None,
-            'score': submission.score if submission else None
-        })
-
-    for problem in problem_set.coding_problems:
+    for problem in problem_set.problems:
         submission = SubmissionModel.query.filter_by(
             user_id=user_id,
             problem_id=problem.id,
             problem_set_id=problem_set.id
         ).order_by(SubmissionModel.time_stamp.desc()).first()
-        result['coding_problems'].append({
+        result['problems'].append({
             'id': problem.id,
             'title': problem.title,
             'status': submission.status if submission else None,
@@ -232,8 +202,7 @@ def get_problemsets():
                 'id': ps.course.id,
                 'title': ps.course.course_name,
             } if ps.course else None,
-            'num_legacy_problems': len(ps.legacy_problems),
-            'num_coding_problems': len(ps.coding_problems),
+            'num_problems': len(ps.problems),
         })
 
     return jsonify({

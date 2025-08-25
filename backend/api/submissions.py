@@ -1,55 +1,11 @@
-import os, json, time, hmac, base64, hashlib, threading, requests
+import os, time, hmac, base64, hashlib, threading, requests
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity, get_jwt
+from flask_jwt_extended import get_jwt_identity
 from exts import db
-from models import LegacyProblemModel, CodingProblemModel, ProblemSetModel, SubmissionModel
-from decorators import role_required, ROLE_TEACHER
-from modules.legacy_judger import legacy_judger
+from models import ProblemModel, SubmissionModel
+from decorators import role_required
 
 bp = Blueprint('submissions', __name__, url_prefix='/api/submissions')
-
-@bp.post('/legacy/<int:problem_id>')
-@role_required()
-def submit_legacy(problem_id):
-    """
-    提交 Legacy 题目答案并判分
-    """
-    user_id = get_jwt_identity()
-    data = request.get_json()
-
-    problem_set_id = data.get('problem_set_id') or None
-    user_answers = data.get('user_answer')
-
-    if not problem_id or user_answers is None:
-        return jsonify({'error': 'Missing problem_id or user_answer'}), 400
-
-    problem = LegacyProblemModel.query.get(problem_id)
-    if not problem:
-        return jsonify({'error': 'Problem not found'}), 404
-
-    # 判题
-    score, status = legacy_judger(problem.problem_type, problem.answers, user_answers)
-
-    # 保存提交
-    submission = SubmissionModel(
-        user_id=user_id,
-        problem_set_id=problem_set_id,
-        problem_id=problem_id,
-        problem_type='legacy',
-        user_answer=user_answers,
-        score=score, # type: ignore
-        status=status # pyright: ignore[reportCallIssue]
-    )
-    db.session.add(submission)
-    db.session.commit()
-
-    return jsonify({
-        'problem_id': problem_id,
-        'problem_set_id': problem_set_id,
-        'score': score,
-        'status': status
-    }), 201
-
 
 JUDGE_SERVER = "http://127.0.0.1:8000"  # 判题机地址
 PUBLIC_BASE_URL = "http://127.0.0.1:5000/api"
@@ -82,16 +38,65 @@ def _fire_and_forget_enqueue(url: str, payload: dict, timeout_sec: float = 3.0):
             pass
     threading.Thread(target=_send, daemon=True).start()
 
+def submit_legacy(problem, data: dict):
+    """
+    提交传统题（单选、多选、填空、主观题）
+    请求 JSON: { "user_answer": ... }
+    返回: { "status": "AC/WA", "score": float }
+    """
+    user_id = get_jwt_identity()
+    user_answer = data.get("user_answer")
 
-@bp.post("/coding/<int:problem_id>")
-@role_required()
-def submit_coding(problem_id):
+    correct = problem.test_cases.get("answers", None)
+    problem_type = problem.type
+
+    score = 0
+    status = "WA"
+
+    if problem_type == "single":
+        if user_answer == correct:
+            score = 100
+            status = "AC"
+    elif problem_type == "multiple":
+        # 多选要求集合完全匹配
+        if isinstance(user_answer, list) and set(user_answer) == set(correct):
+            score = 100
+            status = "AC"
+    elif problem_type == "fill":
+        if isinstance(user_answer, list) and user_answer == correct:
+            score = 100
+            status = "AC"
+    elif problem_type == "subjective":
+        score = 100
+        status = "AC"
+    else:
+        return jsonify({"error": "Unsupported problem type"}), 400
+
+    # 写入提交记录
+    submission = SubmissionModel(
+        user_id=user_id,
+        problem_id=problem.id,
+        problem_type=problem_type,
+        user_answer=user_answer,
+        score=score,
+        status=status,
+    )
+    db.session.add(submission)
+    db.session.commit()
+
+    return jsonify({
+        "submission_id": submission.id,
+        "status": submission.status,
+        "score": submission.score,
+    }), 201
+
+
+def submit_coding(problem, data: dict):
     """
     1) 先入库一条 submission（queued）并立即返回 submission_id
     2) 后台异步把任务发给判题机
     """
     user_id = get_jwt_identity()
-    data = request.get_json() or {}
 
     language = data.get("language")
     source_code = data.get("source_code")
@@ -101,20 +106,15 @@ def submit_coding(problem_id):
     if not language or not source_code:
         return jsonify({"error": "Missing language or source_code"}), 400
 
-    problem = CodingProblemModel.query.get(problem_id)
+    problem = ProblemModel.query.get(problem.id)
     if not problem:
         return jsonify({"error": "Problem not found"}), 404
-
-    # 取限制：客户端>题目默认
-    effective_limits = problem.limitations or {}
-    # if isinstance(client_limitations, dict):
-    #     effective_limits.update(client_limitations)
 
     # 1) 入库
     submission = SubmissionModel(
         user_id=user_id,
         problem_set_id=problem_set_id,
-        problem_id=problem_id,
+        problem_id=problem.id,
         problem_type="coding",
         user_answer=source_code,
         language=language,
@@ -129,11 +129,10 @@ def submit_coding(problem_id):
     callback_token = _make_callback_token(submission.id)
 
     judge_payload = {
-        "problem_id": problem_id,
-        # 判题机应当自带该题目的测试数据；如果放 DB/对象存储，这里也可附 test_cases 描述
+        "problem_id": problem.id,
         "language": language,
         "source_code": source_code,
-        "limitations": effective_limits,
+        "limitations": problem.limitations,
         "callback_url": callback_url,
         "callback_token": callback_token
     }
@@ -142,8 +141,20 @@ def submit_coding(problem_id):
     # 立刻返回，前端可以开始轮询 /coding/submissions/<id>
     return jsonify({
         "submission_id": submission.id,
-        "status": submission.status
+        "status": submission.status,
+        "score": submission.score,
     }), 201
+
+@bp.post("/<int:problem_id>")
+@role_required()
+def submit_problem(problem_id):
+    problem = ProblemModel.query.get_or_404(problem_id)
+    data = request.get_json() or {}
+    if problem.type == "coding":
+        return submit_coding(problem, data)
+    else:
+        return submit_legacy(problem, data)
+
 
 @bp.get("/<int:submission_id>/status")
 @role_required()
@@ -153,8 +164,6 @@ def get_submission_status(submission_id):
     """
     s = SubmissionModel.query.get_or_404(submission_id)
     return jsonify({
-        # "submission_id": s.id,
-        # "problem_id": s.problem_id,
         "status": s.status,
         "score": s.score
     }), 200
@@ -167,6 +176,8 @@ def get_submission(submission_id):
     详情页
     """
     s = SubmissionModel.query.get_or_404(submission_id)
+    if s.user.id != get_jwt_identity():
+        return jsonify({'error', 'Permission denied'}), 403
     return jsonify({
         "submission_id": s.id,
         "user": {
@@ -208,7 +219,7 @@ def judge_callback(submission_id):
     max_time = data.get("max_time")
     max_memory = data.get("max_memory")
     detail = data.get("detail")
-    finished_at = data.get("finished_at")
+    # finished_at = data.get("finished_at")
 
     if new_status:
         s.status = new_status

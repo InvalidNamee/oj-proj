@@ -12,14 +12,14 @@ const newTestCases = ref(null);
 const uploading = ref(false); // 上传状态
 
 const fetchProblem = async () => {
-  const res = await axios.get(`/api/coding_problems/${problemId}`);
+  const res = await axios.get(`/api/problems/${problemId}`);
   testCasesList.value = res.data.test_cases?.cases || [];
 };
 
 const deleteSelectedCases = async () => {
   if (!selectedTestCases.value.length) return;
   try {
-    await axios.patch(`/api/coding_problems/${problemId}/test_cases/delete`, {
+    await axios.patch(`/api/problems/${problemId}/test_cases/delete`, {
       cases: testCasesList.value.filter(tc => selectedTestCases.value.includes(tc.name))
     });
     testCasesList.value = testCasesList.value.filter(tc => !selectedTestCases.value.includes(tc.name));
@@ -35,7 +35,7 @@ const uploadNewTestCases = async () => {
     uploading.value = true; // 开始上传
     const form = new FormData();
     form.append("test_cases.zip", newTestCases.value);
-    await axios.patch(`/api/coding_problems/${problemId}/test_cases/add`, form);
+    await axios.patch(`/api/problems/${problemId}/test_cases/add`, form);
     await fetchProblem();
     newTestCases.value = null;
   } catch (err) {

@@ -19,7 +19,7 @@ const pages = ref(1);
 
 const fetchProblems = async () => {
   try {
-    const res = await axios.get("/api/coding_problems/", {
+    const res = await axios.get("/api/problems/", {
       params: {
         course_id: userStore.currentCourseId,
         page: page.value,
@@ -27,7 +27,7 @@ const fetchProblems = async () => {
         keyword: keyword.value || undefined,
       }
     });
-    problems.value = res.data.coding_problems;
+    problems.value = res.data.problems;
     total.value = res.data.total;
     pages.value = res.data.pages;
   } catch (err) {
@@ -39,12 +39,13 @@ const goDetail = (id) => {
   if (!selectMode.value) router.push(`/problems/${id}`);
 };
 const goEdit = (id) => router.push(`/problems/${id}/edit`);
+const goEditTestCases = (id) => router.push(`/problems/${id}/edit/testcases`);
 
 // 单个删除
 const deleteOne = async (id) => {
   if (!confirm("确认删除该题目吗？")) return;
   try {
-    await axios.delete("/api/coding_problems/", {
+    await axios.delete("/api/problems/", {
       data: { pids: [id] },
     });
     fetchProblems();
@@ -62,7 +63,7 @@ const deleteBatch = async () => {
   }
   if (!confirm(`确认删除选中的 ${selected.value.length} 个题目吗？`)) return;
   try {
-    await axios.delete("/api/coding_problems/", {
+    await axios.delete("/api/problems/", {
       data: { pids: selected.value },
     });
     selected.value = [];
@@ -140,7 +141,8 @@ onMounted(fetchProblems);
             <td class="p-3">{{ p.id }}</td>
             <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click.stop="goDetail(p.id)">{{ p.title }}</td>
             <td class="p-3">{{ p.course.name }}</td>
-            <td class="p-3">{{ p.num_test_cases }}</td>
+            <td v-if="p.type === 'coding'" class="p-3 cursor-pointer text-blue-600 hover:underline" @click.stop="goEditTestCases(p.id)">{{ p.num_test_cases }}</td>
+            <td v-else class="p-3">-</td>
             <td class="p-3">{{ p.timestamp }}</td>
             <td class="p-3 space-x-3">
               <button class="text-blue-500 hover:underline" @click.stop="goEdit(p.id)">编辑</button>
