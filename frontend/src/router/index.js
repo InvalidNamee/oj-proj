@@ -164,12 +164,6 @@ const router = createRouter({
           meta: { title: '新增题目', requiresAuth: true, requiresTeacher: true }
         },
         {
-          path: ':id/edit/legacy',
-          name: 'EditLegacyProblem',
-          component: () => import('@/views/problemsets/EditLegacy.vue'),
-          meta: { title: '编辑传统题目', requiresAuth: true, requiresTeacher: true }
-        },
-        {
           path: ':id/edit',
           name: 'EditProblem',
           component: () => import('@/views/problemsets/EditProblem.vue'),

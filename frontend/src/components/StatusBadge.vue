@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
-  status: { type: String, required: true },
-  score: { type: Number, default: null }
+  status: { type: String, required: true, default: 'Pending' },
+  score: { type: Number, default: 0.0 }
 })
 
 const colors = {

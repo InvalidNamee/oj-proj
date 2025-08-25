@@ -30,7 +30,7 @@ onMounted(async () => {
       <div><b>提交编号：</b>{{ submission?.submission_id }}</div>
       <div><b>题目编号：</b>{{ submission?.problem_id }}</div>
       <div><b>用户：</b>{{ submission?.user?.username }}</div>
-      <div><b>语言：</b>{{ submission?.language }}</div>
+      <div><b>语言：</b>{{ submission?.language || '无' }}</div>
       <div><b>结果：</b><StatusBadge :status="submission?.status" :score="submission?.score" /></div>
       <div><b>内存：</b>{{ submission?.max_memory ? `${submission.max_memory} KB` : "--" }}</div>
       <div><b>时间：</b>{{ submission?.max_time ? `${submission.max_time} ms` : "--" }}</div>
@@ -38,7 +38,7 @@ onMounted(async () => {
     </div>
 
     <!-- 代码部分 -->
-    <div class="mb-6">
+    <div v-if="submission?.problem_type === 'coding'" class="mb-6">
       <b>代码：</b>
       <CodeMirrorEditor
         v-if="submission"

@@ -89,6 +89,7 @@ const submitAnswer = async () => {
 
       <template v-else>
         <LegacyAnswerArea
+        v-if="problem"
         :problem-data="problem"
           v-model="sourceCode"
         />

@@ -113,7 +113,7 @@ onMounted(fetchSubmissions)
               @click="goDetail(s)"
               :class="{ 'cursor-not-allowed text-gray-400': userStore.usertype === 'student' && s.user.id !== userStore.id }"
             >
-              {{ s.language }}
+              {{ s.language ? s.language : '无' }}
             </td>
             <td class="p-3">{{ s.max_memory ? `${s.max_memory} KB` : "--" }}</td>
             <td class="p-3">{{ s.max_time ? `${s.max_time} ms` : "--" }}</td>

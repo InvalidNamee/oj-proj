@@ -2,26 +2,23 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  problemData: { type: Object, required: true } // 父组件传入的题目数据
+  problemData: { type: Object, required: true }
 })
 const emit = defineEmits(['update:modelValue'])
 
 const problemType = ref('single')
-const options = ref([]) // 单选/多选选项
-const answers = ref([]) // 答案
+const options = ref([])
+const answers = ref(null)  // 单选存值，多选存数组
 
 // 初始化数据
 const initData = (data) => {
   problemType.value = data?.type || 'single'
-  if (problemType.value === 'single' || problemType.value === 'multiple') {
+  if (problemType.value === 'single') {
+    answers.value = data?.user_answer ?? null
     options.value = data?.test_cases?.options || []
-    if (Array.isArray(data?.user_answer)) {
-      answers.value = [...data.user_answer]
-    } else if (data?.user_answer != null) {
-      answers.value = [data.user_answer]
-    } else {
-      answers.value = []
-    }
+  } else if (problemType.value === 'multiple') {
+    answers.value = Array.isArray(data?.user_answer) ? [...data.user_answer] : []
+    options.value = data?.test_cases?.options || []
   } else if (problemType.value === 'fill') {
     answers.value = Array.isArray(data?.user_answer) ? [...data.user_answer] : []
   } else {
@@ -30,16 +27,12 @@ const initData = (data) => {
 }
 
 // watch problemData
-watch(
-  () => props.problemData,
-  (data) => initData(data),
-  { immediate: true, deep: true }
-)
+watch(() => props.problemData, (data) => initData(data), { immediate: true, deep: true })
 
 // 单选/多选操作
 const toggleOption = (id) => {
   if (problemType.value === 'single') {
-    answers.value = [id]
+    answers.value = id
   } else if (problemType.value === 'multiple') {
     if (answers.value.includes(id)) {
       answers.value = answers.value.filter(a => a !== id)
@@ -62,7 +55,9 @@ const removeFillAnswer = (index) => {
 
 // 清空答案
 const clearAnswers = () => {
-  if (problemType.value === 'single' || problemType.value === 'multiple') {
+  if (problemType.value === 'single') {
+    answers.value = null
+  } else if (problemType.value === 'multiple') {
     answers.value = []
   } else if (problemType.value === 'fill') {
     answers.value = []
@@ -72,13 +67,9 @@ const clearAnswers = () => {
 }
 
 // watch answers 变化
-watch(
-  answers,
-  () => {
-    emit('update:modelValue', answers.value)
-  },
-  { deep: true }
-)
+watch(answers, () => {
+  emit('update:modelValue', answers.value)
+}, { deep: true })
 </script>
 
 <template>
@@ -95,7 +86,7 @@ watch(
         <input
           type="radio"
           :value="opt.id"
-          :checked="answers.includes(opt.id)"
+          :checked="answers === opt.id"
           @change="toggleOption(opt.id)"
         />
         <span>{{ opt.content }}</span>
