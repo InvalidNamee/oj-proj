@@ -6,15 +6,32 @@ import { RouterLink, useRouter, useRoute } from 'vue-router';
 const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
+
 const activePath = computed(() => route.path);
+
+// 定义视图 + 权限要求
 const views = ref([
-  { name: '主页', path: '/' },
-  { name: '用户', path: '/users' },
-  { name: '课程', path: '/courses' },
-  { name: '题单', path: '/problemsets' },
-  { name: '分组', path: '/groups' },
-  { name: '提交记录', path: '/submissions' }
+  { name: '主页', path: '/', permission: 2 },
+  { name: '课程', path: '/courses', permission: 2 },
+  { name: '用户', path: '/users', permission: 1 },
+  { name: '题单', path: '/problemsets', permission: 2 },
+  { name: '分组', path: '/groups', permission: 1 },
+  { name: '提交记录', path: '/submissions', permission: 2 },
 ]);
+
+// 权限映射
+const rolePermission = {
+  student: 2, // 学生能看 permission <= 2
+  teacher: 1, // 教师能看 permission <= 1
+  admin: 0,   // 管理员能看所有
+};
+
+// 根据用户角色过滤视图
+const filteredViews = computed(() => {
+  const role = userStore.usertype || 'student'; // 默认当学生
+  const level = rolePermission[role] ?? 2;
+  return views.value.filter(view => view.permission >= level);
+});
 
 const dropdownOpen = ref(false);
 const toggleDropdown = () => (dropdownOpen.value = !dropdownOpen.value);
@@ -30,7 +47,6 @@ onMounted(() => {
   }
 });
 
-// 选中课程变化时更新 Pinia
 watch(currentCourseId, (val) => {
   userStore.setCurrentCourse(val);
 });
@@ -52,33 +68,28 @@ const logout = async () => {
   <nav class="bg-white shadow-sm p-4 flex justify-between items-center">
     <div class="flex items-center space-x-4">
       <div class="text-lg font-bold text-gray-800">DawOj v2</div>
-      <!-- 课程选择框，左上角 logo 右边 -->
+
+      <!-- 课程选择 -->
       <template v-if="userStore.uid && userStore.courses.length">
         <select
           v-model="currentCourseId"
           class="border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
           style="margin-left: 8px; min-width: 120px;"
         >
-          <option
-            v-if="userStore.usertype === 'admin'"
-            value=null
-            >
+          <option v-if="userStore.usertype === 'admin'" :value="null">
             全部课程
           </option>
-          <option
-            v-for="course in userStore.courses"
-            :key="course.id"
-            :value="course.id"
-          >
+          <option v-for="course in userStore.courses" :key="course.id" :value="course.id">
             {{ course.name }}
           </option>
         </select>
       </template>
     </div>
 
+    <!-- 导航栏菜单 -->
     <div class="flex space-x-4">
       <RouterLink
-        v-for="view in views"
+        v-for="view in filteredViews"
         :key="view.name"
         :to="view.path"
         class="px-3 py-1 rounded text-gray-800 hover:text-blue-600 hover:bg-blue-50 transition-colors"
@@ -99,7 +110,6 @@ const logout = async () => {
           </svg>
         </button>
 
-        <!-- 修正下拉菜单位置 -->
         <div
           v-show="dropdownOpen"
           class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-sm z-50 border border-gray-100"

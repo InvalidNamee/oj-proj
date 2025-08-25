@@ -41,6 +41,10 @@ const deleteCourse = async (id) => {
   }
 };
 
+const goDetail = (id) => {
+  router.push(`/courses/${id}`);
+};
+
 watch(() => route.query, () => fetchCourses(), { immediate: true });
 </script>
 
@@ -57,7 +61,7 @@ watch(() => route.query, () => fetchCourses(), { immediate: true });
     <div class="space-y-4">
       <div v-for="course in courses" :key="course.id" class="bg-white shadow-md rounded-xl p-4 border border-gray-200 flex justify-between items-center">
         <div>
-          <div class="font-medium">{{ course.name }}</div>
+          <div class="font-medium" @click.prevent="goDetail(course.id)">{{ course.name }}</div>
           <div class="text-gray-500 text-sm">{{ course.description || '-' }}</div>
           <div class="text-gray-400 text-xs mt-1">更新时间: {{ course.timestamp }}</div>
         </div>

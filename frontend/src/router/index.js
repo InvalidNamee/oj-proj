@@ -58,13 +58,19 @@ const router = createRouter({
       path: '/courses',
       name: 'Courses',
       component: () => import('@/views/courses/Layout.vue'),
-      meta: { title: '课程管理', requiresAuth: true, requiresAdmin: true },
+      meta: { title: '课程管理', requiresAuth: true },
       children: [
         {
           path: '',
           name: 'CourseList',
           component: () => import('@/views/courses/List.vue'),
           meta: { title: '课程列表', requiresAuth: true, requiresAdmin: true }
+        },
+        {
+          path: ':id',
+          name: 'CourseDetail',
+          component: () => import('@/views/courses/Detail.vue'),
+          meta: { title: '课程详情', requiresAuth: true }
         },
         {
           path: 'add',
@@ -211,6 +217,15 @@ router.beforeEach(async (to, from, next) => {
   const requiresTeacher = to.matched.some(record => record.meta.requiresTeacher);
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
   const userStore = useUserStore();
+  
+  if (to.path === '/courses') {
+    if (userStore.usertype !== 'admin') {
+      if (userStore.currentCourseId) {
+        return next(`/courses/${userStore.currentCourseId}`)
+      }
+    }
+  }
+
   if (requiresAuth) {
     if (!userStore.id) {
       return next('/login')

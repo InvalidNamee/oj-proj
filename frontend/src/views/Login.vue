@@ -22,7 +22,7 @@ const handleLogin = async () => {
     userStore.setUser(user, access_token, refresh_token);
     console.log('登录成功:', user);
     router.push('/');
-    // window.location.reload();
+    window.location.reload();
   } catch (error) {
     errorMsg.value = error.response?.data?.error || '登录失败';
   }

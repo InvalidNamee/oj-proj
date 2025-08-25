@@ -31,7 +31,3 @@ const activePath = computed(() => route.path);
     </nav>
   </aside>
 </template>
-
-<style scoped>
-/* 简单过渡效果，保持极简风格 */
-</style>

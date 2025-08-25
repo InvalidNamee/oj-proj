@@ -77,10 +77,10 @@ onMounted(fetchSubmissions)
 
     <!-- 筛选 -->
     <div class="flex flex-wrap gap-3 mb-4">
-      <input v-model="filters.user_id" placeholder="用户ID" class="border p-2 rounded w-24"/>
-      <input v-model="filters.problem_id" placeholder="题目ID" class="border p-2 rounded w-24"/>
-      <input v-model="filters.problem_set_id" placeholder="题单ID" class="border p-2 rounded w-24"/>
-      <button @click="doSearch" class="px-3 py-1 bg-blue-500 text-white rounded">搜索</button>
+      <input v-model="filters.user_id" placeholder="用户ID" class="border border-gray-500 px-2 py-1 rounded w-24"/>
+      <input v-model="filters.problem_id" placeholder="题目ID" class="border border-gray-500 px-2 py-1 rounded w-24"/>
+      <input v-model="filters.problem_set_id" placeholder="题单ID" class="border border-gray-500 px-2 py-1 rounded w-24"/>
+      <button @click="doSearch" class="px-2 py-1 bg-blue-500 text-white rounded">搜索</button>
     </div>
 
     <!-- 表格 -->

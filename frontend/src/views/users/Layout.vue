@@ -2,7 +2,9 @@
 import { RouterView } from 'vue-router';
 import Sidebar from '@/components/Sidebar.vue';
 import { ref } from 'vue';
+import { useUserStore } from '@/stores/user.js';
 
+const userStore = useUserStore();
 const views = ref([
   { name: '用户列表', path: '/users' },
   { name: '注册', path: '/users/register' },
@@ -12,7 +14,7 @@ const views = ref([
 
 <template>
   <div class="flex">
-    <Sidebar :views="views" />
+    <Sidebar v-if="userStore.usertype !== 'student'" :views="views" />
     <main class="flex-1 p-6">
       <RouterView />
     </main>
