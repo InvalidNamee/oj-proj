@@ -191,7 +191,7 @@ def get_problem(pid):
         return jsonify({'error': 'Permission denied'}), 403
     
     submission = SubmissionModel.query.filter_by(user_id=user.id, problem_id=pid).order_by(SubmissionModel.time_stamp.desc()).first()
-    user_answer = submission.user_answer if submission else ''
+    user_answer = submission.user_answer if submission else None
     language = submission.language if submission else ''
         
 

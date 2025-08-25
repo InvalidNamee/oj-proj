@@ -1,6 +1,6 @@
 import os, time, hmac, base64, hashlib, threading, requests
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
 from models import ProblemModel, SubmissionModel
 from decorators import role_required
@@ -176,8 +176,9 @@ def get_submission(submission_id):
     详情页
     """
     s = SubmissionModel.query.get_or_404(submission_id)
-    if s.user.id != get_jwt_identity():
-        return jsonify({'error', 'Permission denied'}), 403
+    login_type = get_jwt()['login_type']
+    if login_type == 'student' and s.user.id != get_jwt_identity():
+        return jsonify({'error': 'Permission denied'}), 403
     return jsonify({
         "submission_id": s.id,
         "user": {
