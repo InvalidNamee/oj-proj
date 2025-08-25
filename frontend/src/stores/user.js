@@ -21,9 +21,11 @@ export const useUserStore = defineStore('user', {
       this.accessToken = accessToken;
       this.refreshToken = refreshToken;
       this.courses = user.courses || [];
-      this.currentCourseId = user.usertype === 'admin'
-        ? null
-        : (user.courses?.length > 0 ? user.courses[0].id : null);
+      if (!this.currentCourseId) {
+        this.currentCourseId = user.usertype === 'admin'
+          ? null
+          : (user.courses?.length > 0 ? user.courses[0].id : null);
+      }
       axios.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`;
     },
 

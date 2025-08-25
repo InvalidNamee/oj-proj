@@ -54,6 +54,16 @@ const goUser = (submission) => {
   router.push(`/users/${submission.user.id}`)
 }
 
+const goProblem = (submission) => {
+  router.push(`/problems/${submission.problem_id}?${submission.problem_set_id ? `psid=${submission.problem_set_id}` : ''}`)
+}
+
+const goProblemSet = (submission) => {
+  if (submission.problem_set_id) {
+    router.push(`/problemsets/${submission.problem_set_id}`)
+  }
+}
+
 // 改变页码
 const changePage = (p) => {
   if (p >= 1 && p <= pages.value) {
@@ -77,9 +87,10 @@ onMounted(fetchSubmissions)
 
     <!-- 筛选 -->
     <div class="flex flex-wrap gap-3 mb-4">
-      <input v-model="filters.user_id" placeholder="用户ID" class="border border-gray-500 px-2 py-1 rounded w-24"/>
-      <input v-model="filters.problem_id" placeholder="题目ID" class="border border-gray-500 px-2 py-1 rounded w-24"/>
-      <input v-model="filters.problem_set_id" placeholder="题单ID" class="border border-gray-500 px-2 py-1 rounded w-24"/>
+      <input v-model="filters.user_id" placeholder="用户ID" class="border border-gray-500 px-2 py-1 rounded w-24" />
+      <input v-model="filters.problem_id" placeholder="题目ID" class="border border-gray-500 px-2 py-1 rounded w-24" />
+      <input v-model="filters.problem_set_id" placeholder="题单ID"
+        class="border border-gray-500 px-2 py-1 rounded w-24" />
       <button @click="doSearch" class="px-2 py-1 bg-blue-500 text-white rounded">搜索</button>
     </div>
 
@@ -103,16 +114,14 @@ onMounted(fetchSubmissions)
           <tr v-for="s in submissions" :key="s.submission_id" class="hover:bg-gray-50 border-b border-gray-200">
             <td class="p-3">{{ s.submission_id }}</td>
             <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click="goUser(s)">{{ s.user.username }}</td>
-            <td class="p-3">{{ s.problem_id }}</td>
-            <td class="p-3">{{ s.problem_set_id || '--' }}</td>
+            <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click="goProblem(s)">{{ s.problem_id }}</td>
+            <td v-if="s.problem_set_id" class="p-3 curser-pointer text-blue-600 hover:underline" @click="goProblemSet(s)">{{ s.problem_set_id }}</td>
+            <td v-else class="p-3">--</td>
             <td class="p-3">
               <StatusBadge :status="s.status" :score="s.score" />
             </td>
-            <td
-              class="p-3 cursor-pointer text-blue-600 hover:underline"
-              @click="goDetail(s)"
-              :class="{ 'cursor-not-allowed text-gray-400': userStore.usertype === 'student' && s.user.id !== userStore.id }"
-            >
+            <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click="goDetail(s)"
+              :class="{ 'cursor-not-allowed text-gray-400': userStore.usertype === 'student' && s.user.id !== userStore.id }">
               {{ s.language ? s.language : '无' }}
             </td>
             <td class="p-3">{{ s.max_memory ? `${s.max_memory} KB` : "--" }}</td>
@@ -125,9 +134,11 @@ onMounted(fetchSubmissions)
 
     <!-- 分页 -->
     <div class="mt-4 flex justify-center items-center gap-4">
-      <button @click="changePage(page-1)" :disabled="page<=1" class="px-3 py-1 border rounded disabled:opacity-50">上一页</button>
+      <button @click="changePage(page - 1)" :disabled="page <= 1"
+        class="px-3 py-1 border rounded disabled:opacity-50">上一页</button>
       <span>第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
-      <button @click="changePage(page+1)" :disabled="page>=pages" class="px-3 py-1 border rounded disabled:opacity-50">下一页</button>
+      <button @click="changePage(page + 1)" :disabled="page >= pages"
+        class="px-3 py-1 border rounded disabled:opacity-50">下一页</button>
     </div>
   </div>
 </template>

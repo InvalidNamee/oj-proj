@@ -13,11 +13,19 @@ const views = ref([
 </script>
 
 <template>
-  <div class="flex">
-    <Sidebar v-if="userStore.usertype !== 'student'" :views="views" />
-    <main class="flex-1 p-6">
+  <div class="flex flex-1 relative">
+    <!-- 固定 Sidebar -->
+    <Sidebar
+      v-if="userStore.usertype !== 'student'"
+      :views="views"
+      class="fixed left-0 top-0 h-full w-60"
+    />
+
+    <main
+      class="flex-1 p-6 overflow-auto"
+      :class="userStore.usertype !== 'student' ? 'ml-60' : ''"
+    >
       <RouterView />
     </main>
   </div>
-  <!-- <RouterView /> -->
 </template>

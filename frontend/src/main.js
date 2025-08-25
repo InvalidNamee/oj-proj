@@ -31,6 +31,11 @@ app.use(VueCodemirror, {
 
 app.mount('#app')
 
+const userStore = useUserStore()
+if (userStore.accessToken) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${userStore.accessToken}`
+}
+
 axios.interceptors.response.use(
   res => res,
   async err => {

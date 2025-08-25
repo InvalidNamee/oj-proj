@@ -9,7 +9,7 @@ const total = ref(0);
 const page = ref(1);
 const perPage = ref(10);
 const keyword = ref("");
-const selected = ref([]); // 已选组
+const selected = ref([]);
 const batchMode = ref(false);
 
 const router = useRouter();
@@ -29,41 +29,51 @@ const fetchGroups = async () => {
   total.value = res.data.total || 0;
 };
 
-// 改变路由参数以便能返回同一状态
+// 改变路由参数
 const updateRoute = () => {
-  router.replace({
+  router.push({
     path: "/groups",
     query: {
       page: page.value,
       per_page: perPage.value,
-      keyword: keyword.value || undefined,
+      keyword: keyword.value || "",
     },
   });
 };
 
-watch([page, perPage, keyword], () => {
-  if (keyword.value) {
-    page.value = 1; // 搜索时重置页码
+// 监听路由变化，恢复状态
+watch(
+  () => route.query,
+  (q) => {
+    page.value = Number(q.page) || 1;
+    perPage.value = Number(q.per_page) || 10;
+    keyword.value = q.keyword || "";
+    fetchGroups();
+  },
+  { immediate: true }
+);
+
+watch(() => userStore.currentCourseId, () => {
+  page.value = 1;
+  fetchGroups();
+});
+
+// 翻页
+const changePage = (p) => {
+  if (p >= 1 && p <= Math.ceil(total.value / perPage.value)) {
+    page.value = p;
+    updateRoute();
   }
+};
+
+// 搜索
+const search = () => {
+  page.value = 1;
   updateRoute();
-  fetchGroups();
-});
-
-// 初始加载时从路由恢复参数
-onMounted(() => {
-  page.value = Number(route.query.page) || 1;
-  perPage.value = Number(route.query.per_page) || 10;
-  keyword.value = route.query.keyword || "";
-  fetchGroups();
-});
-
-const goDetail = (id) => {
-  router.push(`/groups/${id}`);
 };
 
-const goEdit = (id) => {
-  router.push(`/groups/${id}/edit`);
-};
+const goDetail = (id) => router.push(`/groups/${id}`);
+const goEdit = (id) => router.push(`/groups/${id}/edit`);
 
 const deleteOne = async (id) => {
   if (!confirm("确认删除该组？")) return;
@@ -83,19 +93,19 @@ const deleteBatch = async () => {
 <template>
   <div class="p-6">
     <h2 class="text-xl font-bold mb-2">分组列表</h2>
+
     <!-- 搜索栏 -->
     <div class="flex justify-between items-center mb-2">
-      <!-- 左侧搜索框 -->
       <div class="flex items-center space-x-2">
-        <input type="text" v-model="keyword" placeholder="按组名搜索"
+        <input v-model="keyword" placeholder="按组名搜索"
           class="border border-gray-500 rounded px-2 py-1 w-64" />
         <button class="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
-          @click="page = 1; updateRoute(); fetchGroups();">
+          @click="search">
           搜索
         </button>
       </div>
 
-      <!-- 右侧操作按钮 -->
+      <!-- 批量操作 -->
       <div class="flex items-center space-x-2">
         <button class="px-4 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
           @click="batchMode = !batchMode; selected = []">
@@ -108,7 +118,7 @@ const deleteBatch = async () => {
       </div>
     </div>
 
-
+    <!-- 表格 -->
     <div class="bg-white shadow rounded-lg overflow-hidden">
       <table class="w-full text-left text-sm">
         <thead class="bg-gray-50 text-gray-700">
@@ -139,12 +149,8 @@ const deleteBatch = async () => {
             <td class="p-3">{{ g.problemset_cnt }}</td>
             <td class="p-3 space-x-3">
               <template v-if="userStore.usertype !== 'student'">
-                <button class="text-blue-500 hover:underline" @click.stop="goEdit(g.id)">
-                  编辑
-                </button>
-                <button class="text-red-500 hover:underline" @click.stop="deleteOne(g.id)">
-                  删除
-                </button>
+                <button class="text-blue-500 hover:underline" @click.stop="goEdit(g.id)">编辑</button>
+                <button class="text-red-500 hover:underline" @click.stop="deleteOne(g.id)">删除</button>
               </template>
             </td>
           </tr>
@@ -159,11 +165,15 @@ const deleteBatch = async () => {
 
     <!-- 分页 -->
     <div class="flex justify-center mt-4 space-x-2">
-      <button class="px-3 py-1 border rounded" :disabled="page === 1" @click="page--">
+      <button class="px-3 py-1 border rounded disabled:opacity-50"
+        :disabled="page === 1"
+        @click="changePage(page - 1)">
         上一页
       </button>
       <span>第 {{ page }} / {{ Math.ceil(total / perPage) }} 页</span>
-      <button class="px-3 py-1 border rounded" :disabled="page >= Math.ceil(total / perPage)" @click="page++">
+      <button class="px-3 py-1 border rounded disabled:opacity-50"
+        :disabled="page >= Math.ceil(total / perPage)"
+        @click="changePage(page + 1)">
         下一页
       </button>
     </div>

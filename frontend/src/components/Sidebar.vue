@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
-// import PropTypes from 'vue-types';
 
 const props = defineProps({
   views: {
@@ -11,13 +10,13 @@ const props = defineProps({
 });
 
 const route = useRoute();
-
-// 当前激活的路由路径
 const activePath = computed(() => route.path);
 </script>
 
 <template>
-  <aside class="w-60 h-screen bg-white shadow p-4">
+  <aside
+    class="fixed left-0 top-16 w-60 h-[calc(100vh-4rem)] bg-white shadow p-4 z-10"
+  >
     <nav class="flex flex-col space-y-2">
       <RouterLink
         v-for="view in views"

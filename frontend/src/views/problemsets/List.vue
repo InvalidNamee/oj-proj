@@ -26,7 +26,7 @@ const fetchProblemSets = async () => {
   });
   problemsets.value = res.data.problemsets;
   total.value = res.data.total;
-  pages.value = res.data.pages;
+  pages.value = res.data.total_pages;
 };
 
 onMounted(fetchProblemSets);

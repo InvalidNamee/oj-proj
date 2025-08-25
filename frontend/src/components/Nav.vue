@@ -65,7 +65,7 @@ const logout = async () => {
 </script>
 
 <template>
-  <nav class="bg-white shadow-sm p-4 flex justify-between items-center">
+  <nav class="sticky z-100 top-0 bg-white shadow-sm p-4 flex justify-between items-center">
     <div class="flex items-center space-x-4">
       <div class="text-lg font-bold text-gray-800">DawOj v2</div>
 

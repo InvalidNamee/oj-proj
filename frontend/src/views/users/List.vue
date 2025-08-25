@@ -208,7 +208,7 @@ onMounted(fetchUsers);
               <button class="text-blue-500 hover:underline" @click.stop="goEdit(u.id)">编辑</button>
               <button v-if="userStore.usertype === 'admin'" class="text-red-500 hover:underline"
                 @click.stop="deleteOne(u.id)">删除</button>
-              <button class="text-orange-500 hover:underline" @click.stop="removeFromCourse(u.id)">
+              <button v-if="userStore.currentCourseId" class="text-orange-500 hover:underline" @click.stop="removeFromCourse(u.id)">
                 移除
               </button>
             </td>
