@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
 from models import CourseModel, ProblemModel, ProblemSetModel, SubmissionModel, UserModel
 from decorators import role_required, ROLE_TEACHER
+from modules.verify import can_access_problmeset
 
 bp = Blueprint('problemsets', __name__, url_prefix='/api/problemsets')
 
@@ -86,9 +87,10 @@ def get_problemset(psid):
     查询单个题单信息
     """
     user_id = get_jwt_identity()
-    problem_set = ProblemSetModel.query.get(psid)
-    if not problem_set:
-        return jsonify({'error': 'ProblemSet not found'}), 404
+    problem_set = ProblemSetModel.query.get_or_404(psid)
+    user = UserModel.query.get_or_404(user_id)
+    if not can_access_problmeset(user, problem_set):
+        return jsonify({'error': 'Permission denied'}), 403
 
     # 基础信息
     result = {
@@ -99,7 +101,7 @@ def get_problemset(psid):
         'course': {
             'id': problem_set.course.id,
             'title': problem_set.course.course_name
-        } if problem_set.course else {},
+        },
         'problems': []
     }
 
@@ -156,11 +158,6 @@ def delete_problemsets():
 def get_problemsets():
     """
     获取题单列表
-    query 参数:
-        page: 页码，默认 1
-        per_page: 每页条数，默认 20
-        course_id: 可选，过滤特定课程
-        keyword: 可选，筛选题单标题包含该关键字
     """
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
@@ -169,21 +166,31 @@ def get_problemsets():
 
     user_id = get_jwt_identity()
     user = UserModel.query.get(user_id)
+
+    # 用户所在课程
     course_ids = [course.id for course in user.courses]
 
     query = ProblemSetModel.query
 
+    # 课程过滤
     if course_id:
         if course_id not in course_ids and user.usertype != 'admin':
-            return jsonify({'error': 'No permission to view this course problemsets'}), 403
+            return jsonify({'error': 'Permission denied'}), 403
         query = query.filter(ProblemSetModel.course_id == course_id)
     else:
-        if not course_ids and user.usertype == 'admin':
-            pass  # 管理员可以查看所有题单
-        else:
+        if not course_ids and user.usertype != 'admin':
+            return jsonify({'error': 'Permission denied'}), 403
+        if user.usertype != 'admin':
             query = query.filter(ProblemSetModel.course_id.in_(course_ids))
 
-    # 按关键字过滤
+    # 学生权限：限制只能看到自己组的题单
+    if user.usertype == 'student':
+        group_ids = [g.id for g in user.groups]
+        query = query.filter(
+            (ProblemSetModel.group_id.in_(group_ids))
+        )
+
+    # 关键字搜索
     if keyword:
         query = query.filter(ProblemSetModel.title.ilike(f'%{keyword}%'))
 
@@ -191,19 +198,21 @@ def get_problemsets():
         page=page, per_page=per_page, error_out=False
     )
 
-    problemsets_list = []
-    for ps in pagination.items:
-        problemsets_list.append({
-            'id': ps.id,
-            'title': ps.title,
-            'description': ps.description,
-            'timestamp': ps.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'course': {
-                'id': ps.course.id,
-                'title': ps.course.course_name,
-            } if ps.course else None,
-            'num_problems': len(ps.problems),
-        })
+    problemsets_list = [{
+        'id': ps.id,
+        'title': ps.title,
+        'description': ps.description,
+        'timestamp': ps.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
+        'course': {
+            'id': ps.course.id,
+            'title': ps.course.course_name,
+        } if ps.course else None,
+        'group': {
+            'id': ps.group.id,
+            'title': ps.group.group_name
+        } if ps.group else None,
+        'num_problems': len(ps.problems),
+    } for ps in pagination.items]
 
     return jsonify({
         'problemsets': problemsets_list,

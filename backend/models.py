@@ -59,7 +59,6 @@ class CourseModel(db.Model):
         back_populates="courses"
     )
 
-    # 题目和课程绑死
     problems = db.relationship("ProblemModel", back_populates="course")
 
 class GroupModel(db.Model):

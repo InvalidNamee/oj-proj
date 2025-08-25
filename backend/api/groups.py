@@ -117,8 +117,12 @@ def update_group(group_id):
 @bp.get("")
 @role_required()
 def get_groups():
-    """查询自己相关课程下的组"""
+    """查询自己相关课程下的组（支持组名筛选和分页）"""
     course_id = request.args.get("course_id", type=int)
+    keyword = request.args.get("keyword", type=str)  # 按组名筛选
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+
     user = UserModel.query.get(get_jwt_identity())
 
     if user.usertype == "teacher":
@@ -138,7 +142,14 @@ def get_groups():
             return jsonify({"error": "Permission denied"}), 403
         query = query.filter(GroupModel.course_id == course_id)
 
-    groups = query.all()
+    # 按组名筛选（模糊查询）
+    if keyword:
+        query = query.filter(GroupModel.group_name.ilike(f"%{keyword}%"))
+
+    # 分页
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    groups = pagination.items
+
     return jsonify({
         "groups": [
             {
@@ -152,7 +163,11 @@ def get_groups():
                 "student_cnt": len(g.students),
                 "problemset_cnt": len(g.problemsets)
             } for g in groups
-        ]
+        ],
+        "total": pagination.total,
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "pages": pagination.pages
     })
 
 
