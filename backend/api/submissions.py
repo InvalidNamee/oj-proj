@@ -46,6 +46,7 @@ def submit_legacy(problem, data: dict):
     """
     user_id = get_jwt_identity()
     user_answer = data.get("user_answer")
+    problem_set_id = data.get("problem_set_id")
 
     correct = problem.test_cases.get("answers", None)
     problem_type = problem.type
@@ -76,6 +77,7 @@ def submit_legacy(problem, data: dict):
     submission = SubmissionModel(
         user_id=user_id,
         problem_id=problem.id,
+        problem_set_id=problem_set_id,
         problem_type=problem_type,
         user_answer=user_answer,
         score=score,
