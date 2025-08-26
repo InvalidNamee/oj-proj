@@ -1,9 +1,11 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
 from models import CourseModel, ProblemModel, ProblemSetModel, SubmissionModel, UserModel
 from decorators import role_required, ROLE_TEACHER
 from modules.verify import can_access_problmeset
+import io
+from openpyxl import Workbook
 
 bp = Blueprint('problemsets', __name__, url_prefix='/api/problemsets')
 
@@ -113,7 +115,7 @@ def get_problemset(psid):
             user_id=user_id,
             problem_id=problem.id,
             problem_set_id=problem_set.id
-        ).order_by(SubmissionModel.time_stamp.desc()).first()
+        ).order_by(SubmissionModel.score.desc()).first()
         result['problems'].append({
             'id': problem.id,
             'title': problem.title,
@@ -223,3 +225,122 @@ def get_problemsets():
         'total': pagination.total,
         'total_pages': pagination.pages
     }), 200
+
+
+# todo 限制权限
+@bp.get('/<int:psid>/ranklist')
+# @role_required()
+def get_ranklist(psid):
+    """
+    获取题单排行榜
+    """
+    problemset = ProblemSetModel.query.get_or_404(psid)
+
+    group = problemset.group
+    if not group:
+        return jsonify({"error": "No group bound to this problemset"}), 400
+
+    problems = problemset.problems
+    problem_ids = [p.id for p in problems]
+
+    students = group.students  # 用户模型列表
+
+    result = []
+
+    for student in students:
+        student_row = {
+            "student_id": student.id,
+            "student_name": student.username,
+            "scores": []
+        }
+
+        for pid in problem_ids:
+            # 查该学生在此题上的最高分提交
+            best_sub = (
+                SubmissionModel.query
+                .filter_by(user_id=student.id, problem_id=pid)
+                .order_by(SubmissionModel.score.desc())
+                .first()
+            )
+
+            if best_sub:
+                student_row["scores"].append({
+                    "problem_id": pid,
+                    "score": best_sub.score,
+                    "submission_id": best_sub.id
+                })
+            else:
+                student_row["scores"].append({
+                    "problem_id": pid,
+                    "score": None,
+                    "submission_id": None
+                })
+
+        result.append(student_row)
+
+    return jsonify({
+        "success": True,
+        "problemset_id": psid,
+        "problems": [{"id": p.id, "name": p.title} for p in problems],
+        "ranklist": result
+    }), 200
+
+
+@bp.get('/<int:psid>/ranklist/download')
+# @role_required()
+def download_ranklist(psid):
+    """
+    下载题单排行榜 Excel
+    """
+    problemset = ProblemSetModel.query.get(psid)
+    if not problemset:
+        return jsonify({"error": "ProblemSet not found"}), 404
+
+    group = problemset.group
+    if not group:
+        return jsonify({"error": "No group bound to this problemset"}), 400
+
+    problems = problemset.problems
+    problem_ids = [p.id for p in problems]
+    students = group.students
+
+    # 创建 Excel 工作簿
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Ranklist"
+
+    # 表头
+    headers = ["学号", "姓名"] + [p.title for p in problems] + ["总分"]
+    ws.append(headers)
+
+    for student in students:
+        row = [student.uid, student.username]
+        total_score = 0
+
+        for pid in problem_ids:
+            best_sub = (
+                SubmissionModel.query
+                .filter_by(user_id=student.id, problem_id=pid)
+                .order_by(SubmissionModel.score.desc())
+                .first()
+            )
+            score = best_sub.score if best_sub else 0
+            row.append(score)
+            total_score += score
+
+        row.append(total_score)
+        ws.append(row)
+
+    # 写入内存
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    filename = f"ranklist_problemset_s{psid}.xlsx"
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )

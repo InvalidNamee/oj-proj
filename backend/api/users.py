@@ -3,7 +3,7 @@
 """
 from flask import Blueprint, request, jsonify
 from decorators import role_required, ROLE_ADMIN, ROLE_TEACHER
-from models import UserModel, CourseModel
+from models import UserModel, CourseModel, GroupModel
 from exts import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import get_jwt, get_jwt_identity
@@ -169,28 +169,17 @@ def update_user(user_id):
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    current_user = UserModel.query.get(get_jwt_identity())
-    user = UserModel.query.get(user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    # 权限判断
-    if current_user.usertype == 'teacher':
-        if user.usertype != 'student':
-            return jsonify({"error": "Teachers can only modify students"}), 403
-        shared_course_ids = {c.id for c in current_user.courses} & {c.id for c in user.courses}
-        if not shared_course_ids:
-            return jsonify({"error": "No shared course with this student"}), 403
-    elif current_user.usertype != 'admin':
-        return jsonify({"error": "Permission denied"}), 403
+    user = UserModel.query.get_or_404(user_id)
 
     # 可修改字段
     updatable_fields = ['username', 'school', 'profession', 'password']
     for field in updatable_fields:
         if field in data:
             if field == 'password':
-                user.password = generate_password_hash(data['password'])
-                user.token_version = str(uuid.uuid4())
+                if data['password']:
+                    print(data['password'])
+                    user.password = generate_password_hash(data['password'])
+                    user.token_version = str(uuid.uuid4())
             else:
                 setattr(user, field, data[field])
 
@@ -268,6 +257,15 @@ def modify_user_courses(user_id):
     # 被移除的课程 = 目标学生原课程中允许被操作的 - 新课程列表
     original_courses = {c.id: c for c in target_user.courses}
     removed_courses = [original_courses[cid].course_name for cid in allowed_course_ids if cid not in new_course_ids]
+
+    # 踢出分组
+    if removed_courses:
+        groups_to_remove = [
+            g for g in target_user.groups
+            if g.course_id in allowed_course_ids and g.course_id not in new_course_ids
+        ]
+        for g in groups_to_remove:
+            target_user.groups.remove(g)
 
     # 最终课程 = 剩下不能操作的 + 新课程列表
     remaining_courses = [c for c in target_user.courses if c.id not in allowed_course_ids] + new_courses
