@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import axios from 'axios'
-import MarkdownArea from '@/components/MarkdownArea.vue'
+// import MarkdownArea from '@/components/MarkdownArea.vue'
 import CodeMirrorEditor from "@/components/CodeMirrorEditor.vue"
 import LegacyAnswerArea from '@/components/LegacyAnswerArea.vue' // 传统题答案组件
 
@@ -83,7 +83,7 @@ const submitAnswer = async () => {
       <p><span class="font-semibold">内存限制：</span>{{ problem.limitations.maxMemory }} MB</p>
     </div>
 
-    <MarkdownArea :markdown="problem?.description || ''" />
+    <p>{{problem?.description}}</p>
 
     <div class="mt-8">
       <h3 class="text-lg font-bold mb-2">提交答案</h3>

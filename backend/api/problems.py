@@ -1,9 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from flask_jwt_extended import get_jwt_identity
 from exts import db
 from models import ProblemModel, ProblemSetModel, CourseModel, UserModel, SubmissionModel
 from decorators import role_required, ROLE_TEACHER
-from modules.testcases_processing import process_test_cases, remove_test_cases
+from modules.testcases_processing import process_test_cases, remove_test_cases, pack_test_cases
 from modules.verify import is_admin, is_related
 
 bp = Blueprint('problems', __name__, url_prefix='/api/problems')
@@ -74,6 +74,12 @@ def update_legacy(pid):
 
     db.session.commit()
     return jsonify({'success': True, 'id': problem.id}), 200
+
+
+# @bp.post('/generate')
+# @role_required(ROLE_TEACHER)
+# def generate():
+#
 
 
 @bp.post('/')
@@ -271,6 +277,25 @@ def get_problems():
         'page': pagination.page,
         'pages': pagination.pages
     }), 200
+
+
+@bp.get('/<int:pid>/test_cases/download')
+@role_required(ROLE_TEACHER)
+def download_test_cases(pid):
+    """
+    下载测试用例
+    """
+    try:
+        memory_file = pack_test_cases(pid)
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
+
+    return send_file(
+        memory_file,
+        as_attachment=True,
+        download_name=f"test_cases_{pid}.zip",
+        mimetype="application/zip"
+    )
 
 
 @bp.patch('/<int:pid>/test_cases/delete')

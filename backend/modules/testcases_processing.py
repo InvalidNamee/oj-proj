@@ -95,3 +95,36 @@ def remove_test_cases(pid: str, test_cases_dict: dict):
     # 删除空目录
     if os.path.isdir(base_dir) and not os.listdir(base_dir):
         os.rmdir(base_dir)
+
+
+def pack_test_cases(pid: str):
+    """
+    打包指定 pid 的测试用例目录为 zip 并返回文件对象
+    """
+    parent_root = os.path.dirname(os.getcwd())
+    base_dir = os.path.join(parent_root, 'data', str(pid))
+
+    if not os.path.exists(base_dir) or not os.path.isdir(base_dir):
+        raise FileNotFoundError("测试用例目录不存在")
+
+    # 收集所有文件（只看 base_dir 里的一层）
+    all_files = []
+    for root, dirs, files in os.walk(base_dir):
+        if root != base_dir:
+            dirs[:] = []  # 不进入子目录
+        for f in files:
+            all_files.append(os.path.join(root, f))
+
+    if not all_files:
+        raise FileNotFoundError("测试用例目录为空")
+
+    # 写 zip 到内存
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zf:
+        for file_path in all_files:
+            # 在 zip 内部的路径（保持在 pid/ 下）
+            arcname = os.path.relpath(file_path, parent_root)
+            zf.write(file_path, arcname)
+    memory_file.seek(0)
+
+    return memory_file

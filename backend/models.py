@@ -116,7 +116,7 @@ class ProblemModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
     type = db.Column(db.Enum('single', 'multiple', 'fill', 'subjective', 'coding'), nullable=False)
-    description = db.Column(db.Text)
+    description = db.Column(db.JSON)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
     test_cases = db.Column(db.JSON)
     limitations = db.Column(db.JSON)
