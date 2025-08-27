@@ -3,24 +3,14 @@
 import { ref, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
-import MarkdownIt from "markdown-it"
 import StatusBadge from "@/components/StatusBadge.vue"
+import MarkdownArea from "@/components/MarkdownArea.vue"
 import '@/assets/problemsets.css'
 
 const route = useRoute()
 const router = useRouter()
 const id = route.params.id
 const problemset = ref({})
-
-const md = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true
-})
-
-function renderMarkdown(text) {
-  return md.render(text || "")
-}
 
 async function fetchProblemset() {
   const res = await axios.get(`/api/problemsets/${id}`)
@@ -45,13 +35,11 @@ onMounted(fetchProblemset)
     <p class="problemset-detail-meta">
       所属课程：{{ problemset.course?.title }}
       <span>创建时间：{{ problemset.timestamp }}</span>
+      <span @click="router.push(`/problemsets/${id}/ranklist`)">排行榜</span>
     </p>
 
     <!-- 描述 markdown-it 渲染 -->
-    <div
-      v-html="renderMarkdown(problemset.description)"
-      class="problemset-detail-description prose max-w-none"
-    />
+    <MarkdownArea :model-value="problemset.description" />
 
     <!-- 题目表格 -->
     <div class="problemset-detail-table-container">

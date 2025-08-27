@@ -227,9 +227,8 @@ def get_problemsets():
     }), 200
 
 
-# todo 限制权限
 @bp.get('/<int:psid>/ranklist')
-# @role_required()
+@role_required()
 def get_ranklist(psid):
     """
     获取题单排行榜
@@ -250,6 +249,7 @@ def get_ranklist(psid):
     for student in students:
         student_row = {
             "student_id": student.id,
+            "student_uid": student.uid,
             "student_name": student.username,
             "scores": []
         }
@@ -275,19 +275,20 @@ def get_ranklist(psid):
                     "score": None,
                     "submission_id": None
                 })
-
+                
+        student_row["total_score"] = sum(score["score"] if score["score"] else 0 for score in student_row["scores"])
         result.append(student_row)
 
     return jsonify({
         "success": True,
         "problemset_id": psid,
         "problems": [{"id": p.id, "name": p.title} for p in problems],
-        "ranklist": result
+        "ranklist": sorted(result, key=lambda x: x["total_score"], reverse=True)
     }), 200
 
 
 @bp.get('/<int:psid>/ranklist/download')
-# @role_required()
+@role_required()
 def download_ranklist(psid):
     """
     下载题单排行榜 Excel
@@ -313,10 +314,10 @@ def download_ranklist(psid):
     headers = ["学号", "姓名"] + [p.title for p in problems] + ["总分"]
     ws.append(headers)
 
+    ranked_students = []
     for student in students:
-        row = [student.uid, student.username]
         total_score = 0
-
+        student_scores = []
         for pid in problem_ids:
             best_sub = (
                 SubmissionModel.query
@@ -325,10 +326,20 @@ def download_ranklist(psid):
                 .first()
             )
             score = best_sub.score if best_sub else 0
-            row.append(score)
+            student_scores.append(score)
             total_score += score
+        ranked_students.append({
+            "student": student,
+            "scores": student_scores,
+            "total_score": total_score
+        })
 
-        row.append(total_score)
+    # 按总分降序排序
+    ranked_students.sort(key=lambda x: x["total_score"], reverse=True)
+
+    # 写入 Excel
+    for entry in ranked_students:
+        row = [entry["student"].uid, entry["student"].username] + entry["scores"] + [entry["total_score"]]
         ws.append(row)
 
     # 写入内存
@@ -336,7 +347,7 @@ def download_ranklist(psid):
     wb.save(output)
     output.seek(0)
 
-    filename = f"ranklist_problemset_s{psid}.xlsx"
+    filename = f"ranklist_problemset_{psid}.xlsx"
 
     return send_file(
         output,

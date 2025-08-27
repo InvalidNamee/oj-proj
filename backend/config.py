@@ -61,6 +61,6 @@ Requirements:
 
 3. Test cases must cover basic, edge, and large inputs.
 4. Each individual test case input and output must be small (do not exceed a few lines of text).
-5. All inputs and outputs must be plain text (no binary or special encodings).
+5. All inputs and outputs must be plain text (no binary or special encodings, test_cases like " ".join(["-1000" for _ in range(1000)] are not allowed).
 6. The reference_solution must be correct and solve the problem.
 """

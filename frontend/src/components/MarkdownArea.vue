@@ -1,80 +1,41 @@
+<script setup>
+import { ref, watch } from 'vue'
+import MarkdownIt from 'markdown-it'
+import markdownItKatex from 'markdown-it-katex'
+import 'katex/dist/katex.min.css'
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: ''
+  },
+  renderHtml: {
+    type: Boolean,
+    default: false // 是否允许渲染 HTML
+  }
+})
+
+const renderedHtml = ref('')
+
+// 初始化 markdown-it
+const md = new MarkdownIt({
+  html: props.renderHtml,
+  linkify: true,
+  typographer: true
+}).use(markdownItKatex)
+
+// 监听 modelValue 更新
+watch(() => props.modelValue, (val) => {
+  renderedHtml.value = md.render(val || '')
+}, { immediate: true })
+</script>
+
 <template>
-  <div v-html="markdownContent" />
+  <div class="markdown-area" v-html="renderedHtml"></div>
 </template>
 
-<script>
-import { marked } from "marked";
-import katex from "katex";
-import "katex/dist/katex.min.css";
-
-import hljs from "highlight.js";
-import "highlight.js/styles/github-dark.css";
-
-export default {
-  name: "MarkdownArea",
-  props: {
-    markdown: {
-      type: String,
-      required: true,
-    },
-  },
-  computed: {
-    markdownContent() {
-      // 数学公式替换
-      let formula = this.markdown
-        .replace(/\$\$(.+?)\$\$/gs, (_, equation) => {
-          return (
-            "<katex-formula-ml>" +
-            katex.renderToString(equation, { throwOnError: false }) +
-            "</katex-formula-ml>"
-          );
-        })
-        .replace(/\$(.+?)\$/g, (_, equation) => {
-          return (
-            "<katex-formula>" +
-            katex.renderToString(equation, { throwOnError: false }) +
-            "</katex-formula>"
-          );
-        });
-
-      return marked(formula);
-    },
-  },
-};
-</script>
-
-<script setup>
-import '@/assets/components.css'
-import { marked } from "marked";
-import hljs from "highlight.js";
-
-const renderer = new marked.Renderer();
-
-// 代码高亮 + 复制按钮
-renderer.code = ({ text, lang }) => {
-  let highlighted;
-  if (lang && hljs.getLanguage(lang)) {
-    highlighted = hljs.highlight(text, { language: lang }).value;
-  } else {
-    highlighted = hljs.highlightAuto(text).value;
-    lang = "text";
-  }
-  // 加一个复制按钮
-  return `
-    <pre class="markdown-code-block">
-      <button class="markdown-copy-btn"
-        onclick="navigator.clipboard.writeText(\`${text.replace(/`/g, "\`")}\`)">
-        📋
-      </button>
-      <code class="hljs ${lang}">${highlighted}</code>
-    </pre>
-  `;
-};
-
-marked.setOptions({
-  renderer: renderer,
-  gfm: true,
-  breaks: true,
-  smartLists: true,
-});
-</script>
+<style scoped>
+.markdown-area {
+  overflow-wrap: break-word;
+}
+</style>

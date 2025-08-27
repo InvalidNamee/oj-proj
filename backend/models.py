@@ -103,6 +103,9 @@ class ProblemSetModel(db.Model):
     # 绑定分组
     group = db.relationship('GroupModel', back_populates='problemsets')
     group_id = db.Column(db.Integer, db.ForeignKey("group.id"))
+    # 起止时间
+    start_time = db.Column(db.DateTime, default=datetime.now)
+    end_time = db.Column(db.DateTime, default=datetime(2099, 1, 1, 0, 0, 0))
 
     # 绑定题目
     problems = db.relationship(

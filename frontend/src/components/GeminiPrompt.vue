@@ -9,7 +9,7 @@ const emits = defineEmits([
 ]);
 
 const prompt = ref("");
-const model = ref("gemini-2.5-flash");
+const model = ref("gemini-2.5-flash-lite");
 const generating = ref(false);
 
 const models = [
@@ -48,19 +48,85 @@ const generateProblem = async () => {
 </script>
 
 <template>
-  <div class="fixed top-24 right-4 w-80 p-4 bg-white border rounded shadow-lg z-50">
-    <h2 class="text-lg font-bold mb-2">使用 Gemini 生成题目</h2>
+  <div class="gemini-container">
+    <h2 class="gemini-title">使用 Gemini 生成题目</h2>
 
-    <textarea v-model="prompt" placeholder="输入提示词" rows="4"
-      class="w-full border rounded px-2 py-1 mb-2 focus:ring-2 focus:ring-blue-400 outline-none"></textarea>
+    <textarea
+      v-model="prompt"
+      placeholder="输入提示词"
+      rows="4"
+      class="gemini-textarea"
+    ></textarea>
 
-    <select v-model="model" class="w-full mb-2 border rounded px-2 py-1">
+    <select v-model="model" class="gemini-select">
       <option v-for="m in models" :key="m.value" :value="m.value">{{ m.label }}</option>
     </select>
 
-    <button @click="generateProblem" :disabled="generating" class="w-full py-2 rounded text-white"
-      :class="generating ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'">
+    <button
+      @click="generateProblem"
+      :disabled="generating"
+      :class="['gemini-button', generating ? 'disabled' : '']"
+    >
       {{ generating ? "生成中…" : "生成题目" }}
     </button>
   </div>
 </template>
+
+<style scoped>
+.gemini-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.gemini-title {
+  font-size: 1.5em;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.gemini-textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  font-size: 14px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.gemini-select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.gemini-button {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  color: white;
+  background-color: #7b5cf6; /* 紫色 */
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.gemini-button:hover {
+  background-color: #6d4ce2;
+}
+
+.gemini-button.disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+</style>
