@@ -61,7 +61,6 @@ def _run_in_isolate(
         args.insert(3, f"--stdin=data/{stdin_file}")
 
     proc = _run_cmd(args)
-    print(proc)
 
     # 宿主机上的对应文件路径
     stdout_path = os.path.join(workdir, stdout_file)
@@ -126,7 +125,7 @@ def judge_submission(
     language: str,
     source_code: str,
     limitations: dict,
-    test_cases: list | None = None,  # 新增参数，可传入 [{id, input, output}]
+    test_cases: list | None = None,
 ):
     time_limit = float(limitations.get("maxTime", DEFAULT_TIME_LIMIT))
     mem_mb = int(limitations.get("maxMemory", DEFAULT_MEM_LIMIT_MB))
@@ -201,7 +200,6 @@ def judge_submission(
         else:
             # 自测模式，直接在 box 创建输入文件
             input_path = os.path.join(box_dir, f"data/{name}.in")
-            print(input_path)
             with open(input_path, "w", encoding="utf-8") as f:
                 f.write(input_data_or_file)
             expected = expected_output_or_file

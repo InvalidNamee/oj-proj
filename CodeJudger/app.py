@@ -48,7 +48,7 @@ def create_submission(submission_id):
     # 初始状态
     sub_key = SUB_HASH_PREFIX + submission_id
     rds.hset(sub_key, mapping={
-        "status": "queued",
+        "status": "Pending",
         "result": "",
         "score": "0",
         "created_at": job["created_at"]
@@ -88,7 +88,7 @@ def self_test():
     sub_key = SUB_HASH_PREFIX + submission_id
 
     rds.hset(sub_key, mapping={
-        "status": "queued",
+        "status": "Pending",
         "result": "",
         "score": "0",
         "created_at": job["created_at"]

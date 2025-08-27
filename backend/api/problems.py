@@ -3,7 +3,7 @@ from flask_jwt_extended import get_jwt_identity
 from exts import db
 from models import ProblemModel, ProblemSetModel, CourseModel, UserModel, SubmissionModel
 from decorators import role_required, ROLE_TEACHER
-from modules.testcases_processing import process_test_cases, remove_test_cases, pack_test_cases
+from modules.testcases_processing import process_test_cases, remove_test_cases, pack_test_cases, process_json_data
 from modules.verify import is_admin, is_related
 
 bp = Blueprint('problems', __name__, url_prefix='/api/problems')
@@ -38,6 +38,7 @@ def create_legacy():
     db.session.add(problem)
     db.session.commit()
     return jsonify({'success': True, 'id': problem.id}), 201
+
 
 @bp.put('/<int:pid>/legacy')
 @role_required(ROLE_TEACHER)
@@ -76,12 +77,6 @@ def update_legacy(pid):
     return jsonify({'success': True, 'id': problem.id}), 200
 
 
-# @bp.post('/generate')
-# @role_required(ROLE_TEACHER)
-# def generate():
-#
-
-
 @bp.post('/')
 @role_required(ROLE_TEACHER)
 def create_problem():
@@ -111,7 +106,7 @@ def create_problem():
     db.session.add(problem)
     db.session.flush()
 
-    problem.test_cases = {
+    problem.test_cases = process_json_data(problem.id, data.get("test_cases")) if data.get("test_cases") else {
         "cases": [], "num_cases": 0
     }
     db.session.commit()

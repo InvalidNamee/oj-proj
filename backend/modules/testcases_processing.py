@@ -3,6 +3,46 @@ import io
 import zipfile
 import shutil
 
+import os
+
+def process_json_data(pid: str, test_cases: list):
+    """
+    pid: 测试数据标识
+    test_cases: [{id, input, output}, ...]
+    将每个测试用例写到 data/{pid}/{id}.in 和 {id}.out
+    返回 JSON 信息
+    """
+    parent_root = os.path.dirname(os.getcwd())
+    base_dir = os.path.join(parent_root, "data", str(pid))
+    os.makedirs(base_dir, exist_ok=True)
+
+    cases_info = []
+
+    for tc in test_cases:
+        tc_id = str(tc["id"])
+        input_path = os.path.join(base_dir, f"{tc_id}.in")
+        output_path = os.path.join(base_dir, f"{tc_id}.out")
+
+        # 写入 input
+        with open(input_path, "w", encoding="utf-8") as f_in:
+            f_in.write(tc.get("input", ""))
+
+        # 写入 output
+        with open(output_path, "w", encoding="utf-8") as f_out:
+            f_out.write(tc.get("output", ""))
+
+        cases_info.append({
+            "id": tc_id,
+            "in": os.path.relpath(input_path, parent_root),
+            "out": os.path.relpath(output_path, parent_root)
+        })
+
+    return {
+        "num_cases": len(cases_info),
+        "cases": cases_info
+    }
+
+
 def process_test_cases(pid: str, uploaded_file):
     """
     pid: 测试数据标识

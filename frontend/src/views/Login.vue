@@ -20,9 +20,7 @@ const handleLogin = async () => {
     });
     const { access_token, refresh_token, user } = response.data;
     userStore.setUser(user, access_token, refresh_token);
-    console.log('登录成功:', user);
-    router.push('/');
-    window.location.reload();
+    window.location.href = '/'; // 强制刷新页面
   } catch (error) {
     errorMsg.value = error.response?.data?.error || '登录失败';
   }

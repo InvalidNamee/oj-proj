@@ -23,6 +23,7 @@ def worker_loop(worker_idx: int):
         source_code = task["source_code"]
         language = task["language"]
         limitations = task.get("limitations", {})
+    
 
         print(f"[Worker {worker_idx}] Judging submission {submission_id}")
         
@@ -63,6 +64,7 @@ def worker_loop(worker_idx: int):
             }
         
         sub_key = SUB_HASH_PREFIX + submission_id
+        # print(json.dumps(result, indent=2))
         rds.hset(sub_key, mapping={
             "status": result.get("status", "error"),
             "score": str(result.get("score", 0)),
