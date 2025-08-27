@@ -12,11 +12,11 @@ const problemType = ref("coding");
 
 <template>
   <div class="add-problem-container">
-    <h2 class="text-2xl font-bold mb-6">新建题目</h2>
+    <h2>新建题目</h2>
     <!-- 题目类型选择器（只在外层） -->
-    <div class="mb-6">
-      <label class="mr-2">题目类型:</label>
-      <select v-model="problemType" class="border p-2 rounded border-gray-300">
+    <div>
+      <label>题目类型:</label>
+      <select v-model="problemType">
         <option value="coding">编程题</option>
         <option value="single">单选题</option>
         <option value="multiple">多选题</option>

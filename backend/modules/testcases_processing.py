@@ -3,6 +3,46 @@ import io
 import zipfile
 import shutil
 
+import os
+
+def process_json_data(pid: str, test_cases: list):
+    """
+    pid: 测试数据标识
+    test_cases: [{id, input, output}, ...]
+    将每个测试用例写到 data/{pid}/{id}.in 和 {id}.out
+    返回 JSON 信息
+    """
+    parent_root = os.path.dirname(os.getcwd())
+    base_dir = os.path.join(parent_root, "data", str(pid))
+    os.makedirs(base_dir, exist_ok=True)
+
+    cases_info = []
+
+    for tc in test_cases:
+        tc_id = str(tc["id"])
+        input_path = os.path.join(base_dir, f"{tc_id}.in")
+        output_path = os.path.join(base_dir, f"{tc_id}.out")
+
+        # 写入 input
+        with open(input_path, "w", encoding="utf-8") as f_in:
+            f_in.write(tc.get("input", ""))
+
+        # 写入 output
+        with open(output_path, "w", encoding="utf-8") as f_out:
+            f_out.write(tc.get("output", ""))
+
+        cases_info.append({
+            "id": tc_id,
+            "in": os.path.relpath(input_path, parent_root),
+            "out": os.path.relpath(output_path, parent_root)
+        })
+
+    return {
+        "num_cases": len(cases_info),
+        "cases": cases_info
+    }
+
+
 def process_test_cases(pid: str, uploaded_file):
     """
     pid: 测试数据标识
@@ -95,3 +135,36 @@ def remove_test_cases(pid: str, test_cases_dict: dict):
     # 删除空目录
     if os.path.isdir(base_dir) and not os.listdir(base_dir):
         os.rmdir(base_dir)
+
+
+def pack_test_cases(pid: str):
+    """
+    打包指定 pid 的测试用例目录为 zip 并返回文件对象
+    """
+    parent_root = os.path.dirname(os.getcwd())
+    base_dir = os.path.join(parent_root, 'data', str(pid))
+
+    if not os.path.exists(base_dir) or not os.path.isdir(base_dir):
+        raise FileNotFoundError("测试用例目录不存在")
+
+    # 收集所有文件（只看 base_dir 里的一层）
+    all_files = []
+    for root, dirs, files in os.walk(base_dir):
+        if root != base_dir:
+            dirs[:] = []  # 不进入子目录
+        for f in files:
+            all_files.append(os.path.join(root, f))
+
+    if not all_files:
+        raise FileNotFoundError("测试用例目录为空")
+
+    # 写 zip 到内存
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zf:
+        for file_path in all_files:
+            # 在 zip 内部的路径（保持在 pid/ 下）
+            arcname = os.path.relpath(file_path, parent_root)
+            zf.write(file_path, arcname)
+    memory_file.seek(0)
+
+    return memory_file

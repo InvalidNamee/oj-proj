@@ -2,18 +2,21 @@
 import axios from "axios"
 import { ref, onMounted, computed } from "vue"
 import { useRoute } from "vue-router"
-import CodeMirrorEditor from "@/components/CodeMirrorEditor.vue"
+import MonacoEditor from "@/components/MonacoEditor.vue"
 import StatusBadge from "@/components/StatusBadge.vue"
 import '@/assets/submissions.css'
 
 const route = useRoute()
 const submission = ref(null)
 
-const userAnswer = computed({
-  get: () => submission.value?.user_answer || "",
+const editorData = computed({
+  get: () => ({
+    code: submission.value?.user_answer || "",
+    language: submission.value?.language || "plaintext"
+  }),
   set: (val) => {
-    if (submission.value) submission.value.user_answer = val
-  },
+    if (submission.value) submission.value.user_answer = val.code
+  }
 })
 
 onMounted(async () => {
@@ -42,12 +45,11 @@ onMounted(async () => {
     <!-- 代码部分 -->
     <div v-if="submission?.problem_type === 'coding'" class="submission-detail-code-container">
       <b class="submission-detail-code-title">代码：</b>
-      <CodeMirrorEditor
+      <MonacoEditor
         v-if="submission"
-        v-model="userAnswer"
-        lang="cpp"
-        :editable="false"
-        :height="'auto'"
+        v-model="editorData"
+        readonly="true"
+        height="auto"
       />
     </div>
 

@@ -116,6 +116,12 @@ const router = createRouter({
           name: 'ProblemSetDetail',
           component: () => import('@/views/problemsets/Detail.vue'),
           meta: { title: '题单详情', requiresAuth: true }
+        },
+        {
+          path: ':id/ranklist',
+          name: 'RankList',
+          component: () => import('@/views/problemsets/RankList.vue'),
+          meta: { title: '排行榜', requiresAuth: true}
         }
       ]
     },

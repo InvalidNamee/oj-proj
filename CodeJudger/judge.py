@@ -5,7 +5,7 @@ import subprocess
 from glob import glob
 from datetime import datetime
 from typing import List, Tuple
-from config import DATA_DIR, DEFAULT_TIME_LIMIT, DEFAULT_MEM_LIMIT_MB, DEFAULT_OUTPUT_LIMIT_KB
+from config import DATA_DIR, DEFAULT_TIME_LIMIT, DEFAULT_MEM_LIMIT_MB, DEFAULT_OUTPUT_LIMIT_KB, MAX_DIFF_LEN
 
 class JudgeError(Exception):
     pass
@@ -56,8 +56,9 @@ def _run_in_isolate(
     # stdin/stdout/stderr 使用沙箱路径
     if datadir:
         args.insert(3, f"--dir=/data={datadir}",)
-    if stdin_file:
         args.insert(3, f"--stdin=/data/{stdin_file}")
+    elif stdin_file:
+        args.insert(3, f"--stdin=data/{stdin_file}")
 
     proc = _run_cmd(args)
 
@@ -99,26 +100,58 @@ def _load_testcases(problem_id: int):
 def _normalize(s: str) -> str:
     return "\n".join([line.rstrip() for line in s.rstrip().splitlines()])
 
+def _get_diff(expected: str, actual: str) -> str:
+    """生成简易 diff（只取前 MAX_DIFF_LEN 字符）"""
+    expected_lines = expected.splitlines()
+    actual_lines = actual.splitlines()
+    diffs = []
+    for i, (e, a) in enumerate(zip(expected_lines, actual_lines)):
+        if e != a:
+            diffs.append(f"Line {i+1}:\n  Expected: {e}\n  Actual:   {a}")
+    # 多余行
+    for i in range(len(actual_lines), len(expected_lines)):
+        diffs.append(f"Line {i+1}:\n  Expected: {expected_lines[i]}\n  Actual:   <no line>")
+    for i in range(len(expected_lines), len(actual_lines)):
+        diffs.append(f"Line {i+1}:\n  Expected: <no line>\n  Actual:   {actual_lines[i]}")
+    diff_text = "\n".join(diffs)
+    if len(diff_text) > MAX_DIFF_LEN:
+        diff_text = diff_text[:MAX_DIFF_LEN] + "\n...[truncated]..."
+    return diff_text
+
+
 def judge_submission(
     box_id: int,
     problem_id: int,
     language: str,
     source_code: str,
-    limitations: dict
+    limitations: dict,
+    test_cases: list | None = None,
 ):
     time_limit = float(limitations.get("maxTime", DEFAULT_TIME_LIMIT))
     mem_mb = int(limitations.get("maxMemory", DEFAULT_MEM_LIMIT_MB))
 
-    tests, datadir = _load_testcases(problem_id)
-    if not tests:
-        return {"status": "IE", "score": 0, "cases": [], "extra": "No testcases"}
+    # 如果没有传入 test_cases，就按原来的读取文件
+    if test_cases is None:
+        tests, datadir = _load_testcases(problem_id)
+        if not tests:
+            return {"status": "IE", "score": 0, "cases": [], "extra": "No testcases"}
+        use_files = True
+    else:
+        # 将 test_cases 转成 [(name, input_file, expected_output_file)] 的形式，但这里不读文件
+        tests = []
+        for i, tc in enumerate(test_cases):
+            name = tc.get("id", f"case_{i}")
+            tests.append((name, tc.get("input", ""), tc.get("output", "")))
+        use_files = False
+        datadir = ""  # 不需要绑定目录
 
-    box_dir = f"/var/lib/isolate/{box_id}/box"  # box 的根目录
+    box_dir = f"/var/lib/isolate/{box_id}/box"
 
-    _cleanup_box(box_id)  # 清理 box，保证干净
+    _cleanup_box(box_id)
     _ensure_box(box_id)
+    os.makedirs(f"{box_dir}/data", exist_ok=True)
 
-    # 写入源文件到 box
+    # 写入源文件
     if language == "python":
         src_path = os.path.join(box_dir, "main.py")
         with open(src_path, "w") as f:
@@ -130,7 +163,7 @@ def judge_submission(
             f.write(source_code)
         code, meta, out, err = _run_in_isolate(
             box_id,
-            ["/usr/bin/g++", "-o2", "-std=c++17", "-o", "main", "main.cpp"],
+            ["/usr/bin/g++", "-O2", "-std=c++17", "-o", "main", "main.cpp"],
             workdir=box_dir,
             time_limit=10.0,
             mem_limit_mb=1024
@@ -148,22 +181,40 @@ def judge_submission(
     max_time = 0.0
     max_memory = 0.0
 
-    for name, in_file, out_path in tests:
-        code, meta, out, err = _run_in_isolate(
-            box_id,
-            run_cmd=run_cmd,
-            workdir=box_dir,
-            datadir=datadir,
-            time_limit=time_limit,
-            mem_limit_mb=mem_mb,
-            stdin_file=in_file,  # 相对路径
-            stdout_file=f"{name}.stdout",
-            stderr_file=f"{name}.stderr",
-        )
+    for name, input_data_or_file, expected_output_or_file in tests:
+        if use_files:
+            # 正常提交模式，绑定文件
+            code, meta, out, err = _run_in_isolate(
+                box_id,
+                run_cmd=run_cmd,
+                workdir=box_dir,
+                datadir=datadir,
+                time_limit=time_limit,
+                mem_limit_mb=mem_mb,
+                stdin_file=input_data_or_file,
+                stdout_file=f"{name}.stdout",
+                stderr_file=f"{name}.stderr",
+            )
+            with open(expected_output_or_file, "r", encoding="utf-8", errors="ignore") as fexp:
+                expected = fexp.read()
+        else:
+            # 自测模式，直接在 box 创建输入文件
+            input_path = os.path.join(box_dir, f"data/{name}.in")
+            with open(input_path, "w", encoding="utf-8") as f:
+                f.write(input_data_or_file)
+            expected = expected_output_or_file
+            code, meta, out, err = _run_in_isolate(
+                box_id,
+                run_cmd=run_cmd,
+                workdir=box_dir,
+                time_limit=time_limit,
+                mem_limit_mb=mem_mb,
+                stdin_file=f"{name}.in",
+                stdout_file=f"{name}.stdout",
+                stderr_file=f"{name}.stderr",
+            )
 
-        with open(out_path, "r", encoding="utf-8", errors="ignore") as fexp:
-            expected = fexp.read()
-
+        # 解析 meta
         time_used = None
         peek_memory = None
         try:
@@ -175,6 +226,7 @@ def judge_submission(
         except Exception:
             status_meta = ""
 
+        # 判定状态
         if status_meta in ("TO", "TL"):
             case_status = "TLE"
         elif status_meta in ("RE", "SG"):
@@ -192,19 +244,20 @@ def judge_submission(
 
         if case_status == "AC":
             passed += 1
-
         max_time = max(max_time, time_used)
         max_memory = max(max_memory, peek_memory)
-        
+        diff_text = _get_diff(expected, out) if case_status == "WA" else ""
+
         results.append({
             "name": name,
             "status": case_status,
             "time": time_used,
             "memory": peek_memory,
-            "message": err.strip() if err else ""
+            "message": err.strip() if err else "",
+            "diff": diff_text
         })
 
-    status_list = [result.get("status") for result in results]
+    status_list = [r["status"] for r in results]
     overall = "WA"
     if passed == len(status_list):
         overall = "AC"
@@ -218,10 +271,10 @@ def judge_submission(
         overall = "WA"
     elif "TLE" in status_list:
         overall = "TLE"
-        
-    score = round(100.0 * passed / max(1, len(results)), 2)
 
+    score = round(100.0 * passed / max(1, len(results)), 2)
     _cleanup_box(box_id)
+
     return {
         "status": overall,
         "score": score,

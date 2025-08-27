@@ -1,5 +1,7 @@
-import os, time, hmac, base64, hashlib, threading, requests
-from flask import Blueprint, request, jsonify
+import time, hmac, base64, hashlib, threading, requests
+import uuid
+
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
 from models import ProblemModel, SubmissionModel
@@ -7,14 +9,10 @@ from decorators import role_required
 
 bp = Blueprint('submissions', __name__, url_prefix='/api/submissions')
 
-JUDGE_SERVER = "http://127.0.0.1:8000"  # 判题机地址
-PUBLIC_BASE_URL = "http://127.0.0.1:5000/api"
-CALLBACK_SECRET = os.getenv("JUDGE_CALLBACK_SECRET", "change-me")
-
 def _make_callback_token(submission_id: int, ttl_sec: int = 3600) -> str:
     ts = str(int(time.time()))
     payload = f"{submission_id}.{ts}"
-    sig = hmac.new(CALLBACK_SECRET.encode(), payload.encode(), hashlib.sha256).digest()
+    sig = hmac.new(current_app.config["CALLBACK_SECRET"].encode(), payload.encode(), hashlib.sha256).digest()
     return f"{payload}.{base64.urlsafe_b64encode(sig).decode()}"
 
 def _verify_callback_token(token: str, submission_id: int, max_age_sec: int = 3600) -> bool:
@@ -24,7 +22,7 @@ def _verify_callback_token(token: str, submission_id: int, max_age_sec: int = 36
             return False
         if int(time.time()) - int(ts) > max_age_sec:
             return False
-        expected = hmac.new(CALLBACK_SECRET.encode(), f"{sid}.{ts}".encode(), hashlib.sha256).digest()
+        expected = hmac.new(current_app.config["CALLBACK_SECRET"].encode(), f"{sid}.{ts}".encode(), hashlib.sha256).digest()
         return hmac.compare_digest(expected, base64.urlsafe_b64decode(sig_b64.encode()))
     except Exception:
         return False
@@ -46,6 +44,7 @@ def submit_legacy(problem, data: dict):
     """
     user_id = get_jwt_identity()
     user_answer = data.get("user_answer")
+    problem_set_id = data.get("problem_set_id")
 
     correct = problem.test_cases.get("answers", None)
     problem_type = problem.type
@@ -76,6 +75,7 @@ def submit_legacy(problem, data: dict):
     submission = SubmissionModel(
         user_id=user_id,
         problem_id=problem.id,
+        problem_set_id=problem_set_id,
         problem_type=problem_type,
         user_answer=user_answer,
         score=score,
@@ -125,7 +125,7 @@ def submit_coding(problem, data: dict):
     db.session.commit()
 
     # 2) 异步通知判题机
-    callback_url = f"{PUBLIC_BASE_URL}/submissions/{submission.id}"
+    callback_url = f"{current_app.config['PUBLIC_BASE_URL']}/submissions/{submission.id}"
     callback_token = _make_callback_token(submission.id)
 
     judge_payload = {
@@ -136,7 +136,7 @@ def submit_coding(problem, data: dict):
         "callback_url": callback_url,
         "callback_token": callback_token
     }
-    _fire_and_forget_enqueue(f"{JUDGE_SERVER}/judger/{submission.id}", judge_payload, timeout_sec=3.0)
+    _fire_and_forget_enqueue(f"{current_app.config['JUDGE_SERVER']}/judger/{submission.id}", judge_payload, timeout_sec=3.0)
 
     # 立刻返回，前端可以开始轮询 /coding/submissions/<id>
     return jsonify({
@@ -144,6 +144,48 @@ def submit_coding(problem, data: dict):
         "status": submission.status,
         "score": submission.score,
     }), 201
+
+
+@bp.post('/self_check')
+@role_required()
+def self_check():
+    data = request.get_json()
+    language = data.get('language')
+    source_code = data.get('source_code')
+    test_cases = data.get('test_cases')
+    limitations = data.get('limitations', {})
+
+    if not language or not source_code or not test_cases:
+        return jsonify({"error": "missing language / source_code / test_cases"}), 400
+
+    submission_id = None
+
+    # 转发给判题机
+    try:
+        resp = requests.post(
+            f"{current_app.config['JUDGE_SERVER']}/judger/self_test",
+            json={
+                "language": language,
+                "source_code": source_code,
+                "test_cases": test_cases,
+                "limitations": limitations,
+                "callback_url": None,  # 这里不需要回调
+            },
+            timeout=5
+        )
+        if resp.status_code != 202:
+            return jsonify({"error": "judger rejected request"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"submission_id": resp.json().get("submission_id")}), 202
+
+
+@bp.get('/self_check/<submission_id>')
+@role_required()
+def get_self_check(submission_id):
+    resp = requests.get(f"{current_app.config['JUDGE_SERVER']}/judger/self_test/{submission_id}")
+    return jsonify(resp.json()), resp.status_code
 
 @bp.post("/<int:problem_id>")
 @role_required()

@@ -103,6 +103,9 @@ class ProblemSetModel(db.Model):
     # 绑定分组
     group = db.relationship('GroupModel', back_populates='problemsets')
     group_id = db.Column(db.Integer, db.ForeignKey("group.id"))
+    # 起止时间
+    start_time = db.Column(db.DateTime, default=datetime.now)
+    end_time = db.Column(db.DateTime, default=datetime(2099, 1, 1, 0, 0, 0))
 
     # 绑定题目
     problems = db.relationship(
@@ -116,7 +119,7 @@ class ProblemModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
     type = db.Column(db.Enum('single', 'multiple', 'fill', 'subjective', 'coding'), nullable=False)
-    description = db.Column(db.Text)
+    description = db.Column(db.JSON)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now, server_default=func.now())
     test_cases = db.Column(db.JSON)
     limitations = db.Column(db.JSON)

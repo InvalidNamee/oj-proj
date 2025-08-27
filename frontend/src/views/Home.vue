@@ -1,8 +1,21 @@
 <script setup>
+import { ref } from 'vue'
+
+const timeRange = ref([]) // [开始时间, 结束时间]
 </script>
+
 <template>
-  <div class="max-w-4xl mx-auto mt-8 p-6 rounded-xl bg-white shadow">
-    <h2 class="text-2xl font-bold mb-4">首页</h2>
-    <p>欢迎使用在线评测系统！</p>
-  </div>
+  <el-form>
+    <el-form-item label="题单时间">
+      <el-date-picker
+        v-model="timeRange"
+        type="datetimerange"
+        start-placeholder="开始时间"
+        end-placeholder="结束时间"
+        format="YYYY-MM-DD HH:mm:ss"
+        value-format="YYYY-MM-DD HH:mm:ss"
+      >
+      </el-date-picker>
+    </el-form-item>
+  </el-form>
 </template>

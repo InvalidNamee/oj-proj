@@ -1,13 +1,13 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { basicSetup } from 'codemirror'
-import VueCodemirror from 'vue-codemirror'
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
 import axios from 'axios'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { useUserStore } from './stores/user.js'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
 axios.defaults.baseURL = 'http://121.249.151.214:5000'
 // axios.defaults.baseURL = 'http://127.0.0.1:5000'
@@ -18,17 +18,7 @@ const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
 app.use(router)
-app.use(VueCodemirror, {
-  // optional default global options
-  autofocus: true,
-  disabled: false,
-  indentWithTab: true,
-  tabSize: 4,
-  placeholder: 'Code goes here...',
-  extensions: [basicSetup]
-  // ...
-})
-
+app.use(ElementPlus)
 app.mount('#app')
 
 const userStore = useUserStore()
