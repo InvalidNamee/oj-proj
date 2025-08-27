@@ -1,0 +1,173 @@
+/* CSS styles for submissions views */
+
+/* Submissions list styles */
+.submissions-container {
+  padding: 1.5rem; /* p-6 */
+}
+
+.submissions-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.submissions-filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem; /* gap-3 */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.submissions-filter-input {
+  border: 1px solid #6b7280; /* border border-gray-500 */
+  padding: 0.25rem 0.5rem; /* px-2 py-1 */
+  border-radius: 0.25rem; /* rounded */
+  width: 6rem; /* w-24 */
+}
+
+.submissions-search-button {
+  padding: 0.25rem 0.5rem; /* px-2 py-1 */
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  border-radius: 0.25rem; /* rounded */
+  border: none;
+}
+
+.submissions-table-container {
+  background-color: #fff; /* bg-white */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+  border-radius: 0.5rem; /* rounded-lg */
+  overflow: hidden;
+  width: 100%; /* w-full */
+}
+
+.submissions-table {
+  width: 100%; /* w-full */
+  text-align: left;
+  font-size: 0.875rem; /* text-sm */
+}
+
+.submissions-table-header {
+  background-color: #f9fafb; /* bg-gray-50 */
+  color: #374151; /* text-gray-700 */
+}
+
+.submissions-table-header-cell {
+  padding: 0.75rem; /* p-3 */
+}
+
+.submissions-table-row {
+  border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+}
+
+.submissions-table-row:hover {
+  background-color: #f9fafb; /* hover:bg-gray-50 */
+}
+
+.submissions-table-cell {
+  padding: 0.75rem; /* p-3 */
+}
+
+.submissions-link {
+  color: #2563eb; /* text-blue-600 */
+  text-decoration: underline; /* hover:underline */
+  cursor: pointer;
+}
+
+.submissions-link:hover {
+  text-decoration: underline;
+}
+
+.submissions-disabled-link {
+  cursor: not-allowed;
+  color: #9ca3af; /* text-gray-400 */
+}
+
+.submissions-pagination {
+  margin-top: 1rem; /* mt-4 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem; /* gap-4 */
+}
+
+.submissions-pagination-button {
+  padding: 0.25rem 0.75rem; /* px-3 py-1 */
+  border: 1px solid;
+  border-radius: 0.25rem; /* rounded */
+}
+
+.submissions-pagination-button:disabled {
+  opacity: 0.5; /* disabled:opacity-50 */
+}
+
+/* Submission detail styles */
+.submission-detail-container {
+  max-width: 48rem; /* max-w-2xl */
+  margin-left: auto; /* mx-auto */
+  margin-right: auto; /* mx-auto */
+  margin-top: 2.5rem; /* mt-10 */
+  padding: 1.5rem; /* p-6 */
+  background-color: #ffffff; /* bg-white */
+  border-radius: 0.5rem; /* rounded */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.submission-detail-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.submission-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* grid-cols-2 */
+  gap: 1.5rem 1.5rem; /* gap-x-6 gap-y-2 */
+  margin-bottom: 1rem; /* mb-4 */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.submission-detail-info-item {
+  /* Individual grid items */
+}
+
+.submission-detail-code-container {
+  margin-bottom: 1.5rem; /* mb-6 */
+}
+
+.submission-detail-code-title {
+  font-weight: 700; /* font-bold */
+}
+
+.submission-detail-tests-container {
+  margin-top: 0.5rem; /* mt-2 */
+  overflow-x: auto;
+}
+
+.submission-detail-tests-table {
+  width: 100%; /* w-full */
+  text-align: center; /* text-center */
+  border-collapse: collapse; /* border-collapse */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.submission-detail-tests-thead {
+  background-color: #f9fafb; /* bg-gray-50 */
+  color: #374151; /* text-gray-700 */
+}
+
+.submission-detail-tests-th,
+.submission-detail-tests-td {
+  padding: 0.75rem; /* px-3 py-2 */
+  border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+}
+
+.submission-detail-tests-tbody-tr {
+  transition: background-color 0.2s ease; /* transition */
+  border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+}
+
+.submission-detail-tests-tbody-tr:hover {
+  background-color: #f9fafb; /* hover:bg-gray-50 */
+}
+

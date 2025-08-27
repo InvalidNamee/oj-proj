@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import axios from 'axios';
+import '@/assets/users.css';
 
 const route = useRoute();
 const router = useRouter();
@@ -74,26 +75,26 @@ const goToCourse = (courseId) => {
 </script>
 
 <template>
-  <div class="max-w-xl mx-auto mt-8 p-6 bg-white shadow rounded">
-    <h2 class="text-2xl font-bold mb-4 text-gray-800">用户信息</h2>
+  <div class="user-detail-container">
+    <h2 class="user-detail-title">用户信息</h2>
 
-    <div class="space-y-2 text-gray-700">
-      <p><span class="font-semibold">ID:</span> {{ userData?.id }}</p>
-      <p><span class="font-semibold">UID:</span> {{ userData?.uid }}</p>
-      <p><span class="font-semibold">用户名:</span> {{ userData?.username }}</p>
-      <p><span class="font-semibold">身份:</span> {{ identity }}</p>
-      <p><span class="font-semibold">注册时间:</span> {{ userData?.timestamp }}</p>
-      <p v-if="userData?.school"><span class="font-semibold">学校:</span> {{ userData?.school }}</p>
-      <p v-if="userData?.profession"><span class="font-semibold">专业:</span> {{ userData?.profession }}</p>
+    <div class="user-detail-info">
+      <p><span>ID:</span> {{ userData?.id }}</p>
+      <p><span>UID:</span> {{ userData?.uid }}</p>
+      <p><span>用户名:</span> {{ userData?.username }}</p>
+      <p><span>身份:</span> {{ identity }}</p>
+      <p><span>注册时间:</span> {{ userData?.timestamp }}</p>
+      <p v-if="userData?.school"><span>学校:</span> {{ userData?.school }}</p>
+      <p v-if="userData?.profession"><span>专业:</span> {{ userData?.profession }}</p>
     </div>
 
     <!-- 新增课程展示区 -->
     <div v-if="courses.length" class="mt-6">
-      <h3 class="text-lg font-semibold mb-2 text-gray-800">{{ canChangePassword ? "我的课程" : "ta 的课程" }}</h3>
-      <ul class="space-y-1">
+      <h3 class="user-detail-course-title">{{ canChangePassword ? "我的课程" : "ta 的课程" }}</h3>
+      <ul class="space-y-1" style="list-style-type: none; padding-left: 0;">
         <li v-for="course in courses" :key="course.id">
           <button
-            class="text-blue-600 hover:underline"
+            class="user-detail-course-button"
             @click="goToCourse(course.id)"
           >
             {{ course.name }}
@@ -103,37 +104,37 @@ const goToCourse = (courseId) => {
     </div>
 
     <!-- 修改密码 -->
-    <div v-if="canChangePassword" class="mt-6 border-t pt-4">
-      <h3 class="text-xl font-semibold mb-3 text-gray-800">修改密码</h3>
+    <div v-if="canChangePassword" class="user-detail-password-section">
+      <h3 class="user-detail-password-title">修改密码</h3>
 
       <div class="space-y-3">
         <input
           v-model="currentPassword"
           type="password"
           placeholder="当前密码"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          class="user-detail-input"
         />
         <input
           v-model="newPassword"
           type="password"
           placeholder="新密码"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          class="user-detail-input"
         />
         <input
           v-model="confirmPassword"
           type="password"
           placeholder="确认新密码"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          class="user-detail-input"
         />
         <button
           @click="changePassword"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          class="user-detail-button"
         >
           修改密码
         </button>
 
-        <p v-if="changeError" class="text-red-500">{{ changeError }}</p>
-        <p v-if="changeSuccess" class="text-green-600">{{ changeSuccess }}</p>
+        <p v-if="changeError" class="user-detail-error">{{ changeError }}</p>
+        <p v-if="changeSuccess" class="user-detail-success">{{ changeSuccess }}</p>
       </div>
     </div>
   </div>

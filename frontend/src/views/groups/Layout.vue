@@ -3,6 +3,7 @@ import { RouterView } from 'vue-router';
 import Sidebar from '@/components/Sidebar.vue';
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/user.js';
+import '@/assets/groups.css';
 
 const userStore = useUserStore();
 const views = ref([
@@ -13,17 +14,17 @@ const views = ref([
 
 <template>
   
-  <div class="flex flex-1 relative">
+  <div class="group-layout">
     <!-- 固定 Sidebar -->
     <Sidebar
       v-if="userStore.usertype !== 'student'"
       :views="views"
-      class="fixed left-0 top-0 h-full w-60"
+      class="sidebar-container"
     />
 
     <main
-      class="flex-1 p-6 overflow-auto"
-      :class="userStore.usertype !== 'student' ? 'ml-60' : ''"
+      class="group-main"
+      :class="userStore.usertype !== 'student' ? 'group-main-with-sidebar' : ''"
     >
       <RouterView />
     </main>

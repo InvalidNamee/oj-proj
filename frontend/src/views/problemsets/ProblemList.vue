@@ -93,35 +93,35 @@ onMounted(fetchProblems);
 </script>
 
 <template>
-  <div class="p-6">
-    <h2 class="text-xl font-bold mb-4">题目列表</h2>
+  <div class="problem-list-container">
+    <h2 class="problem-list-title">题目列表</h2>
     <!-- 顶部工具栏 -->
-    <div class="flex justify-between items-center mb-4">
+    <div class="problem-list-toolbar">
       <!-- 左侧搜索框 -->
-      <div class="flex items-center space-x-2">
+      <div class="problem-list-search-container">
         <input v-model="keyword" @keyup.enter="page = 1; fetchProblems()" placeholder="搜索题目标题"
-          class="border border-gray-500 rounded px-3 py-1" />
-        <button @click="page = 1; fetchProblems()" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
+          class="problem-list-search-input" />
+        <button @click="page = 1; fetchProblems()" class="problem-list-button problem-list-primary-button">
           搜索
         </button>
       </div>
 
       <!-- 右侧操作按钮 -->
-      <div class="flex items-center space-x-2">
+      <div class="problem-list-search-container">
         <button @click="$router.push('/problems/add')"
-          class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
+          class="problem-list-button problem-list-primary-button">
           新建题目
         </button>
         <button v-if="!selectMode" @click="selectMode = true"
-          class="px-4 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">
+          class="problem-list-button problem-list-secondary-button">
           选择
         </button>
-        <div v-else class="flex items-center space-x-2">
-          <button @click="deleteBatch" class="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer">
+        <div v-else class="problem-list-search-container">
+          <button @click="deleteBatch" class="problem-list-button problem-list-danger-button">
             批量删除
           </button>
           <button @click="selectMode = false; selected = []"
-            class="px-4 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 cursor-pointer">
+            class="problem-list-button problem-list-secondary-button">
             取消
           </button>
         </div>
@@ -130,9 +130,9 @@ onMounted(fetchProblems);
 
 
     <!-- 表格 -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50 text-gray-700">
+    <div class="problem-list-table-container">
+      <table class="problem-list-table">
+        <thead>
           <tr>
             <th class="p-3" v-if="selectMode"></th>
             <th class="p-3">ID</th>
@@ -145,20 +145,20 @@ onMounted(fetchProblems);
         </thead>
         <tbody>
           <tr v-for="p in problems" :key="p.id" @click="toggleSelect(p.id)"
-            :class="['hover:bg-gray-50 transition', selectMode && selected.includes(p.id) ? 'bg-blue-100' : '']">
+            :class="[selectMode && selected.includes(p.id) ? 'problem-list-selected-row' : '']">
             <td class="p-3" v-if="selectMode">
-              <input type="checkbox" :value="p.id" v-model="selected" @click.stop />
+              <input type="checkbox" :value="p.id" v-model="selected" @click.stop class="problem-list-checkbox" />
             </td>
             <td class="p-3">{{ p.id }}</td>
-            <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click.stop="goDetail(p.id)">{{ p.title }}</td>
+            <td class="p-3 problem-list-problem-title" @click.stop="goDetail(p.id)">{{ p.title }}</td>
             <td class="p-3">{{ p.course.name }}</td>
-            <td v-if="p.type === 'coding'" class="p-3 cursor-pointer text-blue-600 hover:underline"
+            <td v-if="p.type === 'coding'" class="p-3 problem-list-problem-title"
               @click.stop="goEditTestCases(p.id)">{{ p.num_test_cases }}</td>
             <td v-else class="p-3">-</td>
             <td class="p-3">{{ p.timestamp }}</td>
-            <td class="p-3 space-x-3">
-              <button class="text-blue-500 hover:underline" @click.stop="goEdit(p.id)">编辑</button>
-              <button class="text-red-500 hover:underline" @click.stop="deleteOne(p.id)">删除</button>
+            <td class="p-3 problem-list-search-container">
+              <button class="problem-list-action-button" @click.stop="goEdit(p.id)">编辑</button>
+              <button class="problem-list-delete-button" @click.stop="deleteOne(p.id)">删除</button>
             </td>
           </tr>
         </tbody>
@@ -166,12 +166,12 @@ onMounted(fetchProblems);
     </div>
 
     <!-- 分页器 -->
-    <div class="flex justify-center items-center mt-4 space-x-2">
+    <div class="problem-list-pagination">
       <button @click="changePage(page - 1)" :disabled="page === 1"
-        class="px-3 py-1 border rounded disabled:opacity-50">上一页</button>
-      <span>第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
+        class="problem-list-pagination-button">上一页</button>
+      <span class="problem-list-pagination-info">第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
       <button @click="changePage(page + 1)" :disabled="page === pages"
-        class="px-3 py-1 border rounded disabled:opacity-50">下一页</button>
+        class="problem-list-pagination-button">下一页</button>
     </div>
   </div>
 </template>

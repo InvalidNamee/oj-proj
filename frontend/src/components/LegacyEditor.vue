@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/components.css'
 import { ref, watch } from "vue";
 
 const props = defineProps({
@@ -59,30 +60,30 @@ watch([options, answers], () => {
 <template>
   <div>
     <!-- 单选/多选 -->
-    <div v-if="problemType==='single' || problemType==='multiple'" class="space-y-2">
-      <div class="flex justify-between items-center">
-        <span class="font-medium">选项</span>
-        <button @click="addOption" class="bg-gray-200 px-2 py-1 rounded">添加选项</button>
+    <div v-if="problemType==='single' || problemType==='multiple'" class="legacy-editor-container">
+      <div class="legacy-editor-header">
+        <span class="legacy-editor-title">选项</span>
+        <button @click="addOption" class="legacy-editor-button">添加选项</button>
       </div>
 
-      <div v-for="opt in options" :key="opt.id" class="flex items-center space-x-2">
+      <div v-for="opt in options" :key="opt.id" class="legacy-editor-option-item">
         <input v-if="problemType==='single'" type="radio" :value="opt.id" v-model="answers" />
         <input v-if="problemType==='multiple'" type="checkbox" :value="opt.id" v-model="answers" />
-        <input v-model="opt.content" placeholder="选项内容" class="flex-1 border border-gray-300 rounded px-2 py-1" />
-        <button @click="removeOption(opt.id)" class="text-red-500">删除</button>
+        <input v-model="opt.content" placeholder="选项内容" class="legacy-editor-option-input" />
+        <button @click="removeOption(opt.id)" class="legacy-editor-delete-button">删除</button>
       </div>
     </div>
 
     <!-- 填空 -->
-    <div v-if="problemType==='fill'" class="space-y-2">
-      <div class="flex justify-between items-center">
-        <span class="font-medium">填空答案</span>
-        <button @click="addAnswer" class="bg-gray-200 px-2 py-1 rounded">添加答案</button>
+    <div v-if="problemType==='fill'" class="legacy-editor-container">
+      <div class="legacy-editor-header">
+        <span class="legacy-editor-title">填空答案</span>
+        <button @click="addAnswer" class="legacy-editor-button">添加答案</button>
       </div>
 
-      <div v-for="(ans, idx) in answers" :key="idx" class="flex items-center space-x-2">
-        <input v-model="answers[idx]" placeholder="答案" class="flex-1 border border-gray-300 rounded px-2 py-1" />
-        <button @click="removeAnswer(idx)" class="text-red-500">删除</button>
+      <div v-for="(ans, idx) in answers" :key="idx" class="legacy-editor-answer-item">
+        <input v-model="answers[idx]" placeholder="答案" class="legacy-editor-answer-input" />
+        <button @click="removeAnswer(idx)" class="legacy-editor-delete-button">删除</button>
       </div>
     </div>
   </div>

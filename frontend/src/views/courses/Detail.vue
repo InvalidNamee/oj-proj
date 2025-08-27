@@ -72,28 +72,28 @@ watch(
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="bg-white shadow-lg rounded-xl p-6">
-      <h1 class="text-3xl font-bold mb-4">{{ course.course_name }}</h1>
-      <p class="text-gray-700 mb-6">{{ course.description || "暂无课程描述" }}</p>
+  <div class="course-main">
+    <div class="course-detail-container">
+      <h1 class="course-detail-title">{{ course.course_name }}</h1>
+      <p class="course-detail-description">{{ course.description || "暂无课程描述" }}</p>
 
       <div class="mb-6">
-        <h2 class="text-2xl font-semibold mb-2">教师</h2>
-        <ul class="list-disc pl-6">
+        <h2 class="course-detail-section-title">教师</h2>
+        <ul class="course-detail-list">
           <li v-for="t in course.teachers" :key="t.id">
-            {{ t.username }} <span class="text-gray-500">({{ t.school || "-" }} {{ t.profession || "-" }})</span>
+            {{ t.username }} <span class="course-detail-list-item-info">({{ t.school || "-" }} {{ t.profession || "-" }})</span>
           </li>
-          <li v-if="course.teachers.length === 0" class="text-gray-400">暂无教师</li>
+          <li v-if="course.teachers.length === 0" class="course-detail-empty-list">暂无教师</li>
         </ul>
       </div>
 
       <div>
-        <h2 class="text-2xl font-semibold mb-2">学生</h2>
-        <ul class="list-disc pl-6">
+        <h2 class="course-detail-section-title">学生</h2>
+        <ul class="course-detail-list">
           <li v-for="s in course.students" :key="s.id">
-            {{ s.username }} <span class="text-gray-500">({{ s.school || "-" }} {{ s.profession || "-" }})</span>
+            {{ s.username }} <span class="course-detail-list-item-info">({{ s.school || "-" }} {{ s.profession || "-" }})</span>
           </li>
-          <li v-if="course.students.length === 0" class="text-gray-400">暂无学生</li>
+          <li v-if="course.students.length === 0" class="course-detail-empty-list">暂无学生</li>
         </ul>
       </div>
     </div>

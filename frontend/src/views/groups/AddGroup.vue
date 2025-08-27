@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/groups.css';
 import { ref, computed, watch } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
@@ -30,26 +31,26 @@ const createGroup = async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-lg mx-auto">
-    <h2 class="text-xl font-bold mb-4">创建分组</h2>
+  <div class="groups-add-container">
+    <h2 class="groups-add-title">创建分组</h2>
 
     <!-- 当前课程显示 -->
-    <div class="mb-3">
-      <label class="block mb-1">课程</label>
-      <input type="text" :value="courseName" disabled class="border border-gray-300 px-2 py-1 w-full bg-gray-100 cursor-not-allowed" />
+    <div class="groups-add-form-group">
+      <label class="groups-add-label">课程</label>
+      <input type="text" :value="courseName" disabled class="groups-add-input groups-add-input-disabled" />
     </div>
 
-    <div class="mb-3">
-      <label class="block mb-1">分组名称</label>
-      <input v-model="groupName" type="text" class="border border-gray-300 px-2 py-1 w-full" placeholder="请输入分组名称" />
+    <div class="groups-add-form-group">
+      <label class="groups-add-label">分组名称</label>
+      <input v-model="groupName" type="text" class="groups-add-input" placeholder="请输入分组名称" />
     </div>
 
-    <div class="mb-3">
-      <label class="block mb-1">描述</label>
-      <textarea v-model="description" class="border border-gray-300 px-2 py-1 w-full" placeholder="请输入分组描述"></textarea>
+    <div class="groups-add-form-group">
+      <label class="groups-add-label">描述</label>
+      <textarea v-model="description" class="groups-add-textarea" placeholder="请输入分组描述"></textarea>
     </div>
 
-    <button @click="createGroup" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+    <button @click="createGroup" class="groups-add-button">
       创建
     </button>
   </div>

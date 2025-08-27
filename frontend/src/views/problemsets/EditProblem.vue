@@ -22,7 +22,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto mt-12 p-6 rounded-xl bg-white shadow">
+  <div class="edit-problem-container">
     <h2 class="text-2xl font-bold mb-6">编辑题目</h2>
     <div v-if="loading">加载中...</div>
     <template v-else>

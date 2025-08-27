@@ -35,29 +35,29 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto mt-12 p-6 rounded-xl bg-white shadow">
-    <h2 class="text-2xl font-bold mb-6">新建题单</h2>
-    <div class="space-y-4">
+  <div class="add-problemset-container">
+    <h2 class="add-problemset-title">新建题单</h2>
+    <div class="add-problemset-space-y-4">
       <input
         v-model="title"
         placeholder="题单标题"
-        class="w-full border border-gray-300 rounded px-3 py-2"
+        class="add-problemset-input"
       />
       <textarea
         v-model="description"
         rows="4"
         placeholder="描述"
-        class="w-full border border-gray-300 rounded px-3 py-2"
+        class="add-problemset-textarea"
       ></textarea>
 
       <!-- 课程显示 -->
       <div>
-        <label class="block mb-1 text-gray-700">所属课程</label>
+        <label class="add-problemset-label">所属课程</label>
         <input
           type="text"
           :value="courseName"
           disabled
-          class="border border-gray-300 px-2 py-1 w-full bg-gray-100 cursor-not-allowed"
+          class="add-problemset-course-input"
         />
         <p class="text-xs text-gray-500 mt-1">
           题单必须绑定课程，如需更改，请先切换当前课程。
@@ -66,13 +66,13 @@ const submit = async () => {
 
       <!-- 题目选择器 -->
       <div>
-        <label class="block mb-1 text-gray-700">选择代码题</label>
+        <label class="add-problemset-label">选择代码题</label>
         <ProblemSelector v-model="Selected" />
       </div>
 
       <button
         @click="submit"
-        class="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+        class="add-problemset-button"
       >
         创建题单
       </button>

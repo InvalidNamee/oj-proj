@@ -53,17 +53,17 @@ async function submit() {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="add-legacy-problem-container">
     <!-- 标题 -->
     <div>
       <input v-model="title" placeholder="请输入题目标题"
-        class="w-full border border-gray-300 rounded px-2 py-2 text-gray-700 focus:ring-2 focus:ring-blue-400" />
+        class="add-legacy-problem-input" />
     </div>
 
     <!-- 描述 -->
     <div>
       <textarea v-model="description" rows="6" placeholder="请输入题目描述"
-        class="w-full border border-gray-300 rounded px-2 py-2 text-gray-700 focus:ring-2 focus:ring-blue-400"></textarea>
+        class="add-legacy-problem-textarea"></textarea>
     </div>
 
     <!-- 子组件 -->
@@ -73,13 +73,14 @@ async function submit() {
     <div>
       <label class="block mb-1 font-medium">所属课程</label>
       <input type="text" :value="courseName" disabled
-        class="w-full border border-gray-300 rounded px-2 py-2 text-gray-700 bg-gray-100 cursor-not-allowed" />
+        class="add-legacy-problem-course-input" />
     </div>
 
     <!-- 提交按钮 -->
-    <div class="pt-2">
-      <button @click="submit" :disabled="submitting" class="w-full px-3 py-2 rounded text-white"
-        :class="submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'">
+    <div class="add-legacy-problem-pt-2">
+      <button @click="submit" :disabled="submitting"
+        class="add-legacy-problem-submit-button"
+        :class="submitting ? 'add-legacy-problem-disabled-input' : ''">
         {{ submitting ? "提交中…" : "提交" }}
       </button>
     </div>

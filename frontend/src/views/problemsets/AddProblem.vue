@@ -11,7 +11,7 @@ const problemType = ref("coding");
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto mt-12 p-6 rounded-xl bg-white shadow">
+  <div class="add-problem-container">
     <h2 class="text-2xl font-bold mb-6">新建题目</h2>
     <!-- 题目类型选择器（只在外层） -->
     <div class="mb-6">
