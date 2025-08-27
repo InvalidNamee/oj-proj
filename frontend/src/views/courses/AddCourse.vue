@@ -47,7 +47,9 @@ const submitCourse = async () => {
 
 <template>
   <div class="course-add-container">
-    <h2 class="course-add-title">添加课程</h2>
+    <div class="course-add-header">
+      <h2 class="course-add-title">添加课程</h2>
+    </div>
 
     <div class="mb-4">
       <label class="course-add-label">课程名称</label>

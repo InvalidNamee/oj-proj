@@ -5,7 +5,7 @@
   flex: 1;
   position: relative;
   height: 100vh;
-  background-color: #f3f4f6; /* bg-gray-100 */
+  background-color: #e5e7eb; /* bg-gray-200 */
 }
 
 .group-main {
@@ -21,112 +21,251 @@
 /* Groups list styles */
 .groups-container {
   padding: 1.5rem; /* p-6 */
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .groups-title {
-  font-size: 1.25rem; /* text-xl */
-  font-weight: 700; /* font-bold */
-  margin-bottom: 0.5rem; /* mb-2 */
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 0; /* mb-0 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  background: linear-gradient(135deg, #f9fafb 0%, #fff 100%); /* 渐变背景 */
+  border-radius: 0.75rem 0.75rem 0 0; /* 圆角 */
+  padding: 1.5rem; /* 内边距 */
+  transform: translateY(0.5rem); /* 直接下移一点点 */
+}
+
+.groups-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
 }
 
 .groups-search-bar {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 0.5rem; /* mb-2 */
-  padding: 0.5rem 0; /* 增加上下内边距 */
+  gap: 1rem; /* gap-4 */
+  padding: 1.25rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #f9fafb 0%, #fff 100%); /* 渐变背景 */
+  border-radius: 0.75rem 0.75rem 0 0; /* 只在顶部保留圆角 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 更明显的阴影 */
+  border-bottom: none; /* 移除底部边框 */
+  margin-bottom: 0; /* 移除底部外边距 */
 }
 
 .groups-search-input-container {
   display: flex;
+  gap: 1rem; /* gap-4 */
   align-items: center;
-  gap: 0.5rem; /* space-x-2 */
 }
 
 .groups-search-input {
-  border: 1px solid #6b7280; /* border border-gray-500 */
-  border-radius: 0.25rem; /* rounded */
-  padding: 0.75rem 0.75rem; /* 增加内边距以增大高度 */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem 1rem; /* 增加内边距 */
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem; /* text-sm */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* subtle shadow */
   width: 16rem; /* w-64 */
 }
 
+.groups-search-input:focus {
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* focus:ring */
+  transform: translateY(-1px); /* 轻微上移效果 */
+}
+
 .groups-search-button {
-  padding: 0.5rem 1rem; /* 增加内边距 */
-  background-color: #3b82f6; /* bg-blue-500 */
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* 渐变背景 */
   color: #fff;
-  border-radius: 0.25rem; /* rounded */
-  border: none;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
 }
 
 .groups-search-button:hover {
-  background-color: #2563eb; /* hover:bg-blue-600 */
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* hover:bg-blue-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4); /* 更明显的阴影 */
+}
+
+.groups-search-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.3); /* 阴影变小 */
 }
 
 .groups-batch-actions {
+  margin-left: auto; /* ml-auto */
   display: flex;
-  align-items: center;
-  gap: 0.5rem; /* space-x-2 */
+  gap: 0.75rem; /* gap-3 */
 }
 
 .groups-batch-toggle-button {
-  padding: 0.5rem 1rem; /* 调整内边距与搜索按钮一致 */
-  background-color: #6b7280; /* bg-gray-500 */
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); /* 灰色渐变 */
   color: #fff;
-  border-radius: 0.25rem; /* rounded */
-  border: none;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
 }
 
 .groups-batch-toggle-button:hover {
-  background-color: #4b5563; /* hover:bg-gray-600 */
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%); /* hover:bg-gray-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(107, 114, 128, 0.4); /* 更明显的阴影 */
+}
+
+.groups-batch-toggle-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(107, 114, 128, 0.3); /* 阴影变小 */
 }
 
 .groups-batch-delete-button {
-  padding: 0.5rem 1rem; /* 调整内边距与搜索按钮一致 */
-  background-color: #ef4444; /* bg-red-500 */
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); /* 红色渐变 */
   color: #fff;
-  border-radius: 0.25rem; /* rounded */
-  border: none;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
 }
 
 .groups-batch-delete-button:hover {
-  background-color: #dc2626; /* hover:bg-red-600 */
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); /* hover:bg-red-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4); /* 更明显的阴影 */
+}
+
+.groups-batch-delete-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(239, 68, 68, 0.3); /* 阴影变小 */
 }
 
 /* Groups detail styles */
 .groups-detail-container {
+  max-width: 42rem; /* max-w-xl */
+  margin: 2rem auto; /* mx-auto mt-8 */
   padding: 1.5rem; /* p-6 */
-  max-width: 56rem; /* max-w-4xl */
-  margin: 0 auto; /* mx-auto */
+  background-color: #ffffff; /* white background */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  border-radius: 0.75rem; /* rounded-lg */
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .groups-detail-title {
-  font-size: 1.25rem; /* text-xl */
-  font-weight: 700; /* font-bold */
-  margin-bottom: 1rem; /* mb-4 */
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.groups-detail-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
 }
 
 .groups-detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* grid-cols-2 */
-  gap: 1.5rem 1.5rem; /* gap-x-6 gap-y-2 */
-  font-size: 0.875rem; /* text-sm */
-  margin-bottom: 1rem; /* mb-4 */
+  margin-bottom: 1.5rem; /* mb-6 */
+  background: linear-gradient(135deg, #f9fafb 0%, #fff 100%); /* 渐变背景 */
+  border-radius: 0.75rem; /* rounded-lg */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  overflow: hidden;
+  border: 1px solid #e5e7eb; /* 添加边框 */
 }
 
+.groups-detail-grid-item {
+  padding: 0.75rem 1rem; /* py-3 px-4 */
+  border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+}
+
+.groups-detail-grid-item:last-child {
+  border-bottom: none;
+}
 
 .groups-detail-grid-item-full {
   grid-column: span 2; /* col-span-2 */
+  padding: 1rem; /* p-4 */
 }
 
 .groups-detail-section-title {
-  font-weight: 600; /* font-semibold */
-  margin-bottom: 0.5rem; /* mb-2 */
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+  color: #111827; /* text-gray-900 */
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.groups-detail-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #34d399); /* 绿色渐变 */
+  border-radius: 1.5px;
 }
 
 .groups-detail-list {
-  list-style-type: disc; /* list-disc */
-  padding-left: 1.25rem; /* pl-5 */
-  margin-bottom: 1rem; /* mb-4 for student list */
+  list-style-type: none; /* 移除默认列表样式 */
+  padding-left: 0; /* 移除默认内边距 */
+  margin: 0 0 1.5rem 0; /* mb-6 */
+}
+
+.groups-detail-list-item {
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  margin-bottom: 0.25rem; /* mb-1 */
+  background-color: #f9fafb; /* bg-gray-50 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+}
+
+.groups-detail-list-item:hover {
+  background-color: #eff6ff; /* hover:bg-blue-50 */
+  transform: translateY(-1px); /* 轻微上移效果 */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
 }
 
 .groups-detail-list:last-child {
@@ -136,36 +275,57 @@
 
 .groups-table-container {
   background-color: #fff; /* bg-white */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
-  border-radius: 0.5rem; /* rounded-lg */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  border-radius: 0 0 0.75rem 0.75rem; /* 只在底部保留圆角 */
   overflow: hidden;
+  margin-top: 0; /* 移除顶部外边距 */
+  border: 1px solid #e5e7eb; /* 添加边框 */
+  border-top: none; /* 移除顶部边框 */
 }
 
 .groups-table {
   width: 100%;
   text-align: left;
   font-size: 0.875rem; /* text-sm */
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .groups-table-header {
-  background-color: #f9fafb; /* bg-gray-50 */
-  color: #374151; /* text-gray-700 */
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); /* 渐变背景 */
+  color: #1f2937; /* text-gray-800 */
+  border-bottom: 2px solid #9ca3af; /* 更粗的底部边框 */
 }
 
 .groups-table-header-cell {
-  padding: 0.75rem; /* p-3 */
+  padding: 1.25rem 1rem; /* 增加内边距 */
+  font-weight: 700; /* font-bold */
+  text-transform: uppercase; /* uppercase */
+  letter-spacing: 0.05em; /* tracking-wide */
+  font-size: 1rem; /* 从text-xs增大到text-sm */
+  color: #374151; /* text-gray-700 */
 }
 
 .groups-table-row {
-  transition: background-color 0.2s; /* transition */
+  transition: all 0.3s; /* 更平滑的过渡 */
+  border-bottom: 1px solid #e5e7eb; /* 更浅的底部边框 */
+}
+
+.groups-table-row:last-child {
+  border-bottom: none;
 }
 
 .groups-table-row:hover {
-  background-color: #f9fafb; /* hover:bg-gray-50 */
+  background-color: #eff6ff; /* hover:bg-blue-50 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); /* 阴影 */
 }
 
 .groups-table-cell {
-  padding: 0.75rem; /* p-3 */
+  padding: 1.25rem 1rem; /* 增加内边距 */
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb; /* 更浅的底部边框 */
+  transition: background-color 0.2s;
 }
 
 .groups-name-link {
@@ -189,15 +349,73 @@
   color: #3b82f6; /* text-blue-500 */
   text-decoration: none; /* 移除下划线 */
   margin-right: 0.5rem; /* 添加右边距 */
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+  font-weight: 600; /* font-semibold */
+  position: relative;
+  overflow: hidden;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.groups-edit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
 }
 
 .groups-edit-button:hover {
+  background-color: #eff6ff; /* hover:bg-blue-50 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); /* 阴影 */
   text-decoration: none; /* 悬停时也移除下划线 */
+}
+
+.groups-edit-button:hover::before {
+  left: 100%;
 }
 
 .groups-delete-button {
   color: #ef4444; /* text-red-500 */
   text-decoration: none; /* 移除下划线 */
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+  font-weight: 600; /* font-semibold */
+  position: relative;
+  overflow: hidden;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.groups-delete-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.groups-delete-button:hover {
+  background-color: #fef2f2; /* hover:bg-red-50 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2); /* 阴影 */
+  text-decoration: none; /* 悬停时也移除下划线 */
+}
+
+.groups-delete-button:hover::before {
+  left: 100%;
 }
 
 /* Groups edit styles */
@@ -205,12 +423,30 @@
   padding: 1.5rem; /* p-6 */
   max-width: 32rem; /* max-w-lg */
   margin: 0 auto; /* mx-auto */
+  border: 1px solid #ffffff; /* white border */
+  background-color: #ffffff; /* white background */
 }
 
 .groups-edit-title {
-  font-size: 1.25rem; /* text-xl */
-  font-weight: 700; /* font-bold */
-  margin-bottom: 1rem; /* mb-4 */
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.groups-edit-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
 }
 
 .groups-edit-form-group {
@@ -254,14 +490,34 @@
 /* Groups edit styles */
 .groups-add-container {
   padding: 1.5rem; /* p-6 */
-  max-width: 32rem; /* max-w-lg */
-  margin: 0 auto; /* mx-auto */
+  max-width: 42rem; /* max-w-xl */
+  margin: 2rem auto; /* mx-auto mt-8 */
+  background-color: #ffffff; /* white background */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  border-radius: 0.75rem; /* rounded-lg */
+  animation: fadeIn 0.5s ease-out;
 }
 
 .groups-add-title {
-  font-size: 1.25rem; /* text-xl */
-  font-weight: 700; /* font-bold */
-  margin-bottom: 1rem; /* mb-4 */
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.groups-add-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
 }
 
 .groups-add-form-group {
@@ -311,16 +567,39 @@
 .groups-pagination {
   display: flex;
   justify-content: center;
-  margin-top: 1rem; /* mt-4 */
-  gap: 0.5rem; /* space-x-2 */
+  align-items: center;
+  padding: 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #fff 0%, #f9fafb 100%); /* 渐变背景 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  border-radius: 0 0 0.75rem 0.75rem; /* 只在底部保留圆角 */
+  margin-top: 0; /* 移除顶部间距 */
+  border: 1px solid #e5e7eb; /* 添加边框 */
+  border-top: none; /* 移除顶部边框 */
+  transform: translateY(-0.5rem); /* 上移一点点 */
 }
 
 .groups-pagination-button {
-  padding: 0.25rem 0.75rem; /* px-3 py-1 */
+  padding: 0.75rem 1.25rem; /* 增加内边距 */
   border: 1px solid #d1d5db; /* border */
-  border-radius: 0.25rem; /* rounded */
+  border-radius: 0.5rem; /* rounded-lg */
+  background: linear-gradient(135deg, #fff 0%, #f9fafb 100%); /* 渐变背景 */
+  color: #374151; /* text-gray-700 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+  margin: 0 0.25rem; /* 添加水平间距 */
+}
+
+.groups-pagination-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); /* hover:bg-gray-100 */
+  border-color: #9ca3af; /* hover:border-gray-400 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 更明显的阴影 */
 }
 
 .groups-pagination-button:disabled {
   opacity: 0.5; /* disabled:opacity-50 */
+  cursor: not-allowed;
+  transform: none; /* 禁用时取消变换 */
 }

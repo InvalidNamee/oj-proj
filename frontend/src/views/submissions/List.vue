@@ -83,7 +83,8 @@ onMounted(fetchSubmissions)
 </script>
 
 <template>
-  <div class="submissions-container">
+  <div class="submissions-list-wrapper">
+    <div class="submissions-container">
     <h2 class="submissions-title">提交记录</h2>
 
     <!-- 筛选 -->
@@ -139,4 +140,5 @@ onMounted(fetchSubmissions)
       <button @click="changePage(page + 1)" :disabled="page >= pages" class="submissions-pagination-button">下一页</button>
     </div>
   </div>
+</div>
 </template>

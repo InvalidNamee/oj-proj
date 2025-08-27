@@ -191,10 +191,10 @@ onMounted(fetchUsers);
             <th class="user-list-table-header-cell">UID</th>
             <th class="user-list-table-header-cell">用户名</th>
             <th class="user-list-table-header-cell">类型</th>
-            <th class="user-list-table-header-cell">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;学校</th>
+            <th class="user-list-table-header-cell">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;学校</th>
             <th class="user-list-table-header-cell">专业</th>
             <th class="user-list-table-header-cell">注册时间</th>
-            <th class="user-list-table-header-cell">操作</th>
+            <th class="user-list-table-header-cell">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;操作</th>
           </tr>
         </thead>
         <tbody>

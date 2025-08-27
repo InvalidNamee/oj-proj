@@ -1,14 +1,42 @@
 /* CSS styles for submissions views */
 
+.submissions-list-wrapper {
+  background-color: #e5e7eb; /* bg-gray-200 */
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
 /* Submissions list styles */
 .submissions-container {
   padding: 1.5rem; /* p-6 */
+  background-color: #ffffff; /* white background */
+  border: 1px solid #ffffff; /* white border */
+  border-radius: 0.75rem; /* rounded-lg */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  max-width: 1200px; /* 限制最大宽度 */
+  margin: 0 auto; /* 居中 */
 }
 
 .submissions-title {
-  font-size: 1.25rem; /* text-xl */
-  font-weight: 700; /* font-bold */
-  margin-bottom: 1rem; /* mb-4 */
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.submissions-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
 }
 
 .submissions-filter-container {
@@ -109,14 +137,31 @@
   margin-top: 2.5rem; /* mt-10 */
   padding: 1.5rem; /* p-6 */
   background-color: #ffffff; /* bg-white */
-  border-radius: 0.5rem; /* rounded */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+  border: 1px solid #ffffff; /* white border */
+  border-radius: 0.75rem; /* rounded-lg */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
 }
 
 .submission-detail-title {
-  font-size: 1.25rem; /* text-xl */
-  font-weight: 700; /* font-bold */
-  margin-bottom: 1rem; /* mb-4 */
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.submission-detail-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
 }
 
 .submission-detail-grid {
