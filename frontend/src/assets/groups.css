@@ -1,0 +1,326 @@
+/* CSS styles for groups views */
+
+.group-layout {
+  display: flex;
+  flex: 1;
+  position: relative;
+  height: 100vh;
+  background-color: #f3f4f6; /* bg-gray-100 */
+}
+
+.group-main {
+  flex: 1;
+  padding: 1.5rem; /* p-6 */;
+  overflow: auto;
+}
+
+.group-main-with-sidebar {
+  margin-left: 10rem; /* ml-40 */
+}
+
+/* Groups list styles */
+.groups-container {
+  padding: 1.5rem; /* p-6 */
+}
+
+.groups-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.groups-search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem; /* mb-2 */
+  padding: 0.5rem 0; /* 增加上下内边距 */
+}
+
+.groups-search-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* space-x-2 */
+}
+
+.groups-search-input {
+  border: 1px solid #6b7280; /* border border-gray-500 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.75rem 0.75rem; /* 增加内边距以增大高度 */
+  width: 16rem; /* w-64 */
+}
+
+.groups-search-button {
+  padding: 0.5rem 1rem; /* 增加内边距 */
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  border-radius: 0.25rem; /* rounded */
+  border: none;
+}
+
+.groups-search-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.groups-batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* space-x-2 */
+}
+
+.groups-batch-toggle-button {
+  padding: 0.5rem 1rem; /* 调整内边距与搜索按钮一致 */
+  background-color: #6b7280; /* bg-gray-500 */
+  color: #fff;
+  border-radius: 0.25rem; /* rounded */
+  border: none;
+}
+
+.groups-batch-toggle-button:hover {
+  background-color: #4b5563; /* hover:bg-gray-600 */
+}
+
+.groups-batch-delete-button {
+  padding: 0.5rem 1rem; /* 调整内边距与搜索按钮一致 */
+  background-color: #ef4444; /* bg-red-500 */
+  color: #fff;
+  border-radius: 0.25rem; /* rounded */
+  border: none;
+}
+
+.groups-batch-delete-button:hover {
+  background-color: #dc2626; /* hover:bg-red-600 */
+}
+
+/* Groups detail styles */
+.groups-detail-container {
+  padding: 1.5rem; /* p-6 */
+  max-width: 56rem; /* max-w-4xl */
+  margin: 0 auto; /* mx-auto */
+}
+
+.groups-detail-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.groups-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* grid-cols-2 */
+  gap: 1.5rem 1.5rem; /* gap-x-6 gap-y-2 */
+  font-size: 0.875rem; /* text-sm */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+
+.groups-detail-grid-item-full {
+  grid-column: span 2; /* col-span-2 */
+}
+
+.groups-detail-section-title {
+  font-weight: 600; /* font-semibold */
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.groups-detail-list {
+  list-style-type: disc; /* list-disc */
+  padding-left: 1.25rem; /* pl-5 */
+  margin-bottom: 1rem; /* mb-4 for student list */
+}
+
+.groups-detail-list:last-child {
+  margin-bottom: 0; /* 最后一个列表不需要底部边距 */
+}
+
+
+.groups-table-container {
+  background-color: #fff; /* bg-white */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+  border-radius: 0.5rem; /* rounded-lg */
+  overflow: hidden;
+}
+
+.groups-table {
+  width: 100%;
+  text-align: left;
+  font-size: 0.875rem; /* text-sm */
+}
+
+.groups-table-header {
+  background-color: #f9fafb; /* bg-gray-50 */
+  color: #374151; /* text-gray-700 */
+}
+
+.groups-table-header-cell {
+  padding: 0.75rem; /* p-3 */
+}
+
+.groups-table-row {
+  transition: background-color 0.2s; /* transition */
+}
+
+.groups-table-row:hover {
+  background-color: #f9fafb; /* hover:bg-gray-50 */
+}
+
+.groups-table-cell {
+  padding: 0.75rem; /* p-3 */
+}
+
+.groups-name-link {
+  color: #2563eb; /* text-blue-600 */
+  text-decoration: underline; /* hover:underline */
+  cursor: pointer;
+}
+
+.groups-name-link:hover {
+  text-decoration: underline;
+}
+
+.groups-action-button {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.groups-edit-button {
+  color: #3b82f6; /* text-blue-500 */
+  text-decoration: none; /* 移除下划线 */
+  margin-right: 0.5rem; /* 添加右边距 */
+}
+
+.groups-edit-button:hover {
+  text-decoration: none; /* 悬停时也移除下划线 */
+}
+
+.groups-delete-button {
+  color: #ef4444; /* text-red-500 */
+  text-decoration: none; /* 移除下划线 */
+}
+
+/* Groups edit styles */
+.groups-edit-container {
+  padding: 1.5rem; /* p-6 */
+  max-width: 32rem; /* max-w-lg */
+  margin: 0 auto; /* mx-auto */
+}
+
+.groups-edit-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.groups-edit-form-group {
+  margin-bottom: 0.75rem; /* mb-3 */
+}
+
+.groups-edit-label {
+  display: block;
+  margin-bottom: 0.25rem; /* mb-1 */
+}
+
+.groups-edit-input {
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  padding: 0.75rem 0.5rem; /* 增加垂直内边距以增大高度 */
+  width: 493px; /* w-full */
+}
+
+.groups-edit-textarea {
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  padding: 0.75rem 0.5rem; /* 增加垂直内边距以增大高度 */
+  width: 494px; /* w-full */
+  resize: vertical; /* 只能纵向延展 */
+}
+
+.groups-edit-save-button {
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  border-radius: 0.25rem; /* rounded */
+  border: none;
+}
+
+.groups-edit-save-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.groups-delete-button:hover {
+  text-decoration: none; /* 悬停时也移除下划线 */
+}
+
+/* Groups edit styles */
+.groups-add-container {
+  padding: 1.5rem; /* p-6 */
+  max-width: 32rem; /* max-w-lg */
+  margin: 0 auto; /* mx-auto */
+}
+
+.groups-add-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.groups-add-form-group {
+  margin-bottom: 0.75rem; /* mb-3 */
+}
+
+.groups-add-label {
+  display: block;
+  margin-bottom: 0.25rem; /* mb-1 */
+}
+
+.groups-add-input {
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  padding: 0.75rem 0.5rem; /* 增加垂直内边距以增大高度 */
+  width: 100%; /* w-full */
+}
+
+.groups-add-input-disabled {
+  background-color: #f3f4f6; /* bg-gray-100 */
+  cursor: not-allowed; /* cursor-not-allowed */
+}
+
+.groups-add-textarea {
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  padding: 0.75rem 0.5rem; /* 增加垂直内边距以增大高度 */
+  width: 100%; /* w-full */
+}
+
+.groups-add-button {
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  border-radius: 0.25rem; /* rounded */
+  border: none;
+  transition: background-color 0.2s; /* transition */
+}
+
+.groups-add-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.groups-empty-row {
+  text-align: center;
+  color: #9ca3af; /* text-gray-400 */
+}
+
+.groups-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem; /* mt-4 */
+  gap: 0.5rem; /* space-x-2 */
+}
+
+.groups-pagination-button {
+  padding: 0.25rem 0.75rem; /* px-3 py-1 */
+  border: 1px solid #d1d5db; /* border */
+  border-radius: 0.25rem; /* rounded */
+}
+
+.groups-pagination-button:disabled {
+  opacity: 0.5; /* disabled:opacity-50 */
+}

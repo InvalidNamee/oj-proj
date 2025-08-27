@@ -62,17 +62,17 @@ const saveCourse = async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-xl mx-auto">
-    <h2 class="text-2xl font-bold mb-4">编辑课程</h2>
+  <div class="course-edit-container">
+    <h2 class="course-edit-title">编辑课程</h2>
 
     <div class="mb-4">
-      <label class="block text-gray-700 mb-1">课程名称</label>
-      <input v-model="courseName" type="text" class="w-full p-2 border border-gray-300 rounded" />
+      <label class="course-edit-label">课程名称</label>
+      <input v-model="courseName" type="text" class="course-edit-input" />
     </div>
 
     <div class="mb-4">
-      <label class="block text-gray-700 mb-1">课程描述</label>
-      <textarea v-model="courseDescription" class="w-full p-2 border border-gray-300 rounded" rows="3" />
+      <label class="course-edit-label">课程描述</label>
+      <textarea v-model="courseDescription" class="course-edit-textarea" rows="3" />
     </div>
 
     <div class="mb-4">
@@ -81,10 +81,12 @@ const saveCourse = async () => {
         :teachers="teachers"
       />
     </div>
+    
+    <div class="course-edit-spacer"></div>
 
-    <div class="flex justify-end space-x-2">
-      <button @click="router.back()" class="px-4 py-2 border rounded">取消</button>
-      <button @click="saveCourse" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">保存</button>
+    <div class="course-edit-button-container">
+      <button @click="router.back()" class="course-edit-cancel-button">取消</button>
+      <button @click="saveCourse" class="course-edit-save-button">保存</button>
     </div>
   </div>
 </template>

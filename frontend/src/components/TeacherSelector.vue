@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/components.css'
 import { ref, computed, watch } from "vue";
 
 // Props: teachers 数组, modelValue 用于 v-model 双向绑定
@@ -46,24 +47,24 @@ watch(selectedIds, (val) => {
 
 <template>
   <div>
-    <label class="block text-gray-700 mb-1">选择教师</label>
+    <label class="teacher-selector-label">选择教师</label>
 
     <!-- 搜索框 -->
     <input
       v-model="search"
       placeholder="搜索教师..."
-      class="w-full p-2 mb-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      class="teacher-selector-input"
     />
 
     <!-- 列表 -->
-    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-300 rounded p-2">
-      <label v-for="t in filteredTeachers" :key="t.id" class="flex items-center space-x-2">
+    <div class="teacher-selector-list">
+      <label v-for="t in filteredTeachers" :key="t.id" class="teacher-selector-item">
         <input type="checkbox" :value="t.id" v-model="selectedIds"
-               class="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-400" />
-        <span class="text-gray-700">{{ t.username }}</span>
+               class="teacher-selector-checkbox" />
+        <span class="teacher-selector-username">{{ t.username }}</span>
       </label>
 
-      <div v-if="filteredTeachers.length === 0" class="text-gray-400 text-sm">
+      <div v-if="filteredTeachers.length === 0" class="teacher-selector-empty">
         无匹配教师
       </div>
     </div>

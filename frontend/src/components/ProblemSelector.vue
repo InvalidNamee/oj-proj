@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/components.css'
 import { ref, computed, onMounted, watch } from "vue";
 import axios from "axios";
 import { useUserStore } from "@/stores/user";
@@ -53,23 +54,23 @@ const updateSelection = (id) => {
     <input
       v-model="search"
       placeholder="搜索题目名..."
-      class="w-full p-2 mb-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      class="problem-selector-input"
     />
-    <div class="grid grid-cols-2 gap-2 max-h-48 overflow-auto border border-gray-300 rounded p-2">
+    <div class="problem-selector-list">
       <label
         v-for="p in filteredProblems"
         :key="p.id"
-        class="flex items-center space-x-2"
+        class="problem-selector-item"
       >
         <input
           type="checkbox"
           :checked="props.modelValue.includes(p.id)"
           @change="updateSelection(p.id)"
-          class="w-4 h-4"
+          class="problem-selector-checkbox"
         />
         <span>{{ p.title }}</span>
       </label>
-      <div v-if="filteredProblems.length === 0" class="text-gray-400 text-sm">
+      <div v-if="filteredProblems.length === 0" class="problem-selector-empty">
         无匹配题目
       </div>
     </div>

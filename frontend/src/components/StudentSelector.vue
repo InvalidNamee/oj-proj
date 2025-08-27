@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/components.css'
 import { ref, computed, watch, onMounted } from "vue";
 import axios from "axios";
 
@@ -57,21 +58,21 @@ watch(selectedIds, (val) => {
 
 <template>
   <div>
-    <label class="block text-gray-700 mb-1">选择学生</label>
+    <label class="student-selector-label">选择学生</label>
 
     <input
       v-model="search"
       placeholder="搜索用户名/专业..."
-      class="w-full p-2 mb-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      class="student-selector-input"
     />
 
-    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-300 rounded p-2">
-      <label v-for="s in filteredStudents" :key="s.id" class="flex items-center space-x-2">
+    <div class="student-selector-list">
+      <label v-for="s in filteredStudents" :key="s.id" class="student-selector-item">
         <input type="checkbox" :value="s.id" v-model="selectedIds"
-               class="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-400" />
-        <span class="text-gray-700">{{ s.username }} <span v-if="s.major" class="text-gray-400">({{ s.major }})</span></span>
+               class="student-selector-checkbox" />
+        <span class="student-selector-username">{{ s.username }} <span v-if="s.major" class="student-selector-major">({{ s.major }})</span></span>
       </label>
-      <div v-if="filteredStudents.length === 0" class="text-gray-400 text-sm">无匹配学生</div>
+      <div v-if="filteredStudents.length === 0" class="student-selector-empty">无匹配学生</div>
     </div>
   </div>
 </template>

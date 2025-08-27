@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import CourseSelector from '@/components/CourseSelector.vue';
+import '@/assets/users.css';
 
 const route = useRoute();
 const router = useRouter();
@@ -78,22 +79,24 @@ onMounted(fetchUser);
 </script>
 
 <template>
-  <div class="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow">
-    <h2 class="text-2xl font-bold mb-4">修改用户信息</h2>
+  <div class="user-edit-container">
+    <h2 class="user-edit-title">修改用户信息</h2>
 
-    <div v-if="error" class="mb-2 text-red-500">{{ error }}</div>
-    <div v-if="success" class="mb-2 text-green-500">{{ success }}</div>
+    <div v-if="error" class="user-edit-error">{{ error }}</div>
+    <div v-if="success" class="user-edit-success">{{ success }}</div>
 
     <div class="space-y-4">
-      <input v-model="form.username" placeholder="用户名" class="w-full border border-gray-300 rounded px-3 py-2" />
-      <input v-model="form.school" placeholder="学校" class="w-full border border-gray-300 rounded px-3 py-2" />
-      <input v-model="form.profession" placeholder="专业" class="w-full border border-gray-300 rounded px-3 py-2" />
-      <input v-model="form.password" placeholder="新密码，留空不重置" class="w-full border border-gray-300 rounded px-3 py-2" />
+      <input v-model="form.username" placeholder="用户名" class="user-edit-input" />
+      <input v-model="form.school" placeholder="学校" class="user-edit-input" />
+      <input v-model="form.profession" placeholder="专业" class="user-edit-input" />
+      <input v-model="form.password" placeholder="新密码，留空不重置" class="user-edit-input" />
 
       <!-- 课程选择 -->
-      <CourseSelector v-model="form.course_list" :courses="courses" />
+      <div class="user-edit-course-selector">
+        <CourseSelector v-model="form.course_list" :courses="courses" />
+      </div>
 
-      <button @click="submit" class="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">
+      <button @click="submit" class="user-edit-button">
         保存修改
       </button>
     </div>

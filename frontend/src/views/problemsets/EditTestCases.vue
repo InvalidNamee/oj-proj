@@ -53,32 +53,32 @@ onMounted(fetchProblem);
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto mt-12 p-6 rounded-xl bg-white shadow">
-    <h2 class="text-2xl font-bold mb-6">管理测试用例</h2>
+  <div class="edit-test-cases-container">
+    <h2 class="edit-test-cases-title">管理测试用例</h2>
 
     <!-- 已有测试用例 -->
     <div v-if="testCasesList.length">
-      <label class="block mb-1 font-semibold">已有测试用例</label>
-      <div class="space-y-1 max-h-48 overflow-auto border border-gray-300 rounded p-2">
-        <label v-for="(tc, idx) in testCasesList" :key="idx" class="flex items-center space-x-2">
+      <label class="edit-test-cases-label">已有测试用例</label>
+      <div class="edit-test-cases-list">
+        <label v-for="(tc, idx) in testCasesList" :key="idx" class="edit-test-cases-item">
           <input type="checkbox" v-model="selectedTestCases" :value="tc.name"
-            class="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-400" />
+            class="edit-test-cases-checkbox" />
           <span>{{ tc.name }} ({{ tc.in }} → {{ tc.out }})</span>
         </label>
       </div>
-      <button @click="deleteSelectedCases" class="mt-2 w-full bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600">
+      <button @click="deleteSelectedCases" class="edit-test-cases-delete-button">
         删除选中
       </button>
     </div>
 
     <!-- 上传新测试用例 -->
     <div class="mt-4">
-      <label class="block mb-1">上传新的测试用例 (zip)</label>
+      <label class="edit-test-cases-upload-label">上传新的测试用例 (zip)</label>
       <input type="file" @change="handleFileChange" accept=".zip"
-        class="w-full border border-gray-300 rounded px-3 py-2 text-gray-700" />
+        class="edit-test-cases-file-input" />
       <button @click="uploadNewTestCases"
               :disabled="uploading"
-              class="mt-2 w-full px-3 py-2 rounded text-white"
+              class="edit-test-cases-upload-button"
               :class="uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'">
         {{ uploading ? '上传中…' : '上传测试用例' }}
       </button>

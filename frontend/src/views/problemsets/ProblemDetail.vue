@@ -6,6 +6,7 @@ import axios from 'axios'
 // import MarkdownArea from '@/components/MarkdownArea.vue'
 import CodeMirrorEditor from "@/components/CodeMirrorEditor.vue"
 import LegacyAnswerArea from '@/components/LegacyAnswerArea.vue' // 传统题答案组件
+import '@/assets/problemsets.css'
 
 const route = useRoute()
 const problemId = Number(route.params.id)
@@ -75,10 +76,16 @@ const submitAnswer = async () => {
 </script>
 
 <template>
-  <div class="p-6 bg-white rounded-lg shadow-md">
-    <h1 class="text-2xl font-bold mb-4">{{ problem?.title || '加载中...' }}</h1>
+  <div class="problem-detail-container">
+    <button 
+      @click="$router.push(`/problems/${problemId}/edit/testcases`);" 
+      class="edit-test-cases-button"
+    >
+      编辑测试用例
+    </button>
+    <h1 class="problem-detail-title">{{ problem?.title || '加载中...' }}</h1>
 
-    <div v-if="problem?.limitations" class="mb-6 text-gray-700 border border-gray-300 rounded-md p-3">
+    <div v-if="problem?.limitations" class="problem-detail-limitations">
       <p><span class="font-semibold">时间限制：</span>{{ problem.limitations.maxTime }} 秒</p>
       <p><span class="font-semibold">内存限制：</span>{{ problem.limitations.maxMemory }} MB</p>
     </div>
@@ -86,10 +93,10 @@ const submitAnswer = async () => {
     <p>{{problem?.description}}</p>
 
     <div class="mt-8">
-      <h3 class="text-lg font-bold mb-2">提交答案</h3>
+      <h3 class="problem-detail-submission-title">提交答案</h3>
 
       <template v-if="problem?.type === 'coding'">
-        <select v-model="language" class="border border-gray-500 p-2 rounded mb-3">
+        <select v-model="language" class="problem-detail-language-select">
           <option value="cpp">C++</option>
           <option value="python">Python</option>
         </select>
@@ -107,21 +114,14 @@ const submitAnswer = async () => {
       <button
         @click="submitAnswer"
         :disabled="submitting"
-        class="mt-4 px-4 py-2 rounded text-white"
-        :class="submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'"
+        class="problem-detail-submit-button"
       >
         {{ submitting ? '提交中...' : '提交' }}
       </button>
 
       <!-- 显示结果 -->
-      <div v-if="submissionStatus" class="mt-4 p-3 rounded font-medium"
-           :class="{
-             'bg-green-100 text-green-700': submissionStatus.status === 'AC',
-             'bg-red-100 text-red-700': ['WA','TLE','MLE','OLE','RE'].includes(submissionStatus.status),
-             'bg-blue-100 text-blue-700': submissionStatus.status === 'Judging',
-             'bg-gray-100 text-gray-700': submissionStatus.status === 'Pending',
-             'bg-orange-100 text-orange-700': submissionStatus.status === 'CE'
-           }"
+      <div v-if="submissionStatus" class="problem-detail-status"
+           :class="submissionStatus.status"
       >
         {{ submissionStatus.status }}
         <template v-if="['WA','TLE','MLE','OLE','RE'].includes(submissionStatus.status) && submissionStatus.score !== null">

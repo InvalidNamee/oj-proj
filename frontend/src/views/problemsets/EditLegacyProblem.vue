@@ -54,9 +54,9 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <input v-model="title" placeholder="标题" class="w-full border border-gray-300 rounded px-3 py-2" />
-    <textarea v-model="description" rows="6" placeholder="题目描述" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+  <div class="edit-legacy-problem-space-y-4">
+    <input v-model="title" placeholder="标题" class="edit-legacy-problem-input" />
+    <textarea v-model="description" rows="6" placeholder="题目描述" class="edit-legacy-problem-textarea"></textarea>
     
     <LegacyEditor
       :problemType="problemType"
@@ -65,14 +65,14 @@ const submit = async () => {
     />
 
     <!-- 课程选择 -->
-    <select v-model="courseId" class="w-full border border-gray-300 rounded px-3 py-2">
+    <select v-model="courseId" class="edit-legacy-problem-select">
       <option v-for="c in courses" :key="c.id" :value="c.id">{{ c.name }}</option>
     </select>
 
     <button
       @click="submit"
       :disabled="submitting"
-      class="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+      class="edit-legacy-problem-button"
     >
       {{ submitting ? "提交中…" : "提交修改" }}
     </button>

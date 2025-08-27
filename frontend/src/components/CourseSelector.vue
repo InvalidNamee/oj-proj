@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/components.css'
 import { defineProps, defineEmits, watch, ref } from 'vue';
 
 const props = defineProps({
@@ -19,12 +20,12 @@ watch(selected, (val) => {
 
 <template>
   <div>
-    <label class="block text-gray-700 mb-1">选择课程</label>
-    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-300 rounded p-2">
-      <label v-for="c in courses" :key="c.id" class="flex items-center space-x-2">
+    <label class="course-selector-label">选择课程</label>
+    <div class="course-selector-list">
+      <label v-for="c in courses" :key="c.id" class="course-selector-item">
         <input type="checkbox" :value="c.id" v-model="selected"
-               class="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-400" />
-        <span class="text-gray-700">{{ c.name }}</span>
+               class="course-selector-checkbox" />
+        <span class="course-selector-name">{{ c.name }}</span>
       </label>
     </div>
   </div>

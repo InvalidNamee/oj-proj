@@ -49,34 +49,34 @@ watch(() => route.query, () => fetchCourses(), { immediate: true });
 </script>
 
 <template>
-  <div class="p-6">
-    <h2 class="text-2xl font-bold mb-4">课程列表</h2>
+  <div class="course-main">
+    <h2 class="course-list-title">课程列表</h2>
 
-    <div class="mb-4 flex justify-end">
-      <button @click="router.push('/courses/add')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    <div class="course-list-actions">
+      <button @click="router.push('/courses/add')" class="course-list-add-button">
         添加课程
       </button>
     </div>
 
-    <div class="space-y-4">
-      <div v-for="course in courses" :key="course.id" class="bg-white shadow-md rounded-xl p-4 border border-gray-200 flex justify-between items-center">
+    <div class="course-list-items">
+      <div v-for="course in courses" :key="course.id" class="course-list-item">
         <div>
-          <div class="font-medium" @click.prevent="goDetail(course.id)">{{ course.name }}</div>
-          <div class="text-gray-500 text-sm">{{ course.description || '-' }}</div>
-          <div class="text-gray-400 text-xs mt-1">更新时间: {{ course.timestamp }}</div>
+          <div class="course-list-item-content" @click.prevent="goDetail(course.id)">{{ course.name }}</div>
+          <div class="course-list-item-description">{{ course.description || '-' }}</div>
+          <div class="course-list-item-timestamp">更新时间: {{ course.timestamp }}</div>
         </div>
-        <div class="flex gap-2">
-          <button @click="router.push(`/courses/edit/${course.id}`)" class="text-blue-500 hover:underline text-sm">编辑</button>
-          <button @click="deleteCourse(course.id)" class="text-red-500 hover:underline text-sm">删除</button>
+        <div class="course-list-item-actions">
+          <button @click="router.push(`/courses/edit/${course.id}`)" class="course-list-edit-button">编辑</button>
+          <button @click="deleteCourse(course.id)" class="course-list-delete-button">删除</button>
         </div>
       </div>
     </div>
 
     <!-- 分页 -->
-    <div class="mt-6 flex justify-center items-center gap-4">
-      <button :disabled="page <= 1" @click="page--; updateRoute()" class="px-3 py-1 border rounded disabled:opacity-50">上一页</button>
-      <span>第 {{ page }} 页 / 共 {{ Math.ceil(total / perPage) }} 页</span>
-      <button :disabled="page >= Math.ceil(total / perPage)" @click="page++; updateRoute()" class="px-3 py-1 border rounded disabled:opacity-50">下一页</button>
+    <div class="course-list-pagination">
+      <button :disabled="page <= 1" @click="page--; updateRoute()" class="course-list-pagination-button">上一页</button>
+      <span class="course-list-pagination-info">第 {{ page }} 页 / 共 {{ Math.ceil(total / perPage) }} 页</span>
+      <button :disabled="page >= Math.ceil(total / perPage)" @click="page++; updateRoute()" class="course-list-pagination-button">下一页</button>
     </div>
   </div>
 </template>

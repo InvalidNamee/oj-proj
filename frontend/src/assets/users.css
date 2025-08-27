@@ -1,0 +1,883 @@
+/* CSS styles for users views */
+
+/* Login styles */
+.login-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 4rem; /* mt-16 */
+}
+
+.login-form-container {
+  background-color: #fff; /* bg-white */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 2rem; /* p-8 */
+  width: 100%;
+  max-width: 20rem; /* max-w-xs */
+}
+
+.login-title {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700; /* font-bold */
+  color: #1f2937; /* text-gray-800 */
+  margin-bottom: 1.5rem; /* mb-6 */
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* space-y-4 */
+}
+
+.login-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form-label {
+  color: #374151; /* text-gray-700 */
+  margin-bottom: 0.25rem; /* mb-1 */
+}
+
+.login-form-input {
+  width: 100%; /* w-full */
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  outline: none;
+}
+
+.login-form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-400 */
+}
+
+.login-form-select {
+  width: 100%; /* w-full */
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  outline: none;
+}
+
+.login-form-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-400 */
+}
+
+.login-error-message {
+  color: #ef4444; /* text-red-500 */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.login-submit-button {
+  width: 100%; /* w-full */
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  padding: 0.5rem; /* py-2 */
+  border-radius: 0.25rem; /* rounded */
+  font-weight: 600; /* font-semibold */
+  transition: background-color 0.2s; /* transition-colors */
+  border: none;
+}
+
+.login-submit-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+/* Layout styles */
+.user-layout {
+  display: flex;
+  height: 100vh;
+  background-color: #e5e7eb; /* bg-gray-200 */
+}
+
+/* Main content area */
+.user-main {
+  flex: 1;
+  padding: 1.5rem; /* p-6 */
+  overflow: auto;
+}
+
+/* Main content area with sidebar */
+.user-main-with-sidebar {
+  margin-left: 10rem; /* ml-40 equivalent */
+}
+
+/* User detail styles */
+.user-detail-container {
+  max-width: 42rem; /* max-w-xl */
+  margin: 2rem auto; /* mx-auto mt-8 */
+  padding: 1.5rem; /* p-6 */
+  background-color: #fff; /* bg-white */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+  border-radius: 0.25rem; /* rounded */
+}
+
+.user-detail-title {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+  color: #1f2937; /* text-gray-800 */
+}
+
+.user-detail-info {
+  margin-bottom: 0.5rem; /* space-y-2 */
+  color: #374151; /* text-gray-700 */
+}
+
+.user-detail-info span {
+  font-weight: 600; /* font-semibold */
+}
+
+.user-detail-course-title {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600; /* font-semibold */
+  margin-bottom: 0.5rem; /* mb-2 */
+  color: #1f2937; /* text-gray-800 */
+}
+
+.user-detail-course-button {
+  color: #2563eb; /* text-blue-600 */
+  text-decoration: underline; /* hover:underline */
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.user-detail-course-button:hover {
+  text-decoration: underline;
+}
+
+.user-detail-password-section {
+  margin-top: 1.5rem; /* mt-6 */
+  border-top: 1px solid #e5e7eb; /* border-t */
+  padding-top: 1rem; /* pt-4 */
+}
+
+.user-detail-password-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600; /* font-semibold */
+  margin-bottom: 0.75rem; /* mb-3 */
+  color: #1f2937; /* text-gray-800 */
+}
+
+.user-detail-input {
+  width: 100%; /* w-full */
+  border: 1px solid #d1d5db; /* border */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  outline: none;
+}
+
+.user-detail-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-400 */
+}
+
+.user-detail-button {
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  border-radius: 0.25rem; /* rounded */
+}
+
+.user-detail-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.user-detail-error {
+  color: #ef4444; /* text-red-500 */
+}
+
+.user-detail-success {
+  color: #16a34a; /* text-green-600 */
+}
+
+/* User edit styles */
+.user-edit-container {
+  max-width: 28rem; /* Reduced from 32rem */
+  margin: 2rem auto; /* Reduced from 3rem */
+  padding: 1.5rem; /* p-6 */
+  background-color: #fff; /* bg-white */
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.user-edit-title {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.user-edit-input {
+  width: 421px; 
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.75rem 0.75rem; /* 增加垂直内边距以增大高度 */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+/* 添加课程选择区域和保存按钮之间的间距 */
+.user-edit-course-selector {
+  margin-bottom: 1.5rem; /* mb-6 */
+}
+
+.user-edit-button {
+  width: 100%; /* w-full */
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  border-radius: 0.25rem; /* rounded */
+  border: none; /* 移除边框 */
+}
+
+.user-edit-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.user-edit-error {
+  margin-bottom: 0.5rem; /* mb-2 */
+  color: #ef4444; /* text-red-500 */
+}
+
+.user-edit-success {
+  margin-bottom: 0.5rem; /* mb-2 */
+  color: #16a34a; /* text-green-500 */
+}
+
+/* User import styles */
+.user-import-container {
+  max-width: 32rem; /* max-w-lg */
+  margin: 1.5rem auto; /* mx-auto mt-6 */
+  padding: 1.5rem; /* p-6 */
+  background-color: #fff; /* bg-white */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+  border-radius: 0.25rem; /* rounded */
+}
+
+.user-import-title {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.user-import-info {
+  margin-bottom: 1rem; /* mb-4 */
+  font-size: 0.875rem; /* text-sm */
+  color: #374151; /* text-gray-700 */
+}
+
+.user-import-info span {
+  font-weight: 500; /* font-medium */
+}
+
+.user-import-label {
+  display: block;
+  margin-bottom: 0.25rem; /* mb-1 */
+}
+
+.user-import-input {
+  width: 100%; /* w-full */
+  border: 1px solid #d1d5db; /* border */
+  padding: 0.25rem 0.5rem; /* px-2 py-1 */
+  border-radius: 0.25rem; /* rounded */
+  margin-bottom: 0.75rem; /* mb-3 */
+}
+
+.user-import-button {
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  border-radius: 0.25rem; /* rounded */
+  border: none; /* 移除边框 */
+}
+
+.user-import-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.user-import-button:disabled {
+  opacity: 0.5; /* disabled:opacity-50 */
+}
+
+.user-import-error {
+  color: #ef4444; /* text-red-500 */
+  margin-top: 0.75rem; /* mt-3 */
+}
+
+.user-import-results {
+  margin-top: 1rem; /* mt-4 */
+}
+
+.user-import-results-title {
+  font-weight: 600; /* font-semibold */
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.user-import-results-list {
+  max-height: 16rem; /* max-h-64 */
+  overflow-y: auto; /* overflow-y-auto */
+  border: 1px solid #d1d5db; /* border */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem; /* p-2 */
+  background-color: #f9fafb; /* bg-gray-50 */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.user-import-result-item {
+  margin-bottom: 0.25rem; /* mb-1 */
+}
+
+.user-import-result-success {
+  color: #16a34a; /* text-green-600 */
+}
+
+.user-import-result-error {
+  color: #dc2626; /* text-red-600 */
+}
+
+/* User register styles */
+.user-register-container {
+  max-width: 28rem; /* max-w-md */
+  margin: 3rem auto; /* mx-auto mt-12 */
+  padding: 1.5rem; /* p-6 */
+  background-color: #fff; /* bg-white */
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.user-register-title {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700; /* font-bold */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.user-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* 增大间距 */
+}
+
+.user-register-input {
+  width: 430px; /* w-full */
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem 0.5rem; /* px-2 py-2 */
+  color: #374151; /* text-gray-700 */
+}
+
+.user-register-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-400 */
+  border-color: #3b82f6; /* focus:border-blue-400 */
+}
+
+.user-register-select {
+  width: 100%; /* w-full */
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem 0.5rem; /* px-2 py-2 */
+  color: #374151; /* text-gray-700 */
+}
+
+.user-register-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-400 */
+  border-color: #3b82f6; /* focus:border-blue-400 */
+}
+
+.user-register-button {
+  width: 100%; /* w-full */
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #fff;
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  border-radius: 0.25rem; /* rounded */
+  border: none; /* 移除边框 */
+  margin-top: 0.5rem; /* 减小顶部间距 */
+}
+
+.user-register-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.user-register-error {
+  margin-bottom: 0.5rem; /* mb-2 */
+  color: #ef4444; /* text-red-500 */
+}
+
+.user-register-success {
+  margin-bottom: 0.5rem; /* mb-2 */
+  color: #16a34a; /* text-green-500 */
+}
+
+/* User list styles */
+.user-list-container {
+  padding: 1.5rem; /* p-6 */
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.user-list-title {
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.user-list-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
+}
+
+.user-list-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem; /* gap-4 */
+  padding: 1.25rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #f9fafb 0%, #fff 100%); /* 渐变背景 */
+  border-radius: 0.75rem 0.75rem 0 0; /* 只在顶部保留圆角 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 更明显的阴影 */
+  border: 1px solid #e5e7eb; /* 添加边框 */
+  border-bottom: none; /* 移除底部边框 */
+  margin-bottom: 0; /* 移除底部外边距 */
+}
+
+.user-list-filter-group {
+  display: flex;
+  gap: 1rem; /* gap-4 */
+  align-items: center;
+}
+
+.user-list-input {
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem 1rem; /* 增加内边距 */
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem; /* text-sm */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* subtle shadow */
+}
+
+.user-list-input:focus {
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* focus:ring */
+  transform: translateY(-1px); /* 轻微上移效果 */
+}
+
+.user-list-input-username {
+  width: 10rem; /* w-40 */
+}
+
+.user-list-select {
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem 1rem; /* 增加内边距 */
+  width: 10rem; /* w-40 */
+  outline: none;
+  transition: all 0.2s;
+  background-color: #fff;
+  font-size: 0.875rem; /* text-sm */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* subtle shadow */
+  appearance: none; /* 移除默认箭头 */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+}
+
+.user-list-select:focus {
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* focus:ring */
+  transform: translateY(-1px); /* 轻微上移效果 */
+}
+
+.user-list-input-school {
+  width: 12rem; /* w-48 */
+}
+
+.user-list-input-profession {
+  width: 12rem; /* w-48 */
+}
+
+.user-list-search-button {
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* 渐变背景 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.user-list-search-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* hover:bg-blue-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4); /* 更明显的阴影 */
+}
+
+.user-list-search-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.3); /* 阴影变小 */
+}
+
+.user-list-action-buttons {
+  margin-left: auto; /* ml-auto */
+  display: flex;
+  gap: 0.75rem; /* gap-3 */
+}
+
+.user-list-new-user-button {
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* 绿色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.user-list-new-user-button:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%); /* hover:bg-green-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.4); /* 更明显的阴影 */
+}
+
+.user-list-new-user-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(16, 185, 129, 0.3); /* 阴影变小 */
+}
+
+.user-list-select-button {
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); /* 灰色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.user-list-select-button:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%); /* hover:bg-gray-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(107, 114, 128, 0.4); /* 更明显的阴影 */
+}
+
+.user-list-select-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(107, 114, 128, 0.3); /* 阴影变小 */
+}
+
+.user-list-batch-buttons {
+  display: flex;
+  gap: 0.75rem; /* gap-3 */
+}
+
+.user-list-batch-delete-button {
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); /* 红色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.user-list-batch-delete-button:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); /* hover:bg-red-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4); /* 更明显的阴影 */
+}
+
+.user-list-batch-delete-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(239, 68, 68, 0.3); /* 阴影变小 */
+}
+
+.user-list-cancel-button {
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); /* 灰色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+}
+
+.user-list-cancel-button:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%); /* hover:bg-gray-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(107, 114, 128, 0.4); /* 更明显的阴影 */
+}
+
+.user-list-cancel-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(107, 114, 128, 0.3); /* 阴影变小 */
+}
+
+.user-list-table-container {
+  background-color: #fff; /* bg-white */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  border-radius: 0 0 0.75rem 0.75rem; /* 只在底部保留圆角 */
+  overflow: hidden;
+  margin-top: 0; /* 移除顶部外边距 */
+  border: 1px solid #e5e7eb; /* 添加边框 */
+  border-top: none; /* 移除顶部边框 */
+}
+
+.user-list-table {
+  width: 100%;
+  text-align: left;
+  font-size: 0.875rem; /* text-sm */
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.user-list-table-header {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); /* 渐变背景 */
+  color: #1f2937; /* text-gray-800 */
+  border-bottom: 2px solid #9ca3af; /* 更粗的底部边框 */
+}
+
+.user-list-table-header-cell {
+  padding: 1.25rem 1rem; /* 增加内边距 */
+  font-weight: 700; /* font-bold */
+  text-transform: uppercase; /* uppercase */
+  letter-spacing: 0.05em; /* tracking-wide */
+  font-size: 1rem; /* 从text-xs增大到text-sm */
+  color: #374151; /* text-gray-700 */
+}
+
+.user-list-table-row {
+  transition: all 0.3s; /* 更平滑的过渡 */
+  border-bottom: 1px solid #e5e7eb; /* 更浅的底部边框 */
+}
+
+.user-list-table-row:last-child {
+  border-bottom: none;
+}
+
+.user-list-table-row:hover {
+  background-color: #f9fafb; /* hover:bg-gray-50 */
+  transform: scale(1.005); /* 轻微放大效果 */
+}
+
+.user-list-table-row-selected {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); /* 蓝色渐变背景 */
+}
+
+.user-list-table-cell {
+  padding: 1.25rem 1rem; /* 增加内边距 */
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb; /* 更浅的底部边框 */
+  transition: background-color 0.2s;
+}
+
+.user-list-username-link {
+  cursor: pointer;
+  color: #2563eb; /* text-blue-600 */
+  text-decoration: none;
+  font-weight: 600; /* font-semibold */
+  transition: all 0.2s;
+  position: relative;
+  padding-bottom: 2px;
+  transform: translateY(-9px); /* 上移一点点 */
+}
+
+.user-list-username-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #2563eb; /* blue-600 */
+  transition: width 0.3s ease;
+}
+
+.user-list-username-link:hover {
+  color: #1d4ed8; /* hover:text-blue-700 */
+}
+
+.user-list-username-link:hover::after {
+  width: 100%;
+}
+
+.user-list-action-button {
+  color: #3b82f6; /* text-blue-500 */
+  text-decoration: none; /* 隐藏下划线 */
+  border: none;
+  background: none;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  cursor: pointer;
+  margin-right: 0.5rem; /* 添加右侧间距 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+  font-weight: 600; /* font-semibold */
+  position: relative;
+  overflow: hidden;
+}
+
+.user-list-action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.user-list-action-button:hover {
+  background-color: #eff6ff; /* hover:bg-blue-50 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); /* 阴影 */
+}
+
+.user-list-action-button:hover::before {
+  left: 100%;
+}
+
+.user-list-delete-button {
+  color: #ef4444; /* text-red-500 */
+  text-decoration: none; /* 隐藏下划线 */
+  border: none;
+  background: none;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  cursor: pointer;
+  margin-right: 0.5rem; /* 添加右侧间距 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+  font-weight: 600; /* font-semibold */
+  position: relative;
+  overflow: hidden;
+}
+
+.user-list-delete-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.user-list-delete-button:hover {
+  background-color: #fef2f2; /* hover:bg-red-50 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2); /* 阴影 */
+}
+
+.user-list-delete-button:hover::before {
+  left: 100%;
+}
+
+.user-list-remove-button {
+  color: #f97316; /* text-orange-500 */
+  text-decoration: none; /* 隐藏下划线 */
+  border: none;
+  background: none;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  cursor: pointer;
+  margin-right: 0.5rem; /* 添加右侧间距 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+  font-weight: 600; /* font-semibold */
+  position: relative;
+  overflow: hidden;
+}
+
+.user-list-remove-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.user-list-remove-button:hover {
+  background-color: #fff7ed; /* hover:bg-orange-50 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2); /* 阴影 */
+}
+
+.user-list-remove-button:hover::before {
+  left: 100%;
+}
+
+.user-list-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #fff 0%, #f9fafb 100%); /* 渐变背景 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  border-radius: 0 0 0.75rem 0.75rem; /* 只在底部保留圆角 */
+  margin-top: 0; /* 移除顶部间距 */
+  border: 1px solid #e5e7eb; /* 添加边框 */
+  border-top: none; /* 移除顶部边框 */
+}
+
+.user-list-pagination-button {
+  padding: 0.75rem 1.25rem; /* 增加内边距 */
+  border: 1px solid #d1d5db; /* border */
+  border-radius: 0.5rem; /* rounded-lg */
+  background: linear-gradient(135deg, #fff 0%, #f9fafb 100%); /* 渐变背景 */
+  color: #374151; /* text-gray-700 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+  margin: 0 0.25rem; /* 添加水平间距 */
+}
+
+.user-list-pagination-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); /* hover:bg-gray-100 */
+  border-color: #9ca3af; /* hover:border-gray-400 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 更明显的阴影 */
+}
+
+.user-list-pagination-button:disabled {
+  opacity: 0.5; /* disabled:opacity-50 */
+  cursor: not-allowed;
+  transform: none; /* 禁用时取消变换 */
+}
+
+.user-list-pagination-info {
+  margin: 0 1.5rem; /* 增加水平间距 */
+  font-weight: 600; /* font-semibold */
+  color: #1f2937; /* text-gray-800 */
+  font-size: 0.875rem; /* text-sm */
+}

@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/components.css'
 import { ref, computed, watch, onMounted } from "vue";
 import axios from "axios";
 
@@ -53,21 +54,21 @@ watch(selectedIds, (val) => {
 
 <template>
   <div>
-    <label class="block text-gray-700 mb-1">选择题单</label>
+    <label class="problemset-selector-label">选择题单</label>
 
     <input
       v-model="search"
       placeholder="搜索题单..."
-      class="w-full p-2 mb-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      class="problemset-selector-input"
     />
 
-    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-300 rounded p-2">
-      <label v-for="p in filteredProblemSets" :key="p.id" class="flex items-center space-x-2">
+    <div class="problemset-selector-list">
+      <label v-for="p in filteredProblemSets" :key="p.id" class="problemset-selector-item">
         <input type="checkbox" :value="p.id" v-model="selectedIds"
-               class="w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-400" />
-        <span class="text-gray-700">{{ p.title }}</span>
+               class="problemset-selector-checkbox" />
+        <span class="problemset-selector-title">{{ p.title }}</span>
       </label>
-      <div v-if="filteredProblemSets.length === 0" class="text-gray-400 text-sm">无匹配题单</div>
+      <div v-if="filteredProblemSets.length === 0" class="problemset-selector-empty">无匹配题单</div>
     </div>
   </div>
 </template>

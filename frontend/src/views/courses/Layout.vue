@@ -4,6 +4,7 @@ import Sidebar from '@/components/Sidebar.vue';
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
+import '@/assets/courses.css';
 
 const userStore = useUserStore();
 const views = ref([
@@ -13,17 +14,17 @@ const views = ref([
 </script>
 
 <template>
-  <div class="flex flex-1 relative">
+  <div class="course-layout">
     <!-- 固定 Sidebar -->
     <Sidebar
       v-if="userStore.usertype === 'admin'"
       :views="views"
-      class="fixed left-0 top-0 h-full w-60"
+      class="sidebar-container"
     />
 
     <main
-      class="flex-1 p-6 overflow-auto"
-      :class="userStore.usertype === 'admin' ? 'ml-60' : ''"
+      class="course-main"
+      :class="userStore.usertype === 'admin' ? 'course-main-with-sidebar' : ''"
     >
       <RouterView />
     </main>

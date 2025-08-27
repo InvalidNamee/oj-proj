@@ -117,9 +117,10 @@ const updateReferenceSolution = (rs) => {
 </script>
 
 <template>
-  <!-- 标题 -->
-  <input v-model="title" placeholder="标题"
-    class="w-full border border-gray-300 rounded px-2 py-2 focus:ring-2 focus:ring-blue-400" />
+  <div class="add-coding-problem-container">
+    <!-- 标题 -->
+    <input v-model="title" placeholder="标题"
+      class="add-coding-problem-input" />
 
   <!-- 题目描述 -->
   <textarea v-model="description" rows="6" placeholder="题目描述"
@@ -138,21 +139,21 @@ const updateReferenceSolution = (rs) => {
   <!-- 标程 + 自测 -->
   <SolutionPanel v-model="referenceSolution" :test-cases="allTestCases" />
 
-  <!-- 限制条件 -->
-  <div class="grid grid-cols-2 gap-4">
-    <input v-model.number="maxTime" type="number" placeholder="时间限制(s)"
-      class="w-full border border-gray-300 rounded px-2 py-2" />
-    <input v-model.number="maxMemory" type="number" placeholder="内存限制(MB)"
-      class="w-full border border-gray-300 rounded px-2 py-2" />
+    <!-- 限制条件 -->
+    <div class="add-coding-problem-grid">
+      <input v-model.number="maxTime" type="number" placeholder="时间限制 (s)"
+        class="add-coding-problem-input" />
+      <input v-model.number="maxMemory" type="number" placeholder="内存限制 (MB)"
+        class="add-coding-problem-input" />
+    </div>
+     <!-- 所属课程（固定） -->
+    <input type="text" :value="courseName" disabled
+      class="add-coding-problem-input add-coding-problem-disabled-input" />
+
+    <!-- 提交按钮 -->
+    <button @click="submit" :disabled="submitting"
+      class="add-coding-problem-submit-button">
+      {{ submitting ? '提交中…' : '提交' }}
+    </button>
   </div>
-
-  <!-- 提交按钮 -->
-  <button @click="submit" :disabled="submitting" class="w-full px-3 py-2 rounded text-white"
-    :class="submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'">
-    {{ submitting ? '提交中…' : '提交' }}
-  </button>
-
-  <!-- GeminiPrompt 悬浮 -->
-  <GeminiPrompt @update:problem="updateProblem" @update:test_cases="updateTestCases"
-    @update:reference_solution="updateReferenceSolution" />
 </template>

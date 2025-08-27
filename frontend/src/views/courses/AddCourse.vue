@@ -46,24 +46,26 @@ const submitCourse = async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-lg mx-auto">
-    <h2 class="text-2xl font-bold mb-4">添加课程</h2>
+  <div class="course-add-container">
+    <h2 class="course-add-title">添加课程</h2>
 
     <div class="mb-4">
-      <label class="block mb-1">课程名称</label>
-      <input v-model="courseName" class="w-full p-2 border border-gray-300 rounded" placeholder="请输入课程名称" />
+      <label class="course-add-label">课程名称</label>
+      <input v-model="courseName" class="course-add-input" placeholder="请输入课程名称" />
     </div>
 
     <div class="mb-4">
-      <label class="block mb-1">课程描述</label>
-      <textarea v-model="courseDescription" class="w-full p-2 border border-gray-300 rounded" placeholder="请输入课程描述"></textarea>
+      <label class="course-add-label">课程描述</label>
+      <textarea v-model="courseDescription" class="course-add-textarea" placeholder="请输入课程描述"></textarea>
     </div>
 
     <TeacherSelector v-model="selectedTeacherIds" :teachers="teachers" class="mb-4" />
+    
+    <div class="course-add-spacer"></div>
 
-    <div class="flex gap-2">
-      <button @click="submitCourse" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">提交</button>
-      <button @click="router.back()" class="border px-4 py-2 rounded hover:bg-gray-100">取消</button>
+    <div class="course-add-button-container">
+      <button @click="submitCourse" class="course-add-submit-button">提交</button>
+      <button @click="router.back()" class="course-add-cancel-button">取消</button>
     </div>
   </div>
 </template>
