@@ -74,8 +74,10 @@ watch(
 <template>
   <div class="course-main">
     <div class="course-detail-container">
-      <h1 class="course-detail-title">{{ course.course_name }}</h1>
-      <p class="course-detail-description">{{ course.description || "暂无课程描述" }}</p>
+      <p class="course-detail-description">
+        <span class="course-name-in-description">{{ course.course_name }}</span>
+        {{ course.description || "暂无课程描述" }}
+      </p>
 
       <div class="mb-6">
         <h2 class="course-detail-section-title">教师</h2>

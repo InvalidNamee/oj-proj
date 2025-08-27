@@ -124,6 +124,7 @@ const deleteBatch = async () => {
       <table class="groups-table">
         <thead class="groups-table-header">
           <tr class="groups-table-header-row">
+            <th class="groups-table-header-cell"></th>
             <th class="groups-table-header-cell" v-if="batchMode">
               <input type="checkbox" :checked="selected.length === groups.length"
                 @change="selected = $event.target.checked ? groups.map(g => g.id) : []" />
@@ -138,6 +139,7 @@ const deleteBatch = async () => {
         </thead>
         <tbody>
           <tr v-for="g in groups" :key="g.id" class="groups-table-row">
+            <td class="groups-table-cell"></td>
             <td class="groups-table-cell" v-if="batchMode">
               <input type="checkbox" v-model="selected" :value="g.id" />
             </td>
@@ -156,7 +158,7 @@ const deleteBatch = async () => {
             </td>
           </tr>
           <tr v-if="groups.length === 0" class="groups-empty-row">
-            <td :colspan="batchMode ? 7 : 6" class="groups-table-cell">
+            <td :colspan="batchMode ? 8 : 7" class="groups-table-cell">
               暂无分组
             </td>
           </tr>

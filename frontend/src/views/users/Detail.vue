@@ -79,19 +79,44 @@ const goToCourse = (courseId) => {
     <h2 class="user-detail-title">用户信息</h2>
 
     <div class="user-detail-info">
-      <p><span>ID:</span> {{ userData?.id }}</p>
-      <p><span>UID:</span> {{ userData?.uid }}</p>
-      <p><span>用户名:</span> {{ userData?.username }}</p>
-      <p><span>身份:</span> {{ identity }}</p>
-      <p><span>注册时间:</span> {{ userData?.timestamp }}</p>
-      <p v-if="userData?.school"><span>学校:</span> {{ userData?.school }}</p>
-      <p v-if="userData?.profession"><span>专业:</span> {{ userData?.profession }}</p>
+      <div class="user-detail-info-header">
+      </div>
+      <div class="user-detail-info-content">
+        <div class="user-detail-info-row">
+          <span class="user-detail-info-label">ID:</span>
+          <span class="user-detail-info-value">{{ userData?.id }}</span>
+        </div>
+        <div class="user-detail-info-row">
+          <span class="user-detail-info-label">UID:</span>
+          <span class="user-detail-info-value">{{ userData?.uid }}</span>
+        </div>
+        <div class="user-detail-info-row">
+          <span class="user-detail-info-label">用户名:</span>
+          <span class="user-detail-info-value">{{ userData?.username }}</span>
+        </div>
+        <div class="user-detail-info-row">
+          <span class="user-detail-info-label">身份:</span>
+          <span class="user-detail-info-value">{{ identity }}</span>
+        </div>
+        <div class="user-detail-info-row">
+          <span class="user-detail-info-label">注册时间:</span>
+          <span class="user-detail-info-value">{{ userData?.timestamp }}</span>
+        </div>
+        <div v-if="userData?.school" class="user-detail-info-row">
+          <span class="user-detail-info-label">学校:</span>
+          <span class="user-detail-info-value">{{ userData?.school }}</span>
+        </div>
+        <div v-if="userData?.profession" class="user-detail-info-row">
+          <span class="user-detail-info-label">专业:</span>
+          <span class="user-detail-info-value">{{ userData?.profession }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- 新增课程展示区 -->
-    <div v-if="courses.length" class="mt-6">
+    <div v-if="courses.length" class="user-detail-course-section">
       <h3 class="user-detail-course-title">{{ canChangePassword ? "我的课程" : "ta 的课程" }}</h3>
-      <ul class="space-y-1" style="list-style-type: none; padding-left: 0;">
+      <ul class="user-detail-course-list">
         <li v-for="course in courses" :key="course.id">
           <button
             class="user-detail-course-button"
@@ -107,7 +132,7 @@ const goToCourse = (courseId) => {
     <div v-if="canChangePassword" class="user-detail-password-section">
       <h3 class="user-detail-password-title">修改密码</h3>
 
-      <div class="space-y-3">
+      <div class="user-detail-password-form">
         <input
           v-model="currentPassword"
           type="password"

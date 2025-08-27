@@ -80,7 +80,9 @@ onMounted(fetchUser);
 
 <template>
   <div class="user-edit-container">
-    <h2 class="user-edit-title">修改用户信息</h2>
+    <div class="user-edit-header">
+      <h2 class="user-edit-title">修改用户信息</h2>
+    </div>
 
     <div v-if="error" class="user-edit-error">{{ error }}</div>
     <div v-if="success" class="user-edit-success">{{ success }}</div>

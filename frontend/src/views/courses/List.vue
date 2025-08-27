@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
+import '@/assets/courses.css';
 
 const router = useRouter();
 const route = useRoute();

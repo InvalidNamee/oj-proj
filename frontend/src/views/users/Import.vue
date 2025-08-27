@@ -49,7 +49,17 @@ const importUsers = async () => {
 
 <template>
   <div class="user-import-container">
-    <h2 class="user-import-title">批量导入学生</h2>
+    <h2 class="user-import-title">批量导入用户</h2>
+
+    <div class="user-import-instructions">
+      <p>Excel文件第一行必须是：<br><strong class="user-import-field-names">username gender profession 班级 uid password school usertype</strong></p>
+      <p>然后就可以在下方相应填写信息。</p>
+      <p><strong>注意：</strong></p>
+      <ul>
+        <li>教师只能注册学生（usertype必须是student，注意大小写）</li>
+        <li>管理员可以注册管理员（usertype为admin）、教师（usertype是teacher）、学生（usertype是student）</li>
+      </ul>
+    </div>
 
     <div class="user-import-info">
       当前课程：<span>{{ courseName }}</span>

@@ -23,7 +23,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="submission-detail-container">
+  <div class="submissions-list-wrapper">
+    <div class="submission-detail-container">
     <h2 class="submission-detail-title">提交详情</h2>
 
     <!-- 上方详细信息 -->
@@ -81,6 +82,7 @@ onMounted(async () => {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   </div>
 </template>
