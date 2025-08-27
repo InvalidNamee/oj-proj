@@ -44,6 +44,7 @@ export default {
 </script>
 
 <script setup>
+import '@/assets/components.css'
 import { marked } from "marked";
 import hljs from "highlight.js";
 
@@ -60,9 +61,9 @@ renderer.code = ({ text, lang }) => {
   }
   // 加一个复制按钮
   return `
-    <pre class="code-block relative group">
-      <button class="copy-btn absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
-        onclick="navigator.clipboard.writeText(\`${text.replace(/`/g, "\\`")}\`)">
+    <pre class="markdown-code-block">
+      <button class="markdown-copy-btn"
+        onclick="navigator.clipboard.writeText(\`${text.replace(/`/g, "\`")}\`)">
         📋
       </button>
       <code class="hljs ${lang}">${highlighted}</code>

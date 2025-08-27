@@ -1,4 +1,5 @@
 <script setup>
+import '@/assets/components.css'
 import { ref, watch } from 'vue'
 
 const props = defineProps({
@@ -73,16 +74,16 @@ watch(answers, () => {
 </script>
 
 <template>
-  <div class="space-y-4 mt-4">
-    <div class="flex justify-end mb-2">
-      <button @click="clearAnswers" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+  <div class="legacy-answer-area-container">
+    <div class="legacy-answer-area-header">
+      <button @click="clearAnswers" class="legacy-answer-area-clear-button">
         清空
       </button>
     </div>
 
     <!-- 单选题 -->
     <div v-if="problemType === 'single' && options.length">
-      <div v-for="opt in options" :key="opt.id" class="flex items-center space-x-2">
+      <div v-for="opt in options" :key="opt.id" class="legacy-answer-area-option-item">
         <input
           type="radio"
           :value="opt.id"
@@ -95,7 +96,7 @@ watch(answers, () => {
 
     <!-- 多选题 -->
     <div v-else-if="problemType === 'multiple' && options.length">
-      <div v-for="opt in options" :key="opt.id" class="flex items-center space-x-2">
+      <div v-for="opt in options" :key="opt.id" class="legacy-answer-area-option-item">
         <input
           type="checkbox"
           :value="opt.id"
@@ -108,15 +109,15 @@ watch(answers, () => {
 
     <!-- 填空题 -->
     <div v-else-if="problemType === 'fill'">
-      <div v-for="(ans, idx) in answers" :key="idx" class="flex items-center space-x-2">
+      <div v-for="(ans, idx) in answers" :key="idx" class="legacy-answer-area-fill-item">
         <input
           v-model="answers[idx]"
           placeholder="填空答案"
-          class="flex-1 border border-gray-300 rounded px-2 py-1"
+          class="legacy-answer-area-fill-input"
         />
-        <button @click="removeFillAnswer(idx)" class="text-red-500">删除</button>
+        <button @click="removeFillAnswer(idx)" class="legacy-answer-area-delete-button">删除</button>
       </div>
-      <button @click="addFillAnswer" class="mt-2 bg-gray-200 px-2 py-1 rounded">添加填空</button>
+      <button @click="addFillAnswer" class="legacy-answer-area-add-button">添加填空</button>
     </div>
 
     <!-- 主观题 -->
@@ -125,7 +126,7 @@ watch(answers, () => {
         v-model="answers"
         rows="6"
         placeholder="请输入答案"
-        class="w-full border border-gray-300 rounded px-3 py-2"
+        class="legacy-answer-area-textarea"
       ></textarea>
     </div>
   </div>

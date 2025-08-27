@@ -5,6 +5,7 @@ import { useRoute, useRouter } from "vue-router"
 import axios from "axios"
 import MarkdownIt from "markdown-it"
 import StatusBadge from "@/components/StatusBadge.vue"
+import '@/assets/problemsets.css'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,47 +39,46 @@ onMounted(fetchProblemset)
 </script>
 
 <template>
-  <div class="p-6">
+  <div class="problemset-detail-container">
     <!-- 题单标题 -->
-    <h1 class="text-3xl font-bold mb-2">{{ problemset.title }}</h1>
-    <p class="text-gray-500 mb-4">
+    <h1 class="problemset-detail-title">{{ problemset.title }}</h1>
+    <p class="problemset-detail-meta">
       所属课程：{{ problemset.course?.title }}
-      <span class="ml-4">创建时间：{{ problemset.timestamp }}</span>
+      <span>创建时间：{{ problemset.timestamp }}</span>
     </p>
 
     <!-- 描述 markdown-it 渲染 -->
     <div
       v-html="renderMarkdown(problemset.description)"
-      class="prose max-w-none mb-6"
+      class="problemset-detail-description prose max-w-none"
     />
 
     <!-- 题目表格 -->
-    <div class="bg-white shadow rounded-lg overflow-hidden w-4/5 mx-auto">
-      <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50 text-gray-700">
+    <div class="problemset-detail-table-container">
+      <table class="problemset-detail-table">
+        <thead>
           <tr>
-            <th class="p-3">ID</th>
-            <th class="p-3">标题</th>
-            <th class="p-3">状态</th>
-            <th class="p-3">操作</th>
+            <th>ID</th>
+            <th>标题</th>
+            <th>状态</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="problem in problemset.problems"
             :key="problem.id"
-            class="hover:bg-gray-50 border-b border-gray-200 transition"
           >
-            <td class="p-3">{{ problem.id }}</td>
-            <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click="goToProblem(problem.id)">
+            <td>{{ problem.id }}</td>
+            <td class="problemset-detail-problem-title" @click="goToProblem(problem.id)">
               {{ problem.title }}
             </td>
-            <td class="p-3">
+            <td>
               <StatusBadge v-if="problem.submission_id" :status="problem.status" :score="problem.score" @click="goToSubmission(problem.submission_id)"/>
               <span v-else class="text-gray-500">未提交</span>
             </td>
-            <td class="p-3">
-              <button class="text-blue-500 hover:underline" @click="goToProblem(problem.id)">进入</button>
+            <td>
+              <button class="problemset-detail-action-button" @click="goToProblem(problem.id)">进入</button>
             </td>
           </tr>
         </tbody>

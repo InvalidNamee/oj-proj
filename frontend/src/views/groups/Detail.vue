@@ -1,4 +1,5 @@
 <script setup>
+import "@/assets/groups.css";
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRoute } from 'vue-router'
@@ -13,24 +14,24 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
-    <h2 class="text-xl font-bold mb-4">分组详情</h2>
+  <div class="groups-detail-container">
+    <h2 class="groups-detail-title">分组详情</h2>
     <div v-if="group">
-      <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4">
-        <div><b>ID：</b>{{ group.id }}</div>
-        <div><b>名称：</b>{{ group.name }}</div>
-        <div class="col-span-2"><b>描述：</b>{{ group.description }}</div>
-        <div><b>课程：</b>{{ group.course.name }} (ID: {{ group.course.id }})</div>
-        <div><b>学生数：</b>{{ group.students.length }}</div>
+      <div class="groups-detail-grid">
+        <div class="groups-detail-grid-item"><b>ID：</b>{{ group.id }}</div>
+        <div class="groups-detail-grid-item"><b>名称：</b>{{ group.name }}</div>
+        <div class="groups-detail-grid-item groups-detail-grid-item-full"><b>描述：</b>{{ group.description }}</div>
+        <div class="groups-detail-grid-item"><b>课程：</b>{{ group.course.name }} (ID: {{ group.course.id }})</div>
+        <div class="groups-detail-grid-item"><b>学生数：</b>{{ group.students.length }}</div>
       </div>
       <div>
-        <h3 class="font-semibold mb-2">学生列表</h3>
-        <ul class="list-disc pl-5 mb-4">
-          <li v-for="s in group.students" :key="s.id">{{ s.username }} (ID: {{ s.id }})</li>
+        <h3 class="groups-detail-section-title">学生列表</h3>
+        <ul class="groups-detail-list">
+          <li class="groups-detail-list-item" v-for="s in group.students" :key="s.id">{{ s.username }} (ID: {{ s.id }})</li>
         </ul>
-        <h3 class="font-semibold mb-2">题单列表</h3>
-        <ul class="list-disc pl-5">
-          <li v-for="ps in group.problemsets" :key="ps.id">{{ ps.title }} (ID: {{ ps.id }})</li>
+        <h3 class="groups-detail-section-title">题单列表</h3>
+        <ul class="groups-detail-list">
+          <li class="groups-detail-list-item" v-for="ps in group.problemsets" :key="ps.id">{{ ps.title }} (ID: {{ ps.id }})</li>
         </ul>
       </div>
     </div>

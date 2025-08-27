@@ -3,6 +3,7 @@ import { ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { useUserStore } from "@/stores/user";
+import "@/assets/problemsets.css";
 
 const props = defineProps({
   problemId: { type: [String, Number], required: true },
@@ -53,26 +54,26 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="edit-coding-problem-container">
     <input v-model="title" placeholder="标题"
-      class="w-full border border-gray-300 rounded px-3 py-2 text-gray-700" />
+      class="edit-coding-problem-input" />
     <textarea v-model="description" rows="6" placeholder="题目描述"
-      class="w-full border border-gray-300 rounded px-3 py-2 text-gray-700"></textarea>
+      class="edit-coding-problem-textarea"></textarea>
 
-    <div class="grid grid-cols-2 gap-4">
+    <div class="edit-coding-problem-grid">
       <input v-model="maxTime" type="number" placeholder="时间限制 (s)"
-        class="w-full border border-gray-300 rounded px-3 py-2 text-gray-700" />
+        class="edit-coding-problem-input" />
       <input v-model="maxMemory" type="number" placeholder="内存限制 (MB)"
-        class="w-full border border-gray-300 rounded px-3 py-2 text-gray-700" />
+        class="edit-coding-problem-input" />
     </div>
 
     <!-- 课程选择 -->
-    <select v-model="courseId" class="w-full border border-gray-300 rounded px-3 py-2 text-gray-700">
+    <select v-model="courseId" class="edit-coding-problem-select">
       <option v-for="c in courses" :key="c.id" :value="c.id">{{ c.name }}</option>
     </select>
 
     <button @click="submit" :disabled="submitting"
-      class="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">
+      class="edit-coding-problem-button">
       {{ submitting ? "提交中…" : "提交修改" }}
     </button>
   </div>

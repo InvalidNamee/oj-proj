@@ -3,6 +3,7 @@ import { ref, watch, onMounted } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
+import '@/assets/users.css';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -147,68 +148,74 @@ onMounted(fetchUsers);
 </script>
 
 <template>
-  <div class="p-6">
-    <h2 class="text-2xl font-bold mb-4">用户列表</h2>
+  <div class="user-list-container">
+    <h2 class="user-list-title">用户列表</h2>
 
     <!-- 筛选栏 + 操作按钮 -->
-    <div class="mb-4 flex flex-wrap items-center gap-2">
-      <input v-model="filters.username" placeholder="用户名" class="border border-gray-500 rounded px-2 py-1 w-36" />
-      <select v-model="filters.usertype" class="border border-gray-500 rounded px-2 py-1 w-32">
-        <option value="">全部类型</option>
-        <option value="student">学生</option>
-        <option value="teacher">教师</option>
-        <option value="admin">管理员</option>
-      </select>
-      <input v-model="filters.school" placeholder="学校" class="border border-gray-500 rounded px-2 py-1 w-40" />
-      <input v-model="filters.profession" placeholder="专业" class="border border-gray-500 rounded px-2 py-1 w-40" />
-      <button @click="page = 1; updateRoute()" class="px-3 py-1 bg-blue-500 text-white rounded">搜索</button>
+    <div class="user-list-filter-bar">
+      <div class="user-list-filter-group">
+        <input v-model="filters.username" placeholder="用户名" class="user-list-input user-list-input-username" />
+        <select v-model="filters.usertype" class="user-list-select">
+          <option value="">全部类型</option>
+          <option value="student">学生</option>
+          <option value="teacher">教师</option>
+          <option value="admin">管理员</option>
+        </select>
+      </div>
+      <div class="user-list-filter-group">
+        <input v-model="filters.school" placeholder="学校" class="user-list-input user-list-input-school" />
+        <input v-model="filters.profession" placeholder="专业" class="user-list-input user-list-input-profession" />
+      </div>
+      <button @click="page = 1; updateRoute()" class="user-list-search-button">搜索</button>
       <!-- 操作按钮区，放最右 -->
-      <div class="ml-auto flex space-x-2">
-        <button @click="$router.push('/users/add')"
-          class="px-3 py-1 bg-blue-500 text-white rounded shadow hover:bg-blue-600">新建用户</button>
+      <div class="user-list-action-buttons">
+        <button @click="$router.push('/users/register')"
+          class="user-list-new-user-button">新建用户</button>
         <button v-if="!selectMode" @click="selectMode = true"
-          class="px-3 py-1 bg-gray-500 text-white rounded shadow hover:bg-gray-600">选择</button>
-        <div v-else class="flex space-x-2">
-          <button @click="deleteBatch" class="px-3 py-1 bg-red-600 text-white rounded shadow">批量删除</button>
+          class="user-list-select-button">选择</button>
+        <div v-else class="user-list-batch-buttons">
+          <button @click="deleteBatch" class="user-list-batch-delete-button">批量删除</button>
           <button @click="selectMode = false; selected = []"
-            class="px-3 py-1 bg-gray-500 text-white rounded shadow">取消</button>
+            class="user-list-cancel-button">取消</button>
         </div>
       </div>
     </div>
 
     <!-- 表格 -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50 text-gray-700">
+    <div class="user-list-table-container">
+      <table class="user-list-table">
+        <thead class="user-list-table-header">
           <tr>
-            <th class="p-3" v-if="selectMode"></th>
-            <th class="p-3">UID</th>
-            <th class="p-3">用户名</th>
-            <th class="p-3">类型</th>
-            <th class="p-3">学校</th>
-            <th class="p-3">专业</th>
-            <th class="p-3">注册时间</th>
-            <th class="p-3">操作</th>
+            <th class="user-list-table-header-cell"></th>
+            <th class="user-list-table-header-cell" v-if="selectMode"></th>
+            <th class="user-list-table-header-cell">UID</th>
+            <th class="user-list-table-header-cell">用户名</th>
+            <th class="user-list-table-header-cell">类型</th>
+            <th class="user-list-table-header-cell">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;学校</th>
+            <th class="user-list-table-header-cell">专业</th>
+            <th class="user-list-table-header-cell">注册时间</th>
+            <th class="user-list-table-header-cell">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="u in users" :key="u.id" @click="toggleSelect(u.id)"
-            :class="['hover:bg-gray-50 transition', selectMode && selected.includes(u.id) ? 'bg-blue-100' : '']">
-            <td class="p-3" v-if="selectMode">
+            :class="[selectMode && selected.includes(u.id) ? 'user-list-table-row-selected' : 'user-list-table-row']">
+            <td class="user-list-table-cell"></td>
+            <td class="user-list-table-cell" v-if="selectMode">
               <input type="checkbox" :value="u.id" v-model="selected" @click.stop />
             </td>
-            <td class="p-3">{{ u.uid }}</td>
-            <td class="p-3 cursor-pointer text-blue-600 hover:underline" @click.stop="goDetail(u.id)">{{ u.username }}
+            <td class="user-list-table-cell">{{ u.uid }}</td>
+            <td class="user-list-table-cell user-list-username-link" @click.stop="goDetail(u.id)">{{ u.username }}
             </td>
-            <td class="p-3">{{ userTypeMap[u.usertype] || u.usertype }}</td>
-            <td class="p-3">{{ u.school || "-" }}</td>
-            <td class="p-3">{{ u.profession || "-" }}</td>
-            <td class="p-3">{{ new Date(u.timestamp).toLocaleString() }}</td>
-            <td class="p-3 space-x-2">
-              <button class="text-blue-500 hover:underline" @click.stop="goEdit(u.id)">编辑</button>
-              <button v-if="userStore.usertype === 'admin'" class="text-red-500 hover:underline"
+            <td class="user-list-table-cell">{{ userTypeMap[u.usertype] || u.usertype }}</td>
+            <td class="user-list-table-cell">{{ u.school || "-" }}</td>
+            <td class="user-list-table-cell">{{ u.profession || "-" }}</td>
+            <td class="user-list-table-cell">{{ new Date(u.timestamp).toLocaleString() }}</td>
+            <td class="user-list-table-cell">
+              <button class="user-list-action-button" @click.stop="goEdit(u.id)">编辑</button>
+              <button v-if="userStore.usertype === 'admin'" class="user-list-delete-button"
                 @click.stop="deleteOne(u.id)">删除</button>
-              <button v-if="userStore.currentCourseId" class="text-orange-500 hover:underline" @click.stop="removeFromCourse(u.id)">
+              <button v-if="userStore.currentCourseId" class="user-list-remove-button" @click.stop="removeFromCourse(u.id)">
                 移除
               </button>
             </td>
@@ -218,12 +225,12 @@ onMounted(fetchUsers);
     </div>
 
     <!-- 分页器 -->
-    <div class="flex justify-center items-center mt-4 space-x-2">
+    <div class="user-list-pagination">
       <button @click="changePage(page - 1)" :disabled="page === 1"
-        class="px-3 py-1 border rounded disabled:opacity-50">上一页</button>
-      <span>第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
+        class="user-list-pagination-button">上一页</button>
+      <span class="user-list-pagination-info">第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
       <button @click="changePage(page + 1)" :disabled="page === pages"
-        class="px-3 py-1 border rounded disabled:opacity-50">下一页</button>
+        class="user-list-pagination-button">下一页</button>
     </div>
   </div>
 </template>

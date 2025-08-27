@@ -84,17 +84,17 @@ const changePage = (p) => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto mt-8 p-6 rounded-xl bg-white shadow">
-    <h2 class="text-2xl font-bold mb-4">题单列表</h2>
+  <div class="problemset-list-container">
+    <h2 class="problemset-list-title">题单列表</h2>
 
     <!-- 顶部操作栏 + 搜索框 -->
-    <div class="flex justify-between items-center mb-4">
+    <div class="problemset-list-toolbar">
       <!-- 左侧搜索框 -->
-      <div class="flex items-center space-x-2">
+      <div class="problemset-list-search-container">
         <input v-model="keyword" @keyup.enter="page = 1; fetchProblemSets()" placeholder="按题单标题筛选"
-          class="border border-gray-500 rounded px-3 py-1" />
+          class="problemset-list-search-input" />
         <button @click="page = 1; fetchProblemSets()"
-          class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
+          class="problemset-list-button problemset-list-primary-button">
           筛选
         </button>
       </div>
@@ -102,15 +102,15 @@ const changePage = (p) => {
       <!-- 右侧操作按钮 -->
       <div class="flex items-center space-x-2">
         <button @click="router.push('/problemsets/add')"
-          class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
+          class="problemset-list-button problemset-list-primary-button">
           新建题单
         </button>
         <button @click="showSelect = !showSelect; selected = []"
-          class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">
+          class="problemset-list-button problemset-list-secondary-button">
           {{ showSelect ? "取消选择" : "选择" }}
         </button>
         <button v-if="showSelect && selected.length > 0" @click="deleteBatch"
-          class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer">
+          class="problemset-list-button problemset-list-danger-button">
           删除选中
         </button>
       </div>
@@ -118,35 +118,35 @@ const changePage = (p) => {
 
 
     <!-- 题单列表 -->
-    <div class="space-y-2">
+    <div class="problemset-list-items-container">
       <div v-for="ps in problemsets" :key="ps.id"
-        class="p-4 border border-gray-300 rounded flex justify-between items-center hover:shadow-md cursor-pointer transition-shadow duration-200"
-        :class="showSelect && selected.includes(ps.id) ? 'bg-blue-50 border-blue-400' : ''"
+        class="problemset-list-item"
+        :class="showSelect && selected.includes(ps.id) ? 'selected' : ''"
         @click="handleSelect(ps.id)">
-        <div class="flex-1">
-          <h3 @click.stop="goDetail(ps.id)" class="font-semibold text-lg">{{ ps.title }}</h3>
-          <p class="text-sm text-gray-500">{{ ps.description }}</p>
-          <p class="text-xs text-gray-400">
+        <div class="problemset-list-item-content">
+          <h3 @click.stop="goDetail(ps.id)" class="problemset-list-item-title">{{ ps.title }}</h3>
+          <p class="problemset-list-item-description">{{ ps.description }}</p>
+          <p class="problemset-list-item-meta">
             课程: {{ ps.course?.title || '无' }} | 题目数: {{ ps.num_problems }}
           </p>
         </div>
-        <div class="space-x-2 flex items-center">
-          <input v-if="showSelect" type="checkbox" v-model="selected" :value="ps.id" @click.stop />
-          <button @click.stop="goEdit(ps.id)" class="text-blue-500 hover:underline">编辑</button>
-          <button @click.stop="deleteOne(ps.id)" class="text-red-500 hover:underline">删除</button>
+        <div class="problemset-list-item-actions">
+          <input v-if="showSelect" type="checkbox" v-model="selected" :value="ps.id" @click.stop class="problemset-list-item-checkbox" />
+          <button @click.stop="goEdit(ps.id)" class="problemset-list-item-action-link">编辑</button>
+          <button @click.stop="deleteOne(ps.id)" class="problemset-list-item-action-link">删除</button>
         </div>
       </div>
     </div>
 
 
     <!-- 分页器 -->
-    <div class="flex justify-center items-center mt-6 space-x-2">
-      <button @click="changePage(page - 1)" :disabled="page === 1" class="px-3 py-1 border rounded disabled:opacity-50">
+    <div class="problemset-list-pagination">
+      <button @click="changePage(page - 1)" :disabled="page === 1" class="problemset-list-pagination-button">
         上一页
       </button>
-      <span>第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
+      <span class="problemset-list-pagination-info">第 {{ page }} / {{ pages }} 页 (共 {{ total }} 条)</span>
       <button @click="changePage(page + 1)" :disabled="page === pages"
-        class="px-3 py-1 border rounded disabled:opacity-50">
+        class="problemset-list-pagination-button">
         下一页
       </button>
     </div>

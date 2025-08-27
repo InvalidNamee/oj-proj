@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import axios from 'axios'
+import '@/assets/users.css'
 
 const file = ref(null)
 const importing = ref(false)
@@ -47,37 +48,37 @@ const importUsers = async () => {
 </script>
 
 <template>
-  <div class="max-w-lg mx-auto p-6 bg-white shadow rounded mt-6">
-    <h2 class="text-xl font-bold mb-4">批量导入学生</h2>
+  <div class="user-import-container">
+    <h2 class="user-import-title">批量导入学生</h2>
 
-    <div class="mb-4 text-sm text-gray-700">
-      当前课程：<span class="font-medium">{{ courseName }}</span>
+    <div class="user-import-info">
+      当前课程：<span>{{ courseName }}</span>
     </div>
 
-    <div class="mb-3">
-      <label class="block mb-1">选择 Excel 文件 (.xlsx)</label>
-      <input type="file" @change="handleFileChange" accept=".xlsx" class="border px-2 py-1 w-full" />
+    <div>
+      <label class="user-import-label">选择 Excel 文件 (.xlsx)</label>
+      <input type="file" @change="handleFileChange" accept=".xlsx" class="user-import-input" />
     </div>
 
     <button
       @click="importUsers"
       :disabled="importing"
-      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+      class="user-import-button"
     >
       {{ importing ? '导入中...' : '开始导入' }}
     </button>
 
-    <div v-if="errorMsg" class="text-red-500 mt-3">{{ errorMsg }}</div>
+    <div v-if="errorMsg" class="user-import-error">{{ errorMsg }}</div>
 
-    <div v-if="results.length" class="mt-4">
-      <h3 class="font-semibold mb-2">导入结果：</h3>
-      <div class="max-h-64 overflow-y-auto border rounded p-2 bg-gray-50 text-sm">
-        <div v-for="(r, index) in results" :key="index" class="mb-1">
-          <span :class="r.status === 'success' ? 'text-green-600' : 'text-red-600'">
+    <div v-if="results.length" class="user-import-results">
+      <h3 class="user-import-results-title">导入结果：</h3>
+      <div class="user-import-results-list">
+        <div v-for="(r, index) in results" :key="index" class="user-import-result-item">
+          <span :class="r.status === 'success' ? 'user-import-result-success' : 'user-import-result-error'">
             {{ r.status.toUpperCase() }}
           </span>
           - {{ r.user.username }} ({{ r.user.uid }}) 
-          <span v-if="r.error" class="text-red-500">: {{ r.error }}</span>
+          <span v-if="r.error" class="user-import-result-error">: {{ r.error }}</span>
         </div>
       </div>
     </div>

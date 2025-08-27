@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
+import '@/assets/components.css';
 
 const props = defineProps({
   views: {
@@ -15,15 +16,15 @@ const activePath = computed(() => route.path);
 
 <template>
   <aside
-    class="fixed left-0 top-16 w-60 h-[calc(100vh-4rem)] bg-white shadow p-4 z-10"
+    class="sidebar-container"
   >
-    <nav class="flex flex-col space-y-2">
+    <nav class="sidebar-nav">
       <RouterLink
         v-for="view in views"
         :key="view.path"
         :to="view.path"
-        class="px-4 py-2 rounded hover:bg-blue-100 transition-colors"
-        :class="activePath === view.path ? 'bg-blue-200 font-semibold text-blue-700' : 'text-gray-800'"
+        class="sidebar-link"
+        :class="activePath === view.path ? 'active' : 'inactive'"
       >
         {{ view.name }}
       </RouterLink>

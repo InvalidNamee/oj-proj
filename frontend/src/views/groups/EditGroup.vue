@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import StudentSelector from '@/components/StudentSelector.vue'
 import ProblemSetSelector from '@/components/ProblemSetSelector.vue'
 import { useUserStore } from '@/stores/user'
+import '@/assets/groups.css'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,30 +40,30 @@ const currentCourseId = computed(() => group.value?.course_id || userStore.curre
 </script>
 
 <template>
-  <div class="p-6 max-w-lg mx-auto">
-    <h2 class="text-xl font-bold mb-4">编辑分组</h2>
+  <div class="groups-edit-container">
+    <h2 class="groups-edit-title">编辑分组</h2>
     <div v-if="group">
-      <div class="mb-3">
-        <label class="block mb-1">分组名称</label>
-        <input v-model="groupName" type="text" class="border border-gray-300 px-2 py-1 w-full" />
+      <div class="groups-edit-form-group">
+        <label class="groups-edit-label">分组名称</label>
+        <input v-model="groupName" type="text" class="groups-edit-input" />
       </div>
-      <div class="mb-3">
-        <label class="block mb-1">描述</label>
-        <textarea v-model="description" class="border border-gray-300 px-2 py-1 w-full"></textarea>
+      <div class="groups-edit-form-group">
+        <label class="groups-edit-label">描述</label>
+        <textarea v-model="description" class="groups-edit-textarea"></textarea>
       </div>
-      <div class="mb-3">
+      <div class="groups-edit-form-group">
         <StudentSelector
           :currentCourseId="currentCourseId"
           v-model="studentIds"
         />
       </div>
-      <div class="mb-3">
+      <div class="groups-edit-form-group">
         <ProblemSetSelector
           :currentCourseId="currentCourseId"
           v-model="problemsetIds"
         />
       </div>
-      <button @click="updateGroup" class="bg-blue-500 text-white px-4 py-2 rounded">保存</button>
+      <button @click="updateGroup" class="groups-edit-save-button">保存</button>
     </div>
   </div>
 </template>

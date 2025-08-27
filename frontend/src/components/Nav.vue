@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { RouterLink, useRouter, useRoute } from 'vue-router';
+import '@/assets/components.css';
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -65,15 +66,15 @@ const logout = async () => {
 </script>
 
 <template>
-  <nav class="sticky z-100 top-0 bg-white shadow-sm p-4 flex justify-between items-center">
-    <div class="flex items-center space-x-4">
-      <div class="text-lg font-bold text-gray-800">DawOj v2</div>
+  <nav class="nav-container">
+    <div class="nav-left">
+      <div class="nav-logo">DawOj v2</div>
 
       <!-- 课程选择 -->
       <template v-if="userStore.uid && userStore.courses.length">
         <select
           v-model="currentCourseId"
-          class="border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
+          class="nav-course-select"
           style="margin-left: 8px; min-width: 120px;"
         >
           <option v-if="userStore.usertype === 'admin'" :value="null">
@@ -87,49 +88,48 @@ const logout = async () => {
     </div>
 
     <!-- 导航栏菜单 -->
-    <div class="flex space-x-4">
+    <div class="nav-menu">
       <RouterLink
         v-for="view in filteredViews"
         :key="view.name"
         :to="view.path"
-        class="px-3 py-1 rounded text-gray-800 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-        :class="activePath === view.path ? 'bg-blue-50 text-blue-600 font-semibold' : ''"
+        class="nav-link"
+        :class="activePath === view.path ? 'active' : ''"
       >
         {{ view.name }}
       </RouterLink>
     </div>
 
     <!-- 用户区域 -->
-    <div class="relative flex items-center space-x-4" id="user-dropdown">
+    <div class="nav-user" id="user-dropdown">
       <template v-if="userStore.uid">
-        <button @click.stop="toggleDropdown"
-          class="flex items-center space-x-2 text-gray-800 hover:text-blue-600 focus:outline-none relative z-10">
+        <button @click.stop="toggleDropdown" class="nav-user-button">
           <span>{{ userStore.username }}</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
 
         <div
           v-show="dropdownOpen"
-          class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-sm z-50 border border-gray-100"
+          class="nav-dropdown"
           style="min-width: 160px;"
         >
-          <div class="px-4 py-2 text-gray-700 border-b border-gray-100">
+          <div class="nav-dropdown-header">
             {{ userStore.username }} ({{ userStore.usertype }})
           </div>
-          <RouterLink :to="`/users/${userStore.id}`" class="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+          <RouterLink :to="`/users/${userStore.id}`" class="nav-dropdown-link"
             @click="closeDropdown">
             Profile
           </RouterLink>
-          <button @click="logout" class="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-50">
+          <button @click="logout" class="nav-dropdown-button">
             Logout
           </button>
         </div>
       </template>
 
       <template v-else>
-        <RouterLink to="/login" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+        <RouterLink to="/login" class="nav-login-link">
           Login
         </RouterLink>
       </template>

@@ -1,4 +1,5 @@
 <script setup>
+import "@/assets/groups.css";
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
@@ -91,27 +92,27 @@ const deleteBatch = async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <h2 class="text-xl font-bold mb-2">分组列表</h2>
+  <div class="groups-container">
+    <h2 class="groups-title">分组列表</h2>
 
     <!-- 搜索栏 -->
-    <div class="flex justify-between items-center mb-2">
-      <div class="flex items-center space-x-2">
+    <div class="groups-search-bar">
+      <div class="groups-search-input-container">
         <input v-model="keyword" placeholder="按组名搜索"
-          class="border border-gray-500 rounded px-2 py-1 w-64" />
-        <button class="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
+          class="groups-search-input" />
+        <button class="groups-search-button"
           @click="search">
           搜索
         </button>
       </div>
 
       <!-- 批量操作 -->
-      <div class="flex items-center space-x-2">
-        <button class="px-4 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
+      <div class="groups-batch-actions">
+        <button class="groups-batch-toggle-button"
           @click="batchMode = !batchMode; selected = []">
           {{ batchMode ? "取消" : "选择" }}
         </button>
-        <button v-if="batchMode" class="px-4 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+        <button v-if="batchMode" class="groups-batch-delete-button"
           @click="deleteBatch">
           批量删除
         </button>
@@ -119,43 +120,43 @@ const deleteBatch = async () => {
     </div>
 
     <!-- 表格 -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50 text-gray-700">
-          <tr>
-            <th class="p-3" v-if="batchMode">
+    <div class="groups-table-container">
+      <table class="groups-table">
+        <thead class="groups-table-header">
+          <tr class="groups-table-header-row">
+            <th class="groups-table-header-cell" v-if="batchMode">
               <input type="checkbox" :checked="selected.length === groups.length"
                 @change="selected = $event.target.checked ? groups.map(g => g.id) : []" />
             </th>
-            <th class="p-3">ID</th>
-            <th class="p-3">组名</th>
-            <th class="p-3">所属课程</th>
-            <th class="p-3">学生数</th>
-            <th class="p-3">题单数</th>
-            <th class="p-3">操作</th>
+            <th class="groups-table-header-cell">ID</th>
+            <th class="groups-table-header-cell">组名</th>
+            <th class="groups-table-header-cell">所属课程</th>
+            <th class="groups-table-header-cell">学生数</th>
+            <th class="groups-table-header-cell">题单数</th>
+            <th class="groups-table-header-cell">操作</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="g in groups" :key="g.id" class="hover:bg-gray-50 transition">
-            <td class="p-3" v-if="batchMode">
+          <tr v-for="g in groups" :key="g.id" class="groups-table-row">
+            <td class="groups-table-cell" v-if="batchMode">
               <input type="checkbox" v-model="selected" :value="g.id" />
             </td>
-            <td class="p-3">{{ g.id }}</td>
-            <td class="p-3 text-blue-600 hover:underline cursor-pointer" @click="goDetail(g.id)">
+            <td class="groups-table-cell">{{ g.id }}</td>
+            <td class="groups-table-cell groups-name-link" @click="goDetail(g.id)">
               {{ g.name }}
             </td>
-            <td class="p-3">{{ g.course.name }}</td>
-            <td class="p-3">{{ g.student_cnt }}</td>
-            <td class="p-3">{{ g.problemset_cnt }}</td>
-            <td class="p-3 space-x-3">
+            <td class="groups-table-cell">{{ g.course.name }}</td>
+            <td class="groups-table-cell">{{ g.student_cnt }}</td>
+            <td class="groups-table-cell">{{ g.problemset_cnt }}</td>
+            <td class="groups-table-cell">
               <template v-if="userStore.usertype !== 'student'">
-                <button class="text-blue-500 hover:underline" @click.stop="goEdit(g.id)">编辑</button>
-                <button class="text-red-500 hover:underline" @click.stop="deleteOne(g.id)">删除</button>
+                <button class="groups-action-button groups-edit-button" @click.stop="goEdit(g.id)">编辑</button>
+                <button class="groups-action-button groups-delete-button" @click.stop="deleteOne(g.id)">删除</button>
               </template>
             </td>
           </tr>
-          <tr v-if="groups.length === 0">
-            <td :colspan="batchMode ? 7 : 6" class="p-3 text-center text-gray-400">
+          <tr v-if="groups.length === 0" class="groups-empty-row">
+            <td :colspan="batchMode ? 7 : 6" class="groups-table-cell">
               暂无分组
             </td>
           </tr>
@@ -164,14 +165,14 @@ const deleteBatch = async () => {
     </div>
 
     <!-- 分页 -->
-    <div class="flex justify-center mt-4 space-x-2">
-      <button class="px-3 py-1 border rounded disabled:opacity-50"
+    <div class="groups-pagination">
+      <button class="groups-pagination-button"
         :disabled="page === 1"
         @click="changePage(page - 1)">
         上一页
       </button>
       <span>第 {{ page }} / {{ Math.ceil(total / perPage) }} 页</span>
-      <button class="px-3 py-1 border rounded disabled:opacity-50"
+      <button class="groups-pagination-button"
         :disabled="page >= Math.ceil(total / perPage)"
         @click="changePage(page + 1)">
         下一页

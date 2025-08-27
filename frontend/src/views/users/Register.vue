@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import CourseSelector from '@/components/CourseSelector.vue';
+import '@/assets/users.css';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -47,36 +48,36 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow">
-    <h2 class="text-2xl font-bold mb-4">注册用户</h2>
+  <div class="user-register-container">
+    <h2 class="user-register-title">注册用户</h2>
 
-    <div v-if="error" class="mb-2 text-red-500">{{ error }}</div>
-    <div v-if="success" class="mb-2 text-green-500">{{ success }}</div>
+    <div v-if="error" class="user-register-error">{{ error }}</div>
+    <div v-if="success" class="user-register-success">{{ success }}</div>
 
-    <div class="space-y-4">
+    <div class="user-register-form">
       <input v-model="form.uid" placeholder="用户ID"
-        class="w-full border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all" />
+        class="user-register-input" />
       <input v-model="form.username" placeholder="用户名"
-        class="w-full border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all" />
+        class="user-register-input" />
       <input v-model="form.password" placeholder="密码"
-        class="w-full border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all" />
+        class="user-register-input" />
 
       <select v-model="form.usertype"
-        class="w-full border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all">
+        class="user-register-select">
         <option value="student">学生</option>
         <option v-if="userStore.usertype === 'admin'" value="teacher">教师</option>
         <option v-if="userStore.usertype === 'admin'" value="admin">管理员</option>
       </select>
 
       <input v-model="form.school" placeholder="学校"
-        class="w-full border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all" />
+        class="user-register-input" />
       <input v-model="form.profession" placeholder="专业"
-        class="w-full border border-gray-300 rounded px-2 py-1 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all" />
+        class="user-register-input" />
 
       <!-- 多选课程 -->
       <CourseSelector v-model="form.course_list" :courses="courses" />
 
-      <button @click="submit" class="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">
+      <button @click="submit" class="user-register-button">
         注册
       </button>
     </div>
