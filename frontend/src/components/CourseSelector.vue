@@ -16,6 +16,11 @@ const selected = ref([...props.modelValue]);
 watch(selected, (val) => {
   emits('update:modelValue', val);
 });
+
+// 当父组件传入的modelValue改变时，更新本地选中状态
+watch(() => props.modelValue, (newVal) => {
+  selected.value = [...newVal];
+});
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import axios from 'axios'
 import '@/assets/users.css'
@@ -8,6 +8,8 @@ const file = ref(null)
 const importing = ref(false)
 const results = ref([])
 const errorMsg = ref('')
+const groups = ref([])
+const selectedGroupId = ref('')
 
 const userStore = useUserStore()
 const courseName = computed(() => {
@@ -19,6 +21,15 @@ const courseName = computed(() => {
 const handleFileChange = (e) => {
   file.value = e.target.files[0]
 }
+
+const fetchGroups = async () => {
+  const res = await axios.get("/api/groups", {
+    params: {
+      course_id: userStore.currentCourseId,
+    },
+  });
+  groups.value = res.data.groups || [];
+};
 
 const importUsers = async () => {
   if (!file.value) {
@@ -33,6 +44,9 @@ const importUsers = async () => {
   const formData = new FormData()
   formData.append('file', file.value)
   formData.append('course_id', userStore.currentCourseId)
+  if (selectedGroupId.value) {
+    formData.append('group_id', selectedGroupId.value)
+  }
 
   try {
     const res = await axios.post('/api/users/import', formData, {
@@ -45,6 +59,10 @@ const importUsers = async () => {
     importing.value = false
   }
 }
+
+onMounted(() => {
+  fetchGroups();
+});
 </script>
 
 <template>
@@ -68,6 +86,16 @@ const importUsers = async () => {
     <div>
       <label class="user-import-label">选择 Excel 文件 (.xlsx)</label>
       <input type="file" @change="handleFileChange" accept=".xlsx" class="user-import-input" />
+    </div>
+
+    <div>
+      <label class="user-import-label">选择组</label>
+      <select v-model="selectedGroupId" class="user-import-input">
+        <option value="">不分配组</option>
+        <option v-for="group in groups" :key="group.id" :value="group.id">
+          {{ group.name }}
+        </option>
+      </select>
     </div>
 
     <button

@@ -1,12 +1,17 @@
-# DawOj-v2
+@bp.get('/<int:pid>/test_cases/download')
+@role_required(ROLE_TEACHER)
+def download_test_cases(pid):
+    """
+    下载测试用例
+    """
+    try:
+        memory_file = pack_test_cases(pid)
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
 
-DawOj v2 的前端
-
-遗留问题
-
-- 更改筛选条件之后回到第一页
-- 全部课程里只有一个题单
-- markdown 样式无效
-- 题目不能搜索
-- 给组分配题单
-- 提交记录只能看自己的
+    return send_file(
+        memory_file,
+        as_attachment=True,
+        download_name=f"test_cases_{pid}.zip",
+        mimetype="application/zip"
+    )

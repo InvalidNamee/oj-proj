@@ -35,7 +35,7 @@ onMounted(fetchProblemset)
     <p class="problemset-detail-meta">
       所属课程：{{ problemset.course?.title }}
       <span>创建时间：{{ problemset.timestamp }}</span>
-      <span @click="router.push(`/problemsets/${id}/ranklist`)">排行榜</span>
+      <button class="problemset-detail-ranklist-button" @click="router.push(`/problemsets/${id}/ranklist`)">排行榜</button>
     </p>
 
     <!-- 描述 markdown-it 渲染 -->

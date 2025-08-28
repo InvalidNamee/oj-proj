@@ -81,6 +81,19 @@ const changePage = (p) => {
     fetchProblemSets();
   }
 };
+
+// 格式化时间显示
+const formatTime = (time) => {
+  if (!time) return '无';
+  return new Date(time).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
 </script>
 
 <template>
@@ -129,11 +142,14 @@ const changePage = (p) => {
           <p class="problemset-list-item-meta">
             课程: {{ ps.course?.title || '无' }} | 题目数: {{ ps.num_problems }}
           </p>
+          <p class="problemset-list-item-meta">
+            开始时间: {{ formatTime(ps.start_time) }} | 结束时间: {{ formatTime(ps.end_time) }}
+          </p>
         </div>
         <div class="problemset-list-item-actions">
           <input v-if="showSelect" type="checkbox" v-model="selected" :value="ps.id" @click.stop class="problemset-list-item-checkbox" />
-          <button @click.stop="goEdit(ps.id)" class="problemset-list-item-action-link">编辑</button>
-          <button @click.stop="deleteOne(ps.id)" class="problemset-list-item-action-link">删除</button>
+          <button @click.stop="goEdit(ps.id)" class="problemset-list-edit-button">编辑</button>
+          <button @click.stop="deleteOne(ps.id)" class="problemset-list-delete-button">删除</button>
         </div>
       </div>
     </div>

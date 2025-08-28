@@ -4,6 +4,7 @@ import { ref } from "vue";
 import AddLegacyProblem from "@/views/problemsets/AddLegacyProblem.vue";
 import AddCodingProblem from "@/views/problemsets/AddCodingProblem.vue";
 import { useUserStore } from "@/stores/user";
+import "@/assets/pr7.css";
 
 const userStore = useUserStore();
 const courseId = userStore.currentCourseId;
@@ -12,7 +13,7 @@ const problemType = ref("coding");
 
 <template>
   <div class="add-problem-container">
-    <h2>新建题目</h2>
+    <h2 class="add-problem-title">新建题目</h2>
     <!-- 题目类型选择器（只在外层） -->
     <div>
       <label>题目类型:</label>

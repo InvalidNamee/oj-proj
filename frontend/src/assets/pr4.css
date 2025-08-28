@@ -1,0 +1,296 @@
+/* CSS styles for ProblemList.vue */
+
+.problem-list-container {
+  max-width: 900px; /* 调整最大宽度 */
+  margin: 0 auto; /* 居中显示 */
+  padding: 1.5rem; /* p-6 */
+  border: 1px solid #ffffff; /* white border */
+  background-color: #ffffff; /* white background */
+}
+
+.problem-list-title {
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.problem-list-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
+}
+
+.problem-list-toolbar {
+  display: flex; /* flex */
+  justify-content: space-between; /* justify-between */
+  align-items: center; /* items-center */
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.problem-list-search-container {
+  display: flex; /* flex */
+  align-items: center; /* items-center */
+  gap: 0.5rem; /* space-x-2 */
+}
+
+.problem-list-search-input {
+  border: 1px solid #6b7280; /* border-gray-500 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.25rem 0.75rem; /* px-3 py-1 */
+}
+
+.problem-list-button {
+  padding: 0.25rem 1rem; /* px-4 py-1 */
+  border: none; /* remove border */
+  border-radius: 0.25rem; /* rounded */
+  color: #ffffff; /* text-white */
+  cursor: pointer; /* cursor-pointer */
+}
+
+.problem-list-primary-button {
+  background-color: #3b82f6; /* bg-blue-500 */
+}
+
+.problem-list-primary-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.problem-list-secondary-button {
+  background-color: #6b7280; /* bg-gray-500 */
+}
+
+.problem-list-secondary-button:hover {
+  background-color: #4b5563; /* hover:bg-gray-600 */
+}
+
+.problem-list-danger-button {
+  background-color: #ef4444; /* bg-red-500 */
+}
+
+.problem-list-danger-button:hover {
+  background-color: #dc2626; /* hover:bg-red-600 */
+}
+
+/* Problem List Table styles */
+.problem-list-table-container {
+  background-color: #ffffff; /* bg-white */
+  border-radius: 0.75rem; /* rounded-xl */
+  overflow-x: auto; /* overflow-x-auto */
+  padding: 1.5rem; /* p-6 */
+  margin-top: 1.5rem; /* mt-6 */
+}
+
+.problem-list-table {
+  width: 100%; /* w-full */
+  font-size: 0.875rem; /* text-sm */
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.problem-list-table thead {
+  /* Removed gradient background */
+  background-color: #f3f4f6; /* bg-gray-100 */
+}
+
+.problem-list-table th {
+  padding: 1rem 1.25rem; /* px-5 py-4 */
+  text-align: left;
+  font-weight: 600; /* font-semibold */
+  color: #1f2937; /* text-gray-800 */
+  text-transform: uppercase; /* uppercase */
+  letter-spacing: 0.025em; /* tracking-wide */
+}
+
+.problem-list-table tbody tr {
+  transition: all 0.2s; /* transition duration-200 */
+  /* Removed border-bottom */
+}
+
+.problem-list-table tbody tr:hover {
+  background: linear-gradient(to right, #f9fafb, #f3f4f6); /* hover:bg-gradient-to-r from-gray-50 to-gray-100 */
+  transform: scale(1.01); /* scale-105 */
+  /* Removed shadow */
+}
+
+.problem-list-table tbody tr.problem-list-table-selected-row {
+  background: linear-gradient(to right, #dbeafe, #bfdbfe); /* bg-gradient-to-r from-blue-100 to-blue-200 */
+}
+
+.problem-list-table td {
+  padding: 1rem 1.25rem; /* px-5 py-4 */
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.problem-list-table td:last-child {
+  border-right: none; /* remove border-r for last cell */
+}
+
+.problem-list-table a {
+  color: #3b82f6; /* text-blue-500 */
+  text-decoration: none;
+  position: relative;
+}
+
+.problem-list-table a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #3b82f6; /* bg-blue-500 */
+  transition: width 0.3s ease-in-out;
+}
+
+.problem-list-table a:hover::after {
+  width: 100%;
+}
+
+.problem-list-problem-title {
+  color: #3b82f6; /* text-blue-500 */
+  cursor: pointer;
+}
+
+.problem-list-table .problem-list-table-actions {
+  display: flex;
+  gap: 0.75rem; /* space-x-3 */
+}
+
+.problem-list-table .problem-list-table-actions button {
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 600; /* font-semibold */
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s; /* transition duration-200 */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.problem-list-table .problem-list-table-actions .problem-list-table-edit-button {
+  color: #ffffff; /* text-white */
+  background: linear-gradient(to bottom, #3b82f6, #2563eb); /* bg-gradient-to-b from-blue-500 to-blue-600 */
+}
+
+.problem-list-table .problem-list-table-actions .problem-list-table-edit-button:hover {
+  background: linear-gradient(to bottom, #2563eb, #1d4ed8); /* hover:bg-gradient-to-b from-blue-600 to-blue-700 */
+  transform: translateY(-2px); /* hover:-translate-y-0.5 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-xl */
+}
+.problem-list-action-button
+{  
+  color: #3b82f6; /* text-blue-500 */
+  text-decoration: none; /* 隐藏下划线 */
+  border: none;
+  background: none;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  cursor: pointer;
+  margin-right: 0.5rem; /* 添加右侧间距 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+  font-weight: 600; /* font-semibold */
+  position: relative;
+  overflow: hidden;
+}
+.problem-list-delete-button
+{
+  color: #ef4444; /* text-red-500 */
+  text-decoration: none; /* 隐藏下划线 */
+  border: none;
+  background: none;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  cursor: pointer;
+  margin-right: 0.5rem; /* 添加右侧间距 */
+  border-radius: 0.375rem; /* rounded-md */
+  transition: all 0.2s;
+  font-weight: 600; /* font-semibold */
+  position: relative;
+  overflow: hidden;
+}
+
+
+.problem-list-table .problem-list-table-actions .problem-list-table-delete-button {
+  color: #ffffff; /* text-white */
+  background: linear-gradient(to bottom, #ef4444, #dc2626); /* bg-gradient-to-b from-red-500 to-red-600 */
+}
+
+.problem-list-table .problem-list-table-actions .problem-list-table-delete-button:hover {
+  background: linear-gradient(to bottom, #dc2626, #b91c1c); /* hover:bg-gradient-to-b from-red-600 to-red-700 */
+  transform: translateY(-2px); /* hover:-translate-y-0.5 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-xl */
+}
+
+.problem-list-table .problem-list-table-actions .problem-list-table-select-button {
+  color: #ffffff; /* text-white */
+  background: linear-gradient(to bottom, #f97316, #ea580c); /* bg-gradient-to-b from-orange-500 to-orange-600 */
+}
+
+.problem-list-table .problem-list-table-actions .problem-list-table-select-button:hover {
+  background: linear-gradient(to bottom, #ea580c, #c2410c); /* hover:bg-gradient-to-b from-orange-600 to-orange-700 */
+  transform: translateY(-2px); /* hover:-translate-y-0.5 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-xl */
+}
+
+/* Problem List Pagination styles */
+.problem-list-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem; /* mt-8 */
+  gap: 0.75rem; /* space-x-3 */
+  flex-wrap: wrap;
+}
+
+.problem-list-pagination button {
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  border-radius: 0.375rem; /* rounded-md */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 600; /* font-semibold */
+  cursor: pointer;
+  border: 1px solid #d1d5db; /* border border-gray-300 */
+  background-color: #ffffff; /* bg-white */
+  transition: all 0.2s; /* transition duration-200 */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.problem-list-pagination button:hover {
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6); /* hover:bg-gradient-to-b from-gray-50 to-gray-100 */
+  transform: translateY(-2px); /* hover:-translate-y-0.5 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-xl */
+}
+
+.problem-list-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none; /* remove transform for disabled */
+  box-shadow: none; /* remove shadow for disabled */
+}
+
+.problem-list-pagination .problem-list-pagination-ellipsis {
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 600; /* font-semibold */
+}
+
+.problem-list-pagination .problem-list-pagination-current {
+  color: #ffffff; /* text-white */
+  background: linear-gradient(to bottom, #3b82f6, #2563eb); /* bg-gradient-to-b from-blue-500 to-blue-600 */
+  border-color: #3b82f6; /* border-blue-500 */
+  transform: translateY(-2px); /* -translate-y-0.5 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+}
+
+.problem-list-pagination .problem-list-pagination-current:hover {
+  background: linear-gradient(to bottom, #2563eb, #1d4ed8); /* hover:bg-gradient-to-b from-blue-600 to-blue-700 */
+}

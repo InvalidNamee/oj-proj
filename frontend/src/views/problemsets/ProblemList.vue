@@ -1,8 +1,10 @@
 <script setup>
+import "@/assets/pr4.css";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
+
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -89,6 +91,18 @@ const changePage = (p) => {
   }
 };
 
+// 类型映射函数
+const getTypeDisplayName = (type) => {
+  const typeMap = {
+    'single': '单选题',
+    'multiple': '多选题',
+    'fill': '填空题',
+    'subjective': '主观题',
+    'coding': '编程题'
+  };
+  return typeMap[type] || type;
+};
+
 onMounted(fetchProblems);
 </script>
 
@@ -137,6 +151,7 @@ onMounted(fetchProblems);
             <th class="p-3" v-if="selectMode"></th>
             <th class="p-3">ID</th>
             <th class="p-3">标题</th>
+            <th class="p-3">类型</th>
             <th class="p-3">所属课程</th>
             <th class="p-3">测试用例数</th>
             <th class="p-3">时间</th>
@@ -151,6 +166,7 @@ onMounted(fetchProblems);
             </td>
             <td class="p-3">{{ p.id }}</td>
             <td class="p-3 problem-list-problem-title" @click.stop="goDetail(p.id)">{{ p.title }}</td>
+            <td class="p-3">{{ getTypeDisplayName(p.type) }}</td>
             <td class="p-3">{{ p.course.name }}</td>
             <td v-if="p.type === 'coding'" class="p-3 problem-list-problem-title"
               @click.stop="goEditTestCases(p.id)">{{ p.num_test_cases }}</td>

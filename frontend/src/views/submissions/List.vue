@@ -4,6 +4,9 @@ import { ref, onMounted, watch } from "vue"
 import axios from "axios"
 import { useRouter } from "vue-router"
 import StatusBadge from "@/components/StatusBadge.vue"
+import UserSelectModal from "@/components/UserSelectModal.vue"
+import CourseSelectModal from "@/components/CourseSelectModal.vue"
+import ProblemSetSelectModal from "@/components/ProblemSetSelectModal.vue"
 import { useUserStore } from "@/stores/user"
 
 const submissions = ref([])
@@ -16,6 +19,15 @@ const filters = ref({
   problem_id: "",
   problem_set_id: "",
 })
+
+// 课程选择弹窗控制
+const showCourseSelectModal = ref(false)
+
+// 用户选择弹窗控制
+const showUserSelectModal = ref(false)
+
+// 题单选择弹窗控制
+const showProblemSetSelectModal = ref(false)
 
 // 分页
 const page = ref(1)
@@ -89,10 +101,40 @@ onMounted(fetchSubmissions)
 
     <!-- 筛选 -->
     <div class="submissions-filter-container">
-      <input v-model="filters.user_id" placeholder="用户ID" class="submissions-filter-input" />
+      <div class="submissions-user-filter">
+        <input v-model="filters.user_id" placeholder="用户ID" class="submissions-filter-input" />
+      <button @click="showUserSelectModal = true" class="submissions-select-user-button">选择用户</button>
+    </div>
+    <div class="submissions-course-filter">
       <input v-model="filters.problem_id" placeholder="题目ID" class="submissions-filter-input" />
+      <button @click="showCourseSelectModal = true" class="submissions-select-course-button">选择课程</button>
+    </div>
+    <div class="submissions-problem-set-filter">
       <input v-model="filters.problem_set_id" placeholder="题单ID" class="submissions-filter-input" />
-      <button @click="doSearch" class="submissions-search-button">搜索</button>
+      <button @click="showProblemSetSelectModal = true" class="submissions-select-problem-set-button">选择题单</button>
+    </div>
+    <button @click="doSearch" class="submissions-search-button">搜索</button>
+    
+    <!-- 课程选择弹窗 -->
+    <CourseSelectModal 
+      v-model="showCourseSelectModal" 
+      :selected-course-id="filters.problem_id"
+      @course-selected="(courseId) => { filters.problem_id = courseId; showCourseSelectModal = false }"
+    />
+    
+    <!-- 题单选择弹窗 -->
+    <ProblemSetSelectModal 
+      v-model="showProblemSetSelectModal" 
+      :selected-problem-set-id="filters.problem_set_id"
+      @problem-set-selected="(problemSetId) => { filters.problem_set_id = problemSetId; showProblemSetSelectModal = false }"
+    />
+      
+      <!-- 用户选择弹窗 -->
+      <UserSelectModal 
+        v-model="showUserSelectModal" 
+        :selected-user-id="filters.user_id"
+        @user-selected="(userId) => { filters.user_id = userId; showUserSelectModal = false }"
+      />
     </div>
 
     <!-- 表格 -->

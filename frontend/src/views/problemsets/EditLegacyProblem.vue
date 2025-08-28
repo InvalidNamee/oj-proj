@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import LegacyEditor from "@/components/LegacyEditor.vue";
 import { useUserStore } from "@/stores/user";
+import "@/assets/pr5.css";
 
 const props = defineProps({
   problemId: { type: [String, Number], required: true },
@@ -54,27 +55,29 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="edit-legacy-problem-space-y-4">
-    <input v-model="title" placeholder="标题" class="edit-legacy-problem-input" />
-    <textarea v-model="description" rows="6" placeholder="题目描述" class="edit-legacy-problem-textarea"></textarea>
-    
-    <LegacyEditor
-      :problemType="problemType"
-      :initialTestCases="testCases"
-      @update:testCases="val => testCases.value = val"
-    />
+  <div class="edit-problem-container">
+    <div class="edit-legacy-problem-space-y-4">
+      <input v-model="title" placeholder="标题" class="edit-legacy-problem-input" />
+      <textarea v-model="description" rows="6" placeholder="题目描述" class="edit-legacy-problem-textarea"></textarea>
+      
+      <LegacyEditor
+        :problemType="problemType"
+        :initialTestCases="testCases"
+        @update:testCases="val => testCases.value = val"
+      />
 
-    <!-- 课程选择 -->
-    <select v-model="courseId" class="edit-legacy-problem-select">
-      <option v-for="c in courses" :key="c.id" :value="c.id">{{ c.name }}</option>
-    </select>
+      <!-- 课程选择 -->
+      <select v-model="courseId" class="edit-legacy-problem-select">
+        <option v-for="c in courses" :key="c.id" :value="c.id">{{ c.name }}</option>
+      </select>
 
-    <button
-      @click="submit"
-      :disabled="submitting"
-      class="edit-legacy-problem-button"
-    >
-      {{ submitting ? "提交中…" : "提交修改" }}
-    </button>
+      <button
+        @click="submit"
+        :disabled="submitting"
+        class="edit-legacy-problem-button"
+      >
+        {{ submitting ? "提交中…" : "提交修改" }}
+      </button>
+    </div>
   </div>
 </template>

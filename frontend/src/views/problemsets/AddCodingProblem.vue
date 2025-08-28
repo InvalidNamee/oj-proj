@@ -4,8 +4,10 @@ import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import axios from "axios";
 import TestCases from "@/components/TestCases.vue";
+import EditableTestCases from "@/components/EditableTestCases.vue";
 import MonacoEditor from "@/components/MonacoEditor.vue";
 import GeminiPrompt from "@/components/GeminiPrompt.vue";
+import "@/assets/pr7.css";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -144,48 +146,89 @@ const updateReferenceSolution = (rs) => {
 </script>
 
 <template>
-  <div class="add-coding-problem-container">
-    <!-- 标题 & 描述 -->
-    <input v-model="title" placeholder="标题" class="add-coding-problem-input" />
-    <textarea v-model="description" rows="6" placeholder="题目描述"
-      class="w-full border border-gray-300 rounded px-2 py-2 focus:ring-2 focus:ring-blue-400" />
-    <input v-model="inputFormat" placeholder="输入格式" class="w-full border border-gray-300 rounded px-2 py-2" />
-    <input v-model="outputFormat" placeholder="输出格式" class="w-full border border-gray-300 rounded px-2 py-2" />
-    <textarea v-model="notes" rows="3" placeholder="说明 / Notes"
-      class="w-full border border-gray-300 rounded px-2 py-2" />
+  <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+    <div class="add-coding-problem-container">
+      <div class="add-coding-problem-main-content">
+        <!-- 左侧表单区域 -->
+        <div class="add-coding-problem-form-section">
+        <!-- 标题 & 描述 -->
+        <div class="add-coding-problem-form-group">
+          <label class="add-coding-problem-form-group-label">标题</label>
+          <input v-model="title" placeholder="请输入题目标题" class="add-coding-problem-input" />
+        </div>
+        
+        <div class="add-coding-problem-form-group">
+          <label class="add-coding-problem-form-group-label">题目描述</label>
+          <textarea v-model="description" rows="6" placeholder="请输入题目描述"
+            class="add-coding-problem-textarea" />
+        </div>
+        
+        <div class="add-coding-problem-grid">
+          <div class="add-coding-problem-form-group">
+            <label class="add-coding-problem-form-group-label">输入格式</label>
+            <input v-model="inputFormat" placeholder="请输入输入格式" class="add-coding-problem-input" />
+          </div>
+          
+          <div class="add-coding-problem-form-group">
+            <label class="add-coding-problem-form-group-label">输出格式</label>
+            <input v-model="outputFormat" placeholder="请输入输出格式" class="add-coding-problem-input" />
+          </div>
+        </div>
+        
+        <div class="add-coding-problem-form-group">
+          <label class="add-coding-problem-form-group-label">说明 / Notes</label>
+          <textarea v-model="notes" rows="3" placeholder="请输入说明或备注"
+            class="add-coding-problem-textarea" />
+        </div>
 
-    <!-- 样例和测试用例 -->
-    <TestCases v-model="samples" title="样例" />
-    <TestCases v-model="testCases" title="测试用例" />
-
-    <!-- 标程 + 自测 -->
-    <MonacoEditor v-model="referenceSolution" />
-     
-    <div class="flex gap-2 mt-2">
-      <button class="btn" @click="runSelfCheck" :disabled="submitting">
-        {{ submitting ? '自测中…' : '自测' }}
-      </button>
-      <button class="btn" @click="submit" :disabled="submitting">
-        {{ submitting ? '提交中…' : '提交' }}
-      </button>
-    </div>
-
-    <!-- 自测结果 -->
-    <div v-if="selfCheckResult" class="self-check-result mt-4">
-      <h4>自测结果: {{ selfCheckResult.status }}</h4>
-      <p v-if="selfCheckResult.score !== undefined">得分: {{ selfCheckResult.score }}</p>
-      <div v-for="r in selfCheckResult.result || []" :key="r.name" class="mt-2 p-2 border rounded">
-        <p>用例 {{ r.name }} - {{ r.status }}</p>
-        <p v-if="r.diff" class="text-red-500 whitespace-pre-line">{{ r.diff }}</p>
-        <p v-if="r.time">时间: {{ r.time }} ms</p>
-        <p v-if="r.memory">内存: {{ r.memory }} KB</p>
+        <!-- 样例和测试用例 -->
+        <EditableTestCases v-model="samples" title="样例" />
+        <EditableTestCases v-model="testCases" title="测试用例" />
+        
+        <!-- 标程 -->
+        <div class="monaco-editor-container">
+          <MonacoEditor v-model="referenceSolution" />
+        </div>
+        
+        <!-- 提交按钮 -->
+        <div class="add-coding-problem-button-group">
+          <button class="add-coding-problem-submit-button" @click="submit" :disabled="submitting">
+            {{ submitting ? '提交中…' : '提交题目' }}
+          </button>
+        </div>
+        
+        <!-- 运行自测按钮 -->
+        <div class="add-coding-problem-button-group">
+          <button class="add-coding-problem-submit-button" @click="runSelfCheck" :disabled="submitting">
+            {{ submitting ? '自测中…' : '运行自测' }}
+          </button>
+        </div>
+      </div>
+      </div>
+      
+      <!-- 自测结果 -->
+      <div v-if="selfCheckResult" class="self-check-result">
+        <h4>自测结果: {{ selfCheckResult.status }}</h4>
+        <p v-if="selfCheckResult.score !== undefined">得分: {{ selfCheckResult.score }}</p>
+        <div v-for="r in selfCheckResult.result || []" :key="r.name" class="self-check-result-item">
+          <p>用例 {{ r.name }} - {{ r.status }}</p>
+          <p v-if="r.diff" class="text-red-500 whitespace-pre-line">{{ r.diff }}</p>
+          <p v-if="r.time">时间: {{ r.time }} ms</p>
+          <p v-if="r.memory">内存: {{ r.memory }} KB</p>
+        </div>
       </div>
     </div>
-
-    <GeminiPrompt
-      @update:problem="updateProblem"
-      @update:test_cases="updateTestCases"
-      @update:reference_solution="updateReferenceSolution"
-    />
+    
+    <!-- 右侧Gemini生成题目部分 -->
+    <div class="add-coding-problem-right-section">
+      <!-- GeminiPrompt -->
+      <div class="gemini-container">
+        <GeminiPrompt
+          @update:problem="updateProblem"
+          @update:test_cases="updateTestCases"
+          @update:reference_solution="updateReferenceSolution"
+        />
+      </div>
+    </div>
   </div>
 </template>

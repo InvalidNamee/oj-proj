@@ -1,0 +1,155 @@
+/* Add ProblemSet styles */
+.add-problemset-container {
+  max-width: 42rem; /* max-w-2xl */
+  margin-left: auto; /* mx-auto */
+  margin-right: auto; /* mx-auto */
+  margin-top: 3rem; /* mt-12 */
+  padding: 1.5rem; /* p-6 */
+  border-radius: 0.75rem; /* rounded-xl */
+  background-color: #ffffff; /* bg-white */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.add-problemset-title {
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.add-problemset-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
+}
+
+.add-problemset-input,
+.add-problemset-textarea {
+  width: 600px; /* w-full */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem; /* px-3 py-2 */
+  resize: vertical; /* 只能纵向延展 */
+}
+
+.add-problemset-label {
+  display: block;
+  margin-bottom: 0.25rem; /* mb-1 */
+  color: #374151; /* text-gray-700 */
+}
+
+.add-problemset-course-input {
+  width: 608px; /* w-full */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.25rem; /* px-2 py-1 */
+  background-color: #f3f4f6; /* bg-gray-100 */
+  cursor: not-allowed; /* cursor-not-allowed */
+}
+
+.add-problemset-button {
+  width: 618px; /* w-full */
+  padding: 0.5rem; /* px-3 py-2 */
+  border-radius: 0.25rem; /* rounded */
+  color: #ffffff; /* text-white */
+  background-color: #3b82f6; /* bg-blue-500 */
+  border: none;
+  cursor: pointer;
+}
+
+.add-problemset-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.add-problemset-space-y-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* space-y-4 */
+}
+
+/* Edit Problem Set styles */
+.edit-problem-set-container {
+  max-width: 42rem; /* max-w-2xl */
+  margin-left: auto; /* mx-auto */
+  margin-right: auto; /* mx-auto */
+  margin-top: 3rem; /* mt-12 */
+  padding: 1.5rem; /* p-6 */
+  border-radius: 0.75rem; /* rounded-xl */
+  background-color: #ffffff; /* bg-white */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.edit-problem-set-title {
+  font-size: 1.75rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  margin-bottom: 1.5rem; /* mb-6 */
+  color: #111827; /* text-gray-900 */
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.edit-problem-set-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* 蓝色渐变 */
+  border-radius: 2px;
+}
+
+.edit-problem-set-input,
+.edit-problem-set-textarea {
+  width:591px; /* w-full */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.25rem; /* rounded */
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  color: #374151; /* text-gray-700 */
+  resize: vertical; /* 只能纵向延展 */
+}
+
+.edit-problem-set-label {
+  display: block;
+  margin-bottom: 0.25rem; /* mb-1 */
+  color: #374151; /* text-gray-700 */
+}
+
+.edit-problem-set-disabled-input {
+  width: 600px; /* w-full */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  padding: 0.25rem 0.5rem; /* px-2 py-1 */
+  background-color: #f3f4f6; /* bg-gray-100 */
+  cursor: not-allowed; /* cursor-not-allowed */
+}
+
+.edit-problem-set-button {
+  width: 617px; /* w-full */
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  border-radius: 0.25rem; /* rounded */
+  color: #ffffff; /* text-white */
+  background-color: #3b82f6; /* bg-blue-500 */
+  border: none;
+  cursor: pointer;
+}
+
+.edit-problem-set-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
+}
+
+.edit-problem-set-space-y-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* space-y-4 */
+}

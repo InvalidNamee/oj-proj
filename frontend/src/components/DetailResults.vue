@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import '@/assets/pr3.css';
 
 const props = defineProps({
   results: {

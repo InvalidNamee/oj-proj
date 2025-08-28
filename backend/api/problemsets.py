@@ -6,6 +6,7 @@ from decorators import role_required, ROLE_TEACHER
 from modules.verify import can_access_problmeset
 import io
 from openpyxl import Workbook
+from datetime import datetime
 
 bp = Blueprint('problemsets', __name__, url_prefix='/api/problemsets')
 
@@ -61,6 +62,8 @@ def update_problemset(psid):
     course_id = data.get('course_id')
     description = data.get('description')
     problem_ids = data.get('problem_ids')
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
     
     print(data)
 
@@ -70,6 +73,12 @@ def update_problemset(psid):
     if course_id:
         course = CourseModel.query.get_or_404(course_id)
         problemset.course = course
+
+    # 更新起止时间
+    if start_time:
+        problemset.start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+    if end_time:
+        problemset.end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
 
     # 更新关联题目
     problemset.problems = ProblemModel.query.filter(
@@ -207,6 +216,8 @@ def get_problemsets():
         'title': ps.title,
         'description': ps.description,
         'timestamp': ps.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
+        'start_time': ps.start_time.strftime('%Y-%m-%d %H:%M:%S') if ps.start_time else None,
+        'end_time': ps.end_time.strftime('%Y-%m-%d %H:%M:%S') if ps.end_time else None,
         'course': {
             'id': ps.course.id,
             'title': ps.course.course_name,
