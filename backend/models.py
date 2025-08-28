@@ -40,6 +40,10 @@ class UserModel(db.Model):
             "courses": [
                 {"id": course.id, "name": course.course_name}
                 for course in self.courses
+            ],
+            "groups": [
+                {"id": group.id, "name": group.group_name}
+                for group in self.groups
             ]
         }
 
@@ -141,7 +145,7 @@ class SubmissionModel(db.Model):
     problem_id = db.Column(db.Integer, nullable=False)
     problem_type = db.Column(db.Enum('single', 'multiple', 'fill', 'subjective', 'coding'), nullable=True)
     user_answer = db.Column(db.JSON)
-    language = db.Column(db.Enum('python', 'cpp'))
+    language = db.Column(db.Enum('python', 'cpp', 'java'))
     score = db.Column(db.Float)
     status = db.Column(db.Enum('Pending', 'Judging', 'AC', 'WA', 'TLE', 'MLE', 'OLE', 'CE', 'RE', 'IE'), default='pending')
     max_time = db.Column(db.Integer)

@@ -6,7 +6,7 @@ QUEUE_KEY = os.getenv("QUEUE_KEY", "judge:queue")
 SUB_HASH_PREFIX = os.getenv("SUB_HASH_PREFIX", "judge:sub:")  # 状态存储 hash 前缀
 
 # 并发
-WORKER_PROCESSES = int(os.getenv("WORKER_PROCESSES", "4"))   # worker 进程数
+WORKER_PROCESSES = int(os.getenv("WORKER_PROCESSES", "2"))   # worker 进程数
 BOX_ID_START = int(os.getenv("BOX_ID_START", "100"))         # isolate box-id 起始（避免冲突）
 # 注意：同一台机所有进程的 box-id 必须唯一，且在 0..999 范围内
 

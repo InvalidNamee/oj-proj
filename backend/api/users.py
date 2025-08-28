@@ -28,6 +28,7 @@ def register_user(login_type, info, commit=True):
     school = info.get('school')
     profession = info.get('profession')
     course_list = info.get('course_list', [])
+    gid = info.get('group_id')
 
     # 教师只能注册学生
     if login_type == 'teacher' and usertype != 'student':
@@ -60,6 +61,11 @@ def register_user(login_type, info, commit=True):
 
         # 并集处理（避免重复）
         user.courses = list(set(user.courses + available_courses))
+    
+    if gid and user.usertype == 'student':
+        group = GroupModel.query.get(gid)
+        if group and group not in user.groups:
+            user.groups.append(group)
 
     if commit:
         db.session.commit()
@@ -76,6 +82,7 @@ def import_users():
     """
     # 获取 course_id，可为空
     course_id = request.form.get("course_id", type=int)
+    group_id = request.form.get("group_id", type=int)
     
     if not course_id and not is_admin():
         return jsonify({'error': 'Permission denied'}), 403
@@ -119,7 +126,8 @@ def import_users():
             "password": row["password"],
             "school": row["school"],
             "profession": row["profession"],
-            "course_list": [course_id]
+            "course_list": [course_id],
+            "group_id": group_id,
         }
 
         res, code = register_user(login_type, user_data, commit=False)

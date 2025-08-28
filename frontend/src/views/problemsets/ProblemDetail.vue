@@ -50,7 +50,7 @@ const runSelfCheck = async () => {
   submissionStatus.value = null
 
   try {
-    const res = await axios.post('/api/self_check', {
+    const res = await axios.post('/api/submissions/self_check', {
       language: solution.value.language,
       source_code: solution.value.code,
       test_cases: cases.value
@@ -67,7 +67,7 @@ const pollSelfCheck = (id) => {
   if (pollTimer) clearInterval(pollTimer)
   pollTimer = setInterval(async () => {
     try {
-      const res = await axios.get(`/api/self_check/${id}`)
+      const res = await axios.get(`/api/submissions/self_check/${id}`)
       if (res.data.status && !['Pending', 'Judging'].includes(res.data.status)) {
         submissionStatus.value = res.data
         submitting.value = false

@@ -13,7 +13,7 @@ const props = defineProps({
 
 const userStore = useUserStore();
 const router = useRouter();
-
+const cases = ref(props.problemData.description.samples || [])
 const title = ref(props.problemData.title || "");
 const description = ref({
   notes: "",
@@ -85,7 +85,7 @@ const submit = async () => {
       class="edit-coding-problem-textarea"></textarea>
 
     <!-- 样例 -->
-    <TestCases :v-model="description.samples" />
+    <TestCases v-model="description.samples" />
     <!-- <div class="samples-editor">
       <div v-for="(sample, index) in description.samples" :key="index" class="sample-item">
         <input v-model="sample.input" placeholder="输入" class="edit-coding-problem-input" />

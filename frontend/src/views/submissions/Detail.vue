@@ -2,12 +2,16 @@
 import axios from "axios"
 import { ref, onMounted, computed } from "vue"
 import { useRoute } from "vue-router"
+import { useUserStore } from "@/stores/user"
 import MonacoEditor from "@/components/MonacoEditor.vue"
 import StatusBadge from "@/components/StatusBadge.vue"
 import '@/assets/submissions.css'
 
 const route = useRoute()
 const submission = ref(null)
+const userStore = useUserStore()
+const polling = ref(false)
+let pollTimer = null
 
 const editorData = computed({
   get: () => ({
@@ -19,13 +23,42 @@ const editorData = computed({
   }
 })
 
-onMounted(async () => {
+const fetchSubmission = async () => {
   const res = await axios.get(`/api/submissions/${route.params.id}`)
   submission.value = res.data
+}
+
+const rejudge = async () => {
+  if (!submission.value) return
+  await axios.patch(`/api/submissions/${submission.value.submission_id}`)
+  submission.value.status = "Pending"
+  submission.value.score = 0
+  polling.value = true
+  startPolling()
+}
+
+// 每隔 2 秒轮询
+const startPolling = () => {
+  if (pollTimer) clearInterval(pollTimer)
+  pollTimer = setInterval(async () => {
+    if (!polling.value) return
+    await fetchSubmission()
+    if (submission.value.status !== "Pending") {
+      clearInterval(pollTimer)
+      polling.value = false
+    }
+  }, 2000)
+}
+
+onMounted(async () => {
+  // const res = await axios.get(`/api/submissions/${route.params.id}`)
+  // submission.value = res.data
+  fetchSubmission();
 })
 </script>
 
 <template>
+  <button @click="rejudge" :disabled="submission?.status === 'Pending'">重判</button>
   <div class="submissions-list-wrapper">
     <div class="submission-detail-container">
     <h2 class="submission-detail-title">提交详情</h2>
@@ -48,7 +81,7 @@ onMounted(async () => {
       <MonacoEditor
         v-if="submission"
         v-model="editorData"
-        readonly="true"
+        :readonly="true"
         height="auto"
       />
     </div>

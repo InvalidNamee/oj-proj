@@ -46,7 +46,7 @@ def _run_in_isolate(
         "--meta", meta_path,
         "--cg-mem", str(mem_limit_mb * 1024),
         "-p",
-        "-E", "PATH=/usr/bin:/bin",
+        "-E", "PATH=/usr/bin:/usr/bin",
         "-o", stdout_file,
         "-r", stderr_file,
         "-k", "65536",
@@ -170,8 +170,28 @@ def judge_submission(
         )
         if code != 0:
             _cleanup_box(box_id)
+            print(code, meta, out, err)
             return {"status": "CE", "score": 0, "cases": [], "message": err or out}
         run_cmd = ["./main"]
+    elif language == "java":
+        src_path = os.path.join(box_dir, "Main.java")
+        with open(src_path, "w") as f:
+            f.write(source_code)
+        # 编译
+        code, meta, out, err = _run_in_isolate(
+            box_id,
+            ["/usr/bin/javac", "Main.java"],
+            workdir=box_dir,
+            time_limit=10.0,
+            mem_limit_mb=1024
+        )
+        if code != 0:
+            print(code, meta, out, err)
+            _cleanup_box(box_id)
+            return {"status": "CE", "score": 0, "cases": [], "message": err or out}
+
+        # 运行
+        run_cmd = ["/usr/bin/java", "-cp", ".", "Main"]
     else:
         _cleanup_box(box_id)
         return {"status": "IE", "score": 0, "cases": [], "message": f"Unsupported language: {language}"}

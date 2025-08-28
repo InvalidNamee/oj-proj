@@ -1,11 +1,10 @@
 import time, hmac, base64, hashlib, threading, requests
 import uuid
-
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
 from models import ProblemModel, SubmissionModel
-from decorators import role_required
+from decorators import role_required, ROLE_TEACHER
 
 bp = Blueprint('submissions', __name__, url_prefix='/api/submissions')
 
@@ -32,7 +31,6 @@ def _fire_and_forget_enqueue(url: str, payload: dict, timeout_sec: float = 3.0):
         try:
             requests.post(url, json=payload, timeout=timeout_sec)
         except Exception:
-            # 这里可以写入日志或将任务放入重试队列
             pass
     threading.Thread(target=_send, daemon=True).start()
 
@@ -101,7 +99,6 @@ def submit_coding(problem, data: dict):
     language = data.get("language")
     source_code = data.get("source_code")
     problem_set_id = data.get("problem_set_id")
-    # client_limitations = data.get("limitations")  # 可选，覆盖题目默认限制
 
     if not language or not source_code:
         return jsonify({"error": "Missing language or source_code"}), 400
@@ -187,8 +184,9 @@ def get_self_check(submission_id):
     resp = requests.get(f"{current_app.config['JUDGE_SERVER']}/judger/self_test/{submission_id}")
     return jsonify(resp.json()), resp.status_code
 
+
 @bp.post("/<int:problem_id>")
-@role_required()
+@role_required(ROLE_TEACHER)
 def submit_problem(problem_id):
     problem = ProblemModel.query.get_or_404(problem_id)
     data = request.get_json() or {}
@@ -196,7 +194,49 @@ def submit_problem(problem_id):
         return submit_coding(problem, data)
     else:
         return submit_legacy(problem, data)
+    
+@bp.patch("/<int:submission_id>")
+@role_required()
+def rejudge(submission_id):
+    submission = SubmissionModel.query.get_or_404(submission_id)
+    problem = ProblemModel.query.get_or_404(submission.problem_id)
+    language = submission.language
+    source_code = submission.user_answer
+    limitations = problem.limitations
 
+    if not language or not source_code:
+        return jsonify({"error": "Missing language or source_code"}), 400
+
+    problem = ProblemModel.query.get_or_404(problem.id)
+
+    # 1) 入库
+    submission.status = "Pending"
+    submission.score = 0.0
+    submission.max_time = None
+    submission.max_memeory = None
+    submission.extra = None
+    db.session.commit()
+
+    # 2) 异步通知判题机
+    callback_url = f"{current_app.config['PUBLIC_BASE_URL']}/submissions/{submission.id}"
+    callback_token = _make_callback_token(submission.id)
+
+    judge_payload = {
+        "problem_id": problem.id,
+        "language": language,
+        "source_code": source_code,
+        "limitations": limitations,
+        "callback_url": callback_url,
+        "callback_token": callback_token
+    }
+    _fire_and_forget_enqueue(f"{current_app.config['JUDGE_SERVER']}/judger/{submission.id}", judge_payload, timeout_sec=3.0)
+
+    # 立刻返回，前端可以开始轮询 /coding/submissions/<id>
+    return jsonify({
+        "submission_id": submission.id,
+        "status": submission.status,
+        "score": submission.score,
+    }), 201
 
 @bp.get("/<int:submission_id>/status")
 @role_required()
@@ -219,7 +259,7 @@ def get_submission(submission_id):
     """
     s = SubmissionModel.query.get_or_404(submission_id)
     login_type = get_jwt()['login_type']
-    if login_type == 'student' and s.user.id != get_jwt_identity():
+    if login_type == 'student' and s.user.id != int(get_jwt_identity()):
         return jsonify({'error': 'Permission denied'}), 403
     return jsonify({
         "submission_id": s.id,

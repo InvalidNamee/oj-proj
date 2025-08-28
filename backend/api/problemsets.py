@@ -3,11 +3,14 @@ from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
 from models import CourseModel, ProblemModel, ProblemSetModel, SubmissionModel, UserModel
 from decorators import role_required, ROLE_TEACHER
-from modules.verify import can_access_problmeset
+from modules.verify import can_access_problemset
 import io
 from openpyxl import Workbook
+from datetime import datetime
+from dateutil import parser
 
 bp = Blueprint('problemsets', __name__, url_prefix='/api/problemsets')
+
 
 @bp.post('/')
 @role_required(ROLE_TEACHER)
@@ -20,6 +23,8 @@ def create_problemset():
     course_id = data.get('course_id')
     description = data.get('description')
     problem_ids = data.get('problem_ids')
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
 
     course = None
     if course_id:
@@ -33,6 +38,15 @@ def create_problemset():
         course=course
     )
 
+    # 处理起止时间
+    if start_time:
+        problem_set.start_time = parser.parse(start_time)
+    if end_time:
+        problem_set.end_time = parser.parse(end_time)
+    else:
+        # 默认给个很远的时间
+        problem_set.end_time = datetime(2099, 1, 1)
+
     # 关联题目
     if problem_ids:
         problem_set.problems = ProblemModel.query.filter(
@@ -44,7 +58,8 @@ def create_problemset():
 
     return jsonify({
         'id': problem_set.id,
-        # todo 不知道写什么
+        'start_time': problem_set.start_time.isoformat(),
+        'end_time': problem_set.end_time.isoformat(),
     }), 201
 
 
@@ -61,15 +76,23 @@ def update_problemset(psid):
     course_id = data.get('course_id')
     description = data.get('description')
     problem_ids = data.get('problem_ids')
-    
-    print(data)
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
 
     # 更新基础信息
-    problemset.title = title
-    problemset.description = description
+    if title is not None:
+        problemset.title = title
+    if description is not None:
+        problemset.description = description
     if course_id:
         course = CourseModel.query.get_or_404(course_id)
         problemset.course = course
+
+    # 更新起止时间
+    if start_time:
+        problemset.start_time = parser.parse(start_time)
+    if end_time:
+        problemset.end_time = parser.parse(end_time)
 
     # 更新关联题目
     problemset.problems = ProblemModel.query.filter(
@@ -79,9 +102,10 @@ def update_problemset(psid):
     db.session.commit()
     return jsonify({
         'id': problemset.id,
-        # 'legacy': len(problem_set.legacy_problems),
-        # 'coding': len(problem_set.problems)
+        'start_time': problemset.start_time.isoformat(),
+        'end_time': problemset.end_time.isoformat(),
     }), 200
+
 
 
 @bp.get('/<int:psid>')
@@ -93,7 +117,7 @@ def get_problemset(psid):
     user_id = get_jwt_identity()
     problem_set = ProblemSetModel.query.get_or_404(psid)
     user = UserModel.query.get_or_404(user_id)
-    if not can_access_problmeset(user, problem_set):
+    if not can_access_problemset(user, problem_set):
         return jsonify({'error': 'Permission denied'}), 403
 
     # 基础信息
@@ -102,6 +126,8 @@ def get_problemset(psid):
         'title': problem_set.title,
         'description': problem_set.description,
         'timestamp': problem_set.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
+        'start_time': problem_set.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'end_time': problem_set.end_time.strftime('%Y-%m-%d %H:%M:%S'),
         'course': {
             'id': problem_set.course.id,
             'title': problem_set.course.course_name
@@ -207,6 +233,8 @@ def get_problemsets():
         'title': ps.title,
         'description': ps.description,
         'timestamp': ps.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
+        'start_time': ps.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'end_time': ps.end_time.strftime('%Y-%m-%d %H:%M:%S'),
         'course': {
             'id': ps.course.id,
             'title': ps.course.course_name,
