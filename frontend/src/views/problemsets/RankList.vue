@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
+import '@/assets/pr2.css'
 
 const route = useRoute()
 const psid = Number(route.params.id)
@@ -33,32 +34,32 @@ const downloadRanklist = () => {
 
 <template>
   <div class="ranklist-container">
-    <h2>题单排行榜</h2>
+    <h2 class="ranklist-title">题单排行榜</h2>
     <button
       v-if="userStore.usertype !== 'student'"
       @click="downloadRanklist"
-      class="btn mb-2"
+      class="ranklist-download-button"
     >
       下载 Excel
     </button>
 
     <table v-if="!loading" class="ranklist-table">
-      <thead>
+      <thead class="ranklist-table-header">
         <tr>
-          <th>学号</th>
-          <th>姓名</th>
-          <th v-for="p in problems" :key="p.id">{{ p.name }}</th>
-          <th>总分</th>
+          <th class="ranklist-table-header-cell">学号</th>
+          <th class="ranklist-table-header-cell">姓名</th>
+          <th class="ranklist-table-header-cell" v-for="p in problems" :key="p.id">{{ p.name }}</th>
+          <th class="ranklist-table-header-cell">总分</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="student in ranklist" :key="student.student_id">
-          <td>{{ student.student_uid }}</td>
-          <td>{{ student.student_name }}</td>
-          <td v-for="score in student.scores" :key="score.problem_id">
+        <tr class="ranklist-table-row" v-for="student in ranklist" :key="student.student_id">
+          <td class="ranklist-table-cell">{{ student.student_uid }}</td>
+          <td class="ranklist-table-cell">{{ student.student_name }}</td>
+          <td class="ranklist-table-cell" v-for="score in student.scores" :key="score.problem_id">
             {{ score.score !== null ? score.score : '-' }}
           </td>
-          <td>{{ student.total_score }}</td>
+          <td class="ranklist-table-cell">{{ student.total_score }}</td>
         </tr>
       </tbody>
     </table>
@@ -69,14 +70,54 @@ const downloadRanklist = () => {
 <style scoped>
 .ranklist-table {
   width: 100%;
-  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem; /* text-sm */
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #fff; /* bg-white */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 更明显的阴影 */
+  border-radius: 0 0 0.75rem 0.75rem; /* 只在底部保留圆角 */
+  overflow: hidden;
+  margin-top: 0; /* 移除顶部外边距 */
+  border: 1px solid #e5e7eb; /* 添加边框 */
+  border-top: none; /* 移除顶部边框 */
 }
-.ranklist-table th, .ranklist-table td {
-  border: 1px solid #ccc;
-  padding: 4px 8px;
+
+.ranklist-table-header {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); /* 渐变背景 */
+  color: #1f2937; /* text-gray-800 */
+  border-bottom: 2px solid #9ca3af; /* 更粗的底部边框 */
+}
+
+.ranklist-table-header-cell {
+  padding: 1.25rem 1rem; /* 增加内边距 */
+  font-weight: 700; /* font-bold */
+  text-transform: uppercase; /* uppercase */
+  letter-spacing: 0.05em; /* tracking-wide */
+  font-size: 1rem; /* 从text-xs增大到text-sm */
+  color: #374151; /* text-gray-700 */
   text-align: center;
 }
-.ranklist-table th {
-  background-color: #f3f3f3;
+
+.ranklist-table-row {
+  transition: all 0.3s; /* 更平滑的过渡 */
+  border-bottom: 1px solid #e5e7eb; /* 更浅的底部边框 */
+}
+
+.ranklist-table-row:last-child {
+  border-bottom: none;
+}
+
+.ranklist-table-row:hover {
+  background-color: #f9fafb; /* hover:bg-gray-50 */
+  transform: scale(1.005); /* 轻微放大效果 */
+}
+
+.ranklist-table-cell {
+  padding: 1.25rem 1rem; /* 增加内边距 */
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb; /* 更浅的底部边框 */
+  transition: background-color 0.2s;
+  text-align: center;
 }
 </style>

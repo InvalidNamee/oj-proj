@@ -46,6 +46,17 @@
   margin-bottom: 1rem; /* mb-4 */
 }
 
+.submissions-user-filter {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.submissions-course-filter,
+.submissions-problem-set-filter {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .submissions-filter-input {
   border: 1px solid #6b7280; /* border border-gray-500 */
   padding: 0.25rem 0.5rem; /* px-2 py-1 */
@@ -53,12 +64,23 @@
   width: 6rem; /* w-24 */
 }
 
+.submissions-select-user-button,
+.submissions-select-course-button,
+.submissions-select-problem-set-button,
 .submissions-search-button {
   padding: 0.25rem 0.5rem; /* px-2 py-1 */
   background-color: #3b82f6; /* bg-blue-500 */
   color: #fff;
   border-radius: 0.25rem; /* rounded */
   border: none;
+  cursor: pointer;
+}
+
+.submissions-select-user-button:hover,
+.submissions-select-course-button:hover,
+.submissions-select-problem-set-button:hover,
+.submissions-search-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-600 */
 }
 
 .submissions-table-container {

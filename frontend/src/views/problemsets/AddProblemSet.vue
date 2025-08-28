@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import axios from "axios";
 import ProblemSelector from "@/components/ProblemSelector.vue";
+import "@/assets/pr6.css";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -11,6 +12,7 @@ const userStore = useUserStore();
 const title = ref("");
 const description = ref("");
 const Selected = ref([]);
+const timeRange = ref([]); // [开始时间, 结束时间]
 
 // 当前课程
 const courseId = computed(() => userStore.currentCourseId);
@@ -29,6 +31,8 @@ const submit = async () => {
     description: description.value,
     course_id: courseId.value,
     problem_ids: Selected.value,
+    start_time: timeRange.value[0], // 添加开始时间
+    end_time: timeRange.value[1]     // 添加结束时间
   });
   router.push("/problemsets");
 };
@@ -49,6 +53,21 @@ const submit = async () => {
         placeholder="描述"
         class="add-problemset-textarea"
       ></textarea>
+
+      <!-- 时间选择器 -->
+      <div>
+        <label class="add-problemset-label">题单时间</label>
+        <el-date-picker
+          v-model="timeRange"
+          type="datetimerange"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
+          format="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          class="add-problemset-date-picker"
+        >
+        </el-date-picker>
+      </div>
 
       <!-- 课程显示 -->
       <div>

@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import CourseSelector from '@/components/CourseSelector.vue';
 import '@/assets/users.css';
+import '@/assets/pr3.css';
 
 const route = useRoute();
 const router = useRouter();

@@ -61,17 +61,23 @@ function removeCase(index) {
       </div>
 
       <div>
-        <label class="block text-xs text-gray-500 mb-1">输入</label>
-        <pre
+        <label class="block text-xs text-gray-500 mb-1">输入<br></label>
+        <textarea
+          v-model="tc.input"
+          @input="updateCase(index, 'input', $event.target.value)"
           class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300"
-        >{{ tc.input }}</pre>
+          rows="2"
+        ></textarea>
       </div>
 
       <div>
-        <label class="block text-xs text-gray-500 mb-1">期望输出</label>
-        <pre
+        <label class="block text-xs text-gray-500 mb-1">期望输出<br></label>
+        <textarea
+          v-model="tc.output"
+          @input="updateCase(index, 'output', $event.target.value)"
           class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300"
-        >{{ tc.output }}</pre>
+          rows="2"
+        ></textarea>
       </div>
       
       <div class="flex justify-end">

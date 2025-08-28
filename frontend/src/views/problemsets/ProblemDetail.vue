@@ -5,10 +5,12 @@ import { useUserStore } from '@/stores/user'
 import useClipboard from 'vue-clipboard3'
 import axios from 'axios'
 import TestCases from '@/components/TestCases.vue'
+import EditableTestCases from '@/components/EditableTestCases.vue'
 import MonacoEditor from '@/components/MonacoEditor.vue'
 import MarkdownArea from '@/components/MarkdownArea.vue'
 import LegacyAnswerArea from '@/components/LegacyAnswerArea.vue'
 import '@/assets/problemsets.css'
+import '@/assets/pr2.css'
 
 const route = useRoute()
 const problemId = Number(route.params.id)
@@ -142,7 +144,16 @@ const copyToClipboard = async (text) => {
 
 <template>
   <div class="problem-detail-container">
-    <h1 class="problem-detail-title">{{ problem?.title || '加载中...' }}</h1>
+    <div class="problem-detail-header">
+      <h1 class="problem-detail-title">{{ problem?.title || '加载中...' }}</h1>
+      <router-link 
+        v-if="problem?.type === 'coding'" 
+        :to="`/problems/${problemId}/edit/testcases`" 
+        class="manage-test-cases-btn"
+      >
+        管理测试用例
+      </router-link>
+    </div>
 
     <div v-if="problem?.limitations" class="problem-detail-limitations">
       <p><span class="font-semibold">时间限制：</span>{{ problem.limitations.maxTime }} 秒</p>
@@ -171,14 +182,14 @@ const copyToClipboard = async (text) => {
               <strong>输入：</strong>
               <pre>{{ sample.input }}</pre>
             </div>
-            <button class="btn" @click="copyToClipboard(sample.input)">复制输入</button>
+            <button class="btn copy-input-button" @click="copyToClipboard(sample.input)">复制输入</button>
           </div>
           <div class="flex gap-2 items-start mt-1">
             <div class="flex-1">
               <strong>输出：</strong>
               <pre>{{ sample.output }}</pre>
             </div>
-            <button class="btn" @click="copyToClipboard(sample.output)">复制输出</button>
+            <button class="btn copy-output-button" @click="copyToClipboard(sample.output)">复制输出</button>
           </div>
         </div>
       </div>
@@ -198,13 +209,22 @@ const copyToClipboard = async (text) => {
 
       <template v-if="problem?.type === 'coding'">
         <MonacoEditor v-model="solution" />
-        <TestCases v-model="cases" />
-        <div class="flex gap-2 mt-2">
-          <button class="btn" :disabled="submitting" @click="runSelfCheck">
+        <button class="problem-detail-submit-button" :disabled="submitting" @click="submitAnswer">
+          {{ submitting ? '提交中...' : '提交' }}
+        </button>
+        <div v-if="submissionStatus" class="problem-detail-status mt-4" :class="submissionStatus.status">
+        {{ submissionStatus.status }}
+        <template
+          v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(submissionStatus.status) && submissionStatus.score !== null">
+          得分: {{ submissionStatus.score }}
+        </template>
+      </div>
+        <div class="self-test-section">
+          <h3 class="self-test-title">代码自测区</h3>
+          <p class="self-test-description">自测代码能否通过测试样例</p>
+          <EditableTestCases v-model="cases" />
+          <button class="self-test-button" :disabled="submitting" @click="runSelfCheck">
             {{ submitting ? '运行中...' : '自测' }}
-          </button>
-          <button class="btn" :disabled="submitting" @click="submitAnswer">
-            {{ submitting ? '提交中...' : '提交' }}
           </button>
         </div>
       </template>
@@ -227,3 +247,30 @@ const copyToClipboard = async (text) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.problem-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.problem-detail-title {
+  margin-bottom: 0;
+}
+
+.manage-test-cases-btn {
+  background-color: #42b983;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.manage-test-cases-btn:hover {
+  background-color: #359c6d;
+}
+</style>

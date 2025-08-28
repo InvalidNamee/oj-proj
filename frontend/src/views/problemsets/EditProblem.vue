@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import EditCodingProblem from "@/views/problemsets/EditCodingProblem.vue";
 import EditLegacyProblem from "@/views/problemsets/EditLegacyProblem.vue";
 import axios from "axios";
+import "@/assets/pr7.css";
 
 const route = useRoute();
 const problemId = route.params.id;
@@ -23,7 +24,7 @@ onMounted(async () => {
 
 <template>
   <div class="edit-problem-container">
-    <h2 class="text-2xl font-bold mb-6">编辑题目</h2>
+    <h2 class="edit-problem-title">编辑题目</h2>
     <div v-if="loading">加载中...</div>
     <template v-else>
       <div class="mb-6">

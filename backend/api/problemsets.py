@@ -233,8 +233,8 @@ def get_problemsets():
         'title': ps.title,
         'description': ps.description,
         'timestamp': ps.time_stamp.strftime('%Y-%m-%d %H:%M:%S'),
-        'start_time': ps.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-        'end_time': ps.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'start_time': ps.start_time.strftime('%Y-%m-%d %H:%M:%S') if ps.start_time else None,
+        'end_time': ps.end_time.strftime('%Y-%m-%d %H:%M:%S') if ps.end_time else None,
         'course': {
             'id': ps.course.id,
             'title': ps.course.course_name,

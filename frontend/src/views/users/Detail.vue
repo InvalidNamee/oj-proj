@@ -10,7 +10,7 @@ const router = useRouter();
 const userId = ref(route.params.id);
 const userData = ref(null);
 const userStore = useUserStore();
-const courses = computed(() => userStore.courses || []);
+const courses = computed(() => userData.value?.courses || []);
 
 // 修改密码相关
 const currentPassword = ref('');

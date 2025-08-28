@@ -5,6 +5,7 @@ import axios from "axios";
 import { useUserStore } from "@/stores/user";
 import TestCases from "@/components/TestCases.vue";
 import "@/assets/problemsets.css";
+import "@/assets/pr5.css";
 
 const props = defineProps({
   problemId: { type: [String, Number], required: true },
