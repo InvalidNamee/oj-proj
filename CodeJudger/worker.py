@@ -1,4 +1,3 @@
-# judge_worker_async.py
 import os
 import json
 import redis
@@ -46,7 +45,7 @@ def worker_loop(worker_idx: int):
                 print(f"[Worker {worker_idx}] Failed to update submission {submission_id}: {e}")
 
         try:
-            if language == "Java":
+            if language == "java":
                 result = judge_submission_docker(
                     # box_id=box_id,
                     image="judge_env",
