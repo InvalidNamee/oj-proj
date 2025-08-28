@@ -4,6 +4,7 @@ import json
 import redis
 import requests
 from judge import judge_submission
+from docker_judge import judge_submission_docker
 from config import REDIS_URL, QUEUE_KEY, WORKER_PROCESSES, BOX_ID_START, SUB_HASH_PREFIX
 from datetime import datetime
 
@@ -45,14 +46,25 @@ def worker_loop(worker_idx: int):
                 print(f"[Worker {worker_idx}] Failed to update submission {submission_id}: {e}")
 
         try:
-            result = judge_submission(
-                box_id=box_id,
-                problem_id=problem_id,
-                language=language,
-                source_code=source_code,
-                limitations=limitations,
-                test_cases=test_cases
-            )
+            if language == "Java":
+                result = judge_submission_docker(
+                    # box_id=box_id,
+                    image="judge_env",
+                    problem_id=problem_id,
+                    language=language,
+                    source_code=source_code,
+                    limitations=limitations,
+                    test_cases=test_cases
+                )
+            else:
+                result = judge_submission(
+                    box_id=box_id,
+                    problem_id=problem_id,
+                    language=language,
+                    source_code=source_code,
+                    limitations=limitations,
+                    test_cases=test_cases
+                )
         except Exception as e:
             print(str(e))
             result = {

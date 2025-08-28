@@ -46,6 +46,11 @@ def _run_docker_shell(
     workdir: str,
     mem_limit_mb: int,
 ) -> Tuple[int, str, str]:
+    """
+    Run a single docker run that executes `bash -lc <shell_cmd>`.
+    Return (returncode, stdout, stderr) of docker client process.
+    stdout/stderr are also truncated and saved under workdir/docker_stdout.txt/docker_stderr.txt.
+    """
     os.makedirs(workdir, exist_ok=True)
     mount = f"{os.path.abspath(workdir)}:/app:rw"
 
@@ -60,9 +65,8 @@ def _run_docker_shell(
         image,
         "bash", "-lc"
     ]
-    quoted = shlex.quote(shell_cmd)
-    full_cmd = docker_base + [quoted]
-    print(' '.join(full_cmd))
+    # pass the raw command string (no extra quoting)
+    full_cmd = docker_base + [shell_cmd]
 
     proc = subprocess.run(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     stdout = proc.stdout
@@ -98,15 +102,17 @@ def judge_submission_docker(
     keep_workdir: bool = False
 ):
     """
+    Single-container judge: compile (if needed) and run all tests inside one docker run.
     - image: docker 镜像名（需包含 python3, g++, javac/java, /usr/bin/time, timeout）
-    - 如果 test_cases is None -> 使用文件模式，从 DATA_DIR/<problem_id> 读取 *.in/*.out 并只读挂载到容器 /app/data
-    - 如果 test_cases 列表 -> 内存模式（自测），在工作目录创建输入文件再运行
-    - keep_workdir=True 会保留宿主机工作目录（便于调试）
+    - test_cases is None => file mode, will mount DATA_DIR/<problem_id> as /app/data:ro
+    - test_cases provided => memory mode, the inputs will be written into workdir and mounted to /app
+    - keep_workdir=True -> do not delete workdir for debugging
     """
     time_limit = float(limitations.get("maxTime", DEFAULT_TIME_LIMIT))
     mem_mb = int(limitations.get("maxMemory", DEFAULT_MEM_LIMIT_MB))
     fsize_kb = int(limitations.get("maxOutput", DEFAULT_OUTPUT_LIMIT_KB))
 
+    # prepare workdir
     if keep_workdir:
         workdir = os.path.abspath(f"./docker_judge_keep_{int(datetime.now().timestamp())}")
         os.makedirs(workdir, exist_ok=True)
@@ -116,26 +122,21 @@ def judge_submission_docker(
         temp_created = True
 
     try:
-        # ---- 1. 选择测试集来源 ----
         use_file_mode = test_cases is None
-        print(use_file_mode)
         file_tests = []
         datadir = ""
         if use_file_mode:
             file_tests, datadir = _collect_test_files(problem_id)
             if not file_tests:
                 return {"status":"IE", "score":0, "cases":[], "message":"No test files found"}
-            # file_tests: list of (name, in_basename, out_abs_path)
         else:
-            # prepare test_cases: ensure id, input, output
-            # create (name, input, output) list for uniform processing
+            # create list of names for tests
             file_tests = []
             for i, tc in enumerate(test_cases):
-                name = str(tc.get("id", f"case_{i}"))
+                name = str(tc.get("id", f"{i+1}"))
                 file_tests.append((name, None, None))
-                # we will write input files in workdir below for memory mode
 
-        # ---- 2. 写源文件并编译（如果需要） ----
+        # write source on host (will be visible in container via mount)
         if language == "python":
             src_name = "main.py"
             _safe_write(os.path.join(workdir, src_name), source_code)
@@ -143,108 +144,111 @@ def judge_submission_docker(
         elif language == "cpp":
             src_name = "main.cpp"
             _safe_write(os.path.join(workdir, src_name), source_code)
-            compile_cmd = "g++ -O2 -std=c++17 main.cpp -o main 2> compile_stderr.txt || echo __COMPILE_FAILED__"
-            code, out, err = _run_docker_shell(image, compile_cmd, workdir, mem_mb)
-            comp_stderr = ""
-            if os.path.exists(os.path.join(workdir,"compile_stderr.txt")):
-                comp_stderr = open(os.path.join(workdir,"compile_stderr.txt"), "r", encoding="utf-8", errors="ignore").read()
-            if not os.path.exists(os.path.join(workdir, "main")):
-                return {"status":"CE", "score":0, "cases":[], "message": comp_stderr or out or err}
             run_cmd = "./main"
         elif language == "java":
             src_name = "Main.java"
             _safe_write(os.path.join(workdir, src_name), source_code)
-            compile_cmd = "javac Main.java 2> compile_stderr.txt || echo __COMPILE_FAILED__"
-            code, out, err = _run_docker_shell(image, compile_cmd, workdir, mem_mb)
-            comp_stderr = ""
-            if os.path.exists(os.path.join(workdir,"compile_stderr.txt")):
-                comp_stderr = open(os.path.join(workdir,"compile_stderr.txt"), "r", encoding="utf-8", errors="ignore").read()
-            if not os.path.exists(os.path.join(workdir, "Main.class")):
-                return {"status":"CE", "score":0, "cases":[], "message": comp_stderr or out or err}
             run_cmd = "java -cp . Main"
         else:
             return {"status":"IE", "score":0, "cases":[], "message":f"Unsupported language: {language}"}
 
-        # ---- 3. 如果是内存模式，事先在 workdir/data 写入输入文件；如果是文件模式，将 datadir 只读挂载 ----
-        if use_file_mode:
-            # datadir must exist
-            if not os.path.isdir(datadir):
-                return {"status":"IE","score":0,"cases":[],"message":"Data dir not found"}
-            # we'll mount datadir -> /app/data:ro in docker run invocation below
-            mount_data_flag = True
-        else:
-            # create data dir under workdir and write inputs
-            data_dir_host = os.path.join(workdir, "data")
-            os.makedirs(data_dir_host, exist_ok=True)
-            for (name, _, _) in file_tests:
-                # find original tc object by id from provided list
-                # build mapping from name->tc
-                pass
-            # Actually write inputs from provided test_cases
+        # memory-mode: write inputs into workdir as <name>.in
+        if not use_file_mode:
             for i, tc in enumerate(test_cases):
                 name = str(tc.get("id", i+1))
                 in_host = os.path.join(workdir, f"{name}.in")
                 _safe_write(in_host, tc.get("input", ""))
-            mount_data_flag = False
-            datadir = ""  # not used in file mode
 
-        # ---- 4. 逐个运行测试 ----
+        # Build run_all_tests.sh contents
+        lines = ["#!/bin/bash", "set +e", "cd /app"]  # do not exit on first error
+        # compilation step (inside container)
+        if language == "cpp":
+            lines.append("g++ -O2 -std=c++17 main.cpp -o main 2> compile_stderr.txt || echo __COMPILE_FAILED__")
+        elif language == "java":
+            lines.append("javac Main.java 2> compile_stderr.txt || echo __COMPILE_FAILED__")
+        # if python, no compile step
+
+        # Per-test commands: use timeout and /usr/bin/time and write exitcode
+        for (name, in_basename, out_abs) in file_tests:
+            if use_file_mode:
+                container_input = f"/app/data/{in_basename}"
+            else:
+                container_input = f"/app/{name}.in"
+
+            # produce unique filenames per test
+            stdout_fname = f"{name}.stdout"
+            stderr_fname = f"{name}.stderr"
+            meta_fname = f"{name}.meta"
+            exit_fname = f"{name}.exitcode"
+
+            # inner command runs time and redirects; we ensure exit code is recorded
+            # we escape $?
+            inner = (f"/usr/bin/time -f 'time:%e\\nmax-rss:%M' -o {meta_fname} -- {run_cmd} "
+                     f"< {container_input} > {stdout_fname} 2> {stderr_fname}; echo \\$? > {exit_fname}")
+            # outer timeout ensures hard time limit
+            lines.append(f"timeout -s KILL {time_limit}s bash -lc \"{inner}\" || true")
+
+        # Write the script to workdir
+        script_path = os.path.join(workdir, "run_all_tests.sh")
+        _safe_write(script_path, "\n".join(lines))
+        os.chmod(script_path, 0o755)
+
+        # build docker run command (single run)
+        docker_cmd = [
+            "docker", "run", "--rm",
+            "--network=none",
+            f"--memory={mem_mb}m",
+            f"--memory-swap={mem_mb}m",
+            "--pids-limit=128",
+            "-v", f"{os.path.abspath(workdir)}:/app:rw",
+            "-w", "/app"
+        ]
+        if use_file_mode:
+            # mount data dir read-only
+            docker_cmd += ["-v", f"{os.path.abspath(datadir)}:/app/data:ro"]
+        docker_cmd += [image, "bash", "-lc", "/app/run_all_tests.sh"]
+
+        # execute single docker run
+        proc = subprocess.run(docker_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # save docker stdout/stderr for debugging
+        _safe_write(os.path.join(workdir, "docker_stdout.txt"), _truncate_text(proc.stdout, DEFAULT_OUTPUT_LIMIT_KB))
+        _safe_write(os.path.join(workdir, "docker_stderr.txt"), _truncate_text(proc.stderr, DEFAULT_OUTPUT_LIMIT_KB))
+
+        # If compilation failed, check compile_stderr.txt existence and return CE
+        compile_stderr = ""
+        comp_err_path = os.path.join(workdir, "compile_stderr.txt")
+        if os.path.exists(comp_err_path):
+            with open(comp_err_path, "r", encoding="utf-8", errors="ignore") as f:
+                compile_stderr = f.read().strip()
+        if language == "cpp" and not os.path.exists(os.path.join(workdir, "main")):
+            return {"status":"CE", "score":0, "cases":[], "message": compile_stderr or proc.stderr or proc.stdout}
+        if language == "java" and not os.path.exists(os.path.join(workdir, "Main.class")):
+            return {"status":"CE", "score":0, "cases":[], "message": compile_stderr or proc.stderr or proc.stdout}
+
+        # parse per-test outputs
         results = []
         passed = 0
         max_time_ms = 0.0
         max_memory_kb = 0.0
 
-        # Helper to run one test; handles mounting datadir read-only if needed
-        def _run_one_test(name: str, in_basename: Optional[str], expected_host_out_path: Optional[str], input_text: Optional[str]):
-            """
-            in_basename: when file mode -> basename of the .in file located in datadir
-            expected_host_out_path: absolute path to expected .out on host (only file mode)
-            input_text: when memory mode -> content string
-            """
-            # ensure per-test working subdir (container will write stdout.txt etc to /app)
-            # We'll use the top-level workdir for outputs (stdout.txt, stderr.txt, meta.txt)
-            # Build shell command: timeout ... "/usr/bin/time -f 'time:%e\nmax-rss:%M' -o meta.txt -- {run_cmd} < <input> > stdout.txt 2> stderr.txt ; echo $? > exitcode.txt"
-            # Input file path inside container:
-            if use_file_mode:
-                container_input = f"/app/data/{in_basename}"
-            else:
-                # input file we created at host: workdir/<name>.in -> mounted to /app/<name>.in
-                container_input = f"/app/{name}.in"
+        # prepare expected mapping for memory mode
+        input_text_and_expected_mapping = {}
+        if not use_file_mode:
+            for tc in test_cases:
+                name = str(tc.get("id", tc.get("name", "")))
+                input_text_and_expected_mapping[name] = tc.get("output", "")
 
-            # build the actual shell (we quote carefully)
-            # note: run inside bash -lc so quoting is simpler
-            shell_cmd = (
-                f"timeout -s KILL {time_limit}s bash -lc "
-                f"\"/usr/bin/time -f 'time:%e\\nmax-rss:%M' -o meta.txt -- {run_cmd} < {shlex.quote(container_input)} > stdout.txt 2> stderr.txt; echo $? > exitcode.txt\""
-            )
+        for idx, (name, in_basename, out_abs) in enumerate(file_tests):
+            stdout_path = os.path.join(workdir, f"{name}.stdout")
+            stderr_path = os.path.join(workdir, f"{name}.stderr")
+            meta_path = os.path.join(workdir, f"{name}.meta")
+            exit_path = os.path.join(workdir, f"{name}.exitcode")
 
-            # prepare docker run base and extra mount if needed
-            os.makedirs(workdir, exist_ok=True)
-            mount = f"{os.path.abspath(workdir)}:/app:rw"
-            docker_cmd = [
-                "docker", "run", "--rm",
-                "--network=none",
-                f"--memory={mem_mb}m",
-                f"--memory-swap={mem_mb}m",
-                "--pids-limit=128",
-                "-v", mount,
-                "-w", "/app"
-            ]
-            # if file-mode, add read-only mount for datadir -> /app/data
-            if use_file_mode:
-                docker_cmd += ["-v", f"{os.path.abspath(datadir)}:/app/data:ro"]
-            docker_cmd += [image, "bash", "-lc", shlex.quote(shell_cmd)]
-
-            proc = subprocess.run(docker_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            # read produced files on host (workdir)
             stdout_text = ""
             stderr_text = ""
             meta_text = ""
             exit_code_inner = None
-            stdout_path = os.path.join(workdir, "stdout.txt")
-            stderr_path = os.path.join(workdir, "stderr.txt")
-            meta_path = os.path.join(workdir, "meta.txt")
-            exitcode_path = os.path.join(workdir, "exitcode.txt")
+
             if os.path.exists(stdout_path):
                 with open(stdout_path, "r", encoding="utf-8", errors="ignore") as f:
                     stdout_text = f.read()
@@ -254,36 +258,35 @@ def judge_submission_docker(
             if os.path.exists(meta_path):
                 with open(meta_path, "r", encoding="utf-8", errors="ignore") as f:
                     meta_text = f.read()
-            if os.path.exists(exitcode_path):
+            if os.path.exists(exit_path):
                 try:
-                    exit_code_inner = int(open(exitcode_path,"r").read().strip())
+                    exit_code_inner = int(open(exit_path,"r").read().strip())
                 except Exception:
                     exit_code_inner = None
 
-            # determine status & parse meta
+            # parse meta
             time_used_ms = None
             peak_rss_kb = None
             try:
                 for line in meta_text.splitlines():
                     if line.startswith("time:"):
-                        val = line.split(":",1)[1].strip()
-                        time_used_ms = float(val) * 1000.0
+                        time_used_ms = float(line.split(":",1)[1].strip()) * 1000.0
                     elif line.startswith("max-rss:"):
                         peak_rss_kb = float(line.split(":",1)[1].strip())
             except Exception:
                 pass
 
-            # get expected output
-            expected = ""
-            if use_file_mode and expected_host_out_path and os.path.exists(expected_host_out_path):
-                with open(expected_host_out_path, "r", encoding="utf-8", errors="ignore") as f:
-                    expected = f.read()
+            expected_text = ""
+            if use_file_mode and out_abs and os.path.exists(out_abs):
+                with open(out_abs, "r", encoding="utf-8", errors="ignore") as f:
+                    expected_text = f.read()
 
-            # decide case status
+            # determine status
             case_status = "AC"
             if exit_code_inner is None:
-                # use proc.returncode & stderr hints
-                if "Timed out" in proc.stderr or "Killed" in proc.stderr or "timeout" in proc.stderr.lower():
+                # if docker wrote something to stderr maybe timeout/killed
+                stderr_combined = (proc.stderr or "").lower()
+                if "killed" in stderr_combined or "timeout" in stderr_combined or "timed out" in stderr_combined:
                     case_status = "TLE"
                 else:
                     case_status = "RE"
@@ -296,78 +299,34 @@ def judge_submission_docker(
                     else:
                         case_status = "RE"
                 else:
-                    # compare output
-                    ok = False
+                    # compare outputs
                     if use_file_mode:
-                        ok = _normalize(stdout_text) == _normalize(expected)
+                        ok = _normalize(stdout_text) == _normalize(expected_text)
                     else:
-                        # memory mode we have expected in the original tc['output']
                         ok = _normalize(stdout_text) == _normalize(input_text_and_expected_mapping.get(name, ""))
                     case_status = "AC" if ok else "WA"
 
-            return {
-                "stdout": _truncate_text(stdout_text, fsize_kb),
-                "stderr": _truncate_text(stderr_text, fsize_kb),
-                "meta": meta_text,
-                "exit_code": exit_code_inner,
-                "time_ms": time_used_ms,
-                "mem_kb": peak_rss_kb,
-                "status": case_status,
-                "expected": expected
-            }
-
-        # For memory-mode expected lookup mapping:
-        input_text_and_expected_mapping = {}
-        if not use_file_mode:
-            for tc in test_cases:
-                name = str(tc.get("id", tc.get("name", "")))
-                input_text_and_expected_mapping[name] = tc.get("output", "")
-
-        # iterate tests
-        for idx, tup in enumerate(file_tests):
-            name, in_basename, out_abs = tup
-            if use_file_mode:
-                res = _run_one_test(name, in_basename, out_abs, None)
-            else:
-                # memory mode: we wrote workdir/<name>.in earlier
-                # ensure the input file exists at workdir/<name>.in
-                input_text = test_cases[idx].get("input","")
-                in_host = os.path.join(workdir, f"{name}.in")
-                _safe_write(in_host, input_text)
-                res = _run_one_test(name, None, None, input_text)
-
-            case_status = res["status"]
             if case_status == "AC":
                 passed += 1
-            if res["time_ms"]:
-                max_time_ms = max(max_time_ms, res["time_ms"])
-            if res["mem_kb"]:
-                max_memory_kb = max(max_memory_kb, res["mem_kb"])
+            if time_used_ms:
+                max_time_ms = max(max_time_ms, time_used_ms)
+            if peak_rss_kb:
+                max_memory_kb = max(max_memory_kb, peak_rss_kb)
+
             diff_text = ""
             if case_status == "WA":
-                # build diff between expected and stdout
-                expected_text = res["expected"] if use_file_mode else input_text_and_expected_mapping.get(name,"")
-                diff_text = _get_diff(expected_text, res["stdout"])
+                expected_for_diff = expected_text if use_file_mode else input_text_and_expected_mapping.get(name,"")
+                diff_text = _get_diff(expected_for_diff, stdout_text)
 
             results.append({
                 "name": name,
                 "status": case_status,
-                "time": res["time_ms"],
-                "memory": res["mem_kb"],
-                "message": res["stderr"] or "",
+                "time": time_used_ms,
+                "memory": peak_rss_kb,
+                "message": stderr_text or "",
                 "diff": diff_text
             })
 
-            # cleanup per-test outputs if not keep_workdir
-            for fname in ("stdout.txt","stderr.txt","meta.txt","exitcode.txt"):
-                p = os.path.join(workdir, fname)
-                try:
-                    if os.path.exists(p) and not keep_workdir:
-                        os.remove(p)
-                except Exception:
-                    pass
-
-        # overall
         overall = "WA"
         if passed == len(results) and len(results) > 0:
             overall = "AC"
@@ -383,7 +342,6 @@ def judge_submission_docker(
             overall = "TLE"
 
         score = round(100.0 * passed / max(1, len(results)), 2)
-
         ret = {
             "status": overall,
             "score": score,
@@ -407,3 +365,289 @@ def judge_submission_docker(
                 os.rmdir(workdir)
             except Exception:
                 pass
+
+
+# def judge_submission_docker(
+#     image: str,
+#     problem_id: int,
+#     language: str,
+#     source_code: str,
+#     limitations: Dict,
+#     test_cases: Optional[List[Dict]] = None,
+#     keep_workdir: bool = False
+# ):
+#     """
+#     Docker-based judge implementation.
+#     - image: docker 镜像名（需包含 python3, g++, javac/java, /usr/bin/time, timeout）
+#     - 如果 test_cases is None -> 使用文件模式，从 DATA_DIR/<problem_id> 读取 *.in/*.out 并只读挂载到容器 /app/data
+#     - 如果 test_cases 列表 -> 内存模式（自测），在工作目录创建输入文件再运行
+#     - keep_workdir=True 会保留宿主机工作目录（便于调试）
+#     """
+#     time_limit = float(limitations.get("maxTime", DEFAULT_TIME_LIMIT))
+#     mem_mb = int(limitations.get("maxMemory", DEFAULT_MEM_LIMIT_MB))
+#     fsize_kb = int(limitations.get("maxOutput", DEFAULT_OUTPUT_LIMIT_KB))
+#
+#     if keep_workdir:
+#         workdir = os.path.abspath(f"./docker_judge_keep_{int(datetime.now().timestamp())}")
+#         os.makedirs(workdir, exist_ok=True)
+#         temp_created = False
+#     else:
+#         workdir = tempfile.mkdtemp(prefix="docker_judge_")
+#         temp_created = True
+#
+#     try:
+#         # ---- test source selection ----
+#         use_file_mode = test_cases is None
+#         print(use_file_mode)
+#         file_tests = []
+#         datadir = ""
+#         if use_file_mode:
+#             file_tests, datadir = _collect_test_files(problem_id)
+#             print(file_tests, datadir)
+#             if not file_tests:
+#                 return {"status":"IE", "score":0, "cases":[], "message":"No test files found"}
+#         else:
+#             file_tests = []
+#             for i, tc in enumerate(test_cases):
+#                 name = str(tc.get("id", f"case_{i+1}"))
+#                 file_tests.append((name, None, None))
+#
+#         # ---- write source and compile if needed ----
+#         if language == "python":
+#             src_name = "main.py"
+#             _safe_write(os.path.join(workdir, src_name), source_code)
+#             run_cmd = f"python3 {shlex.quote(src_name)}"
+#         elif language == "cpp":
+#             src_name = "main.cpp"
+#             _safe_write(os.path.join(workdir, src_name), source_code)
+#             compile_cmd = "g++ -O2 -std=c++17 main.cpp -o main 2> compile_stderr.txt || echo __COMPILE_FAILED__"
+#             code, out, err = _run_docker_shell(image, compile_cmd, workdir, mem_mb)
+#             comp_stderr = ""
+#             if os.path.exists(os.path.join(workdir,"compile_stderr.txt")):
+#                 comp_stderr = open(os.path.join(workdir,"compile_stderr.txt"), "r", encoding="utf-8", errors="ignore").read()
+#             if not os.path.exists(os.path.join(workdir, "main")):
+#                 return {"status":"CE", "score":0, "cases":[], "message": comp_stderr or out or err}
+#             run_cmd = "./main"
+#         elif language == "java":
+#             src_name = "Main.java"
+#             _safe_write(os.path.join(workdir, src_name), source_code)
+#             compile_cmd = "javac Main.java 2> compile_stderr.txt || echo __COMPILE_FAILED__"
+#             code, out, err = _run_docker_shell(image, compile_cmd, workdir, mem_mb)
+#             comp_stderr = ""
+#             if os.path.exists(os.path.join(workdir,"compile_stderr.txt")):
+#                 comp_stderr = open(os.path.join(workdir,"compile_stderr.txt"), "r", encoding="utf-8", errors="ignore").read()
+#             if not os.path.exists(os.path.join(workdir, "Main.class")):
+#                 return {"status":"CE", "score":0, "cases":[], "message": comp_stderr or out or err}
+#             run_cmd = "java -cp . Main"
+#         else:
+#             return {"status":"IE", "score":0, "cases":[], "message":f"Unsupported language: {language}"}
+#
+#         # ---- prepare data files for memory mode ----
+#         if not use_file_mode:
+#             # write inputs into workdir as <name>.in
+#             for i, tc in enumerate(test_cases):
+#                 name = str(tc.get("id", i+1))
+#                 in_host = os.path.join(workdir, f"{name}.in")
+#                 _safe_write(in_host, tc.get("input", ""))
+#
+#         # ---- run each test ----
+#         results = []
+#         passed = 0
+#         max_time_ms = 0.0
+#         max_memory_kb = 0.0
+#
+#         def _run_one_test(name: str, in_basename: Optional[str], expected_host_out_path: Optional[str], input_text: Optional[str]):
+#             # determine container-side input path
+#             if use_file_mode:
+#                 container_input = f"/app/data/{in_basename}"
+#             else:
+#                 container_input = f"/app/{name}.in"
+#
+#             # build shell command executed inside container (single-layer)
+#             # use timeout to enforce time limit, and /usr/bin/time to collect time/memory (make sure image contains /usr/bin/time)
+#             # redirect outputs to stdout.txt/stderr.txt and write exit code to exitcode.txt
+#             inner_cmd = f"/usr/bin/time -f 'time:%e\\nmax-rss:%M' -o meta.txt -- {run_cmd} < {shlex.quote(container_input)} > stdout.txt 2> stderr.txt; echo $? > exitcode.txt"
+#             shell_cmd = f"timeout -s KILL {time_limit}s bash -lc {shlex.quote(inner_cmd)}"
+#
+#             mount = f"{os.path.abspath(workdir)}:/app:rw"
+#             docker_cmd = [
+#                 "docker", "run", "--rm",
+#                 "--network=none",
+#                 f"--memory={mem_mb}m",
+#                 f"--memory-swap={mem_mb}m",
+#                 "--pids-limit=128",
+#                 "-v", mount,
+#                 "-w", "/app",
+#             ]
+#             if use_file_mode:
+#                 # datadir -> /app/data read-only
+#                 docker_cmd += ["-v", f"{os.path.abspath(datadir)}:/app/data:ro"]
+#             docker_cmd += [image, "bash", "-lc", shell_cmd]
+#
+#             proc = subprocess.run(docker_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+#
+#             # read produced files on host
+#             stdout_text = ""
+#             stderr_text = ""
+#             meta_text = ""
+#             exit_code_inner = None
+#
+#             stdout_path = os.path.join(workdir, "stdout.txt")
+#             stderr_path = os.path.join(workdir, "stderr.txt")
+#             meta_path = os.path.join(workdir, "meta.txt")
+#             exitcode_path = os.path.join(workdir, "exitcode.txt")
+#
+#             if os.path.exists(stdout_path):
+#                 with open(stdout_path, "r", encoding="utf-8", errors="ignore") as f:
+#                     stdout_text = f.read()
+#             if os.path.exists(stderr_path):
+#                 with open(stderr_path, "r", encoding="utf-8", errors="ignore") as f:
+#                     stderr_text = f.read()
+#             if os.path.exists(meta_path):
+#                 with open(meta_path, "r", encoding="utf-8", errors="ignore") as f:
+#                     meta_text = f.read()
+#             if os.path.exists(exitcode_path):
+#                 try:
+#                     exit_code_inner = int(open(exitcode_path,"r").read().strip())
+#                 except Exception:
+#                     exit_code_inner = None
+#
+#             # parse meta
+#             time_used_ms = None
+#             peak_rss_kb = None
+#             try:
+#                 for line in meta_text.splitlines():
+#                     if line.startswith("time:"):
+#                         val = line.split(":",1)[1].strip()
+#                         time_used_ms = float(val) * 1000.0
+#                     elif line.startswith("max-rss:"):
+#                         peak_rss_kb = float(line.split(":",1)[1].strip())
+#             except Exception:
+#                 pass
+#
+#             expected = ""
+#             if use_file_mode and expected_host_out_path and os.path.exists(expected_host_out_path):
+#                 with open(expected_host_out_path, "r", encoding="utf-8", errors="ignore") as f:
+#                     expected = f.read()
+#
+#             # determine status
+#             case_status = "AC"
+#             if exit_code_inner is None:
+#                 stderr_combined = (proc.stderr or "").lower()
+#                 if "timed out" in stderr_combined or "killed" in stderr_combined or "timeout" in stderr_combined:
+#                     case_status = "TLE"
+#                 else:
+#                     case_status = "RE"
+#             else:
+#                 if exit_code_inner != 0:
+#                     if exit_code_inner == 124:
+#                         case_status = "TLE"
+#                     elif exit_code_inner == 137:
+#                         case_status = "MLE"
+#                     else:
+#                         case_status = "RE"
+#                 else:
+#                     # compare outputs
+#                     if use_file_mode:
+#                         ok = _normalize(stdout_text) == _normalize(expected)
+#                     else:
+#                         # get expected from mapping passed in caller
+#                         ok = _normalize(stdout_text) == _normalize(input_text_and_expected_mapping.get(name, ""))
+#                     case_status = "AC" if ok else "WA"
+#
+#             return {
+#                 "stdout": _truncate_text(stdout_text, fsize_kb),
+#                 "stderr": _truncate_text(stderr_text, fsize_kb),
+#                 "meta": meta_text,
+#                 "exit_code": exit_code_inner,
+#                 "time_ms": time_used_ms,
+#                 "mem_kb": peak_rss_kb,
+#                 "status": case_status,
+#                 "expected": expected
+#             }
+#
+#         # prepare expected mapping for memory mode
+#         input_text_and_expected_mapping = {}
+#         if not use_file_mode:
+#             for tc in test_cases:
+#                 name = str(tc.get("id", tc.get("name", "")))
+#                 input_text_and_expected_mapping[name] = tc.get("output", "")
+#
+#         for idx, tup in enumerate(file_tests):
+#             name, in_basename, out_abs = tup
+#             if use_file_mode:
+#                 res = _run_one_test(name, in_basename, out_abs, None)
+#             else:
+#                 # memory mode: ensure we wrote <name>.in earlier
+#                 res = _run_one_test(name, None, None, test_cases[idx].get("input",""))
+#
+#             case_status = res["status"]
+#             if case_status == "AC":
+#                 passed += 1
+#             if res["time_ms"]:
+#                 max_time_ms = max(max_time_ms, res["time_ms"])
+#             if res["mem_kb"]:
+#                 max_memory_kb = max(max_memory_kb, res["mem_kb"])
+#             diff_text = ""
+#             if case_status == "WA":
+#                 expected_text = res["expected"] if use_file_mode else input_text_and_expected_mapping.get(name,"")
+#                 diff_text = _get_diff(expected_text, res["stdout"])
+#
+#             results.append({
+#                 "name": name,
+#                 "status": case_status,
+#                 "time": res["time_ms"],
+#                 "memory": res["mem_kb"],
+#                 "message": res["stderr"] or "",
+#                 "diff": diff_text
+#             })
+#
+#             # cleanup per-test outputs if not keep_workdir
+#             for fname in ("stdout.txt","stderr.txt","meta.txt","exitcode.txt"):
+#                 p = os.path.join(workdir, fname)
+#                 try:
+#                     if os.path.exists(p) and not keep_workdir:
+#                         os.remove(p)
+#                 except Exception:
+#                     pass
+#
+#         # overall status
+#         overall = "WA"
+#         if passed == len(results) and len(results) > 0:
+#             overall = "AC"
+#         elif any(r["status"]=="RE" for r in results):
+#             overall = "RE"
+#         elif any(r["status"]=="MLE" for r in results):
+#             overall = "MLE"
+#         elif any(r["status"]=="OLE" for r in results):
+#             overall = "OLE"
+#         elif any(r["status"]=="WA" for r in results):
+#             overall = "WA"
+#         elif any(r["status"]=="TLE" for r in results):
+#             overall = "TLE"
+#
+#         score = round(100.0 * passed / max(1, len(results)), 2)
+#
+#         ret = {
+#             "status": overall,
+#             "score": score,
+#             "max_time": max_time_ms,
+#             "max_memory": max_memory_kb,
+#             "cases": results,
+#             "finished_at": datetime.now().isoformat()
+#         }
+#         if keep_workdir:
+#             ret["workdir"] = workdir
+#         return ret
+#
+#     finally:
+#         if temp_created and (not keep_workdir):
+#             try:
+#                 for root, dirs, files in os.walk(workdir, topdown=False):
+#                     for name in files:
+#                         os.unlink(os.path.join(root, name))
+#                     for name in dirs:
+#                         os.rmdir(os.path.join(root, name))
+#                 os.rmdir(workdir)
+#             except Exception:
+#                 pass

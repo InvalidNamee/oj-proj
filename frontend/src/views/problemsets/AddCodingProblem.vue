@@ -39,7 +39,7 @@ let pollTimer = null;
 const allTestCases = computed(() => {
   const prefixedSamples = samples.value.map(tc => ({
     ...tc,
-    id: `Sample ${tc.id}`
+    id: `Sample_${tc.id}`
   }))
   return [...prefixedSamples, ...testCases.value]
 })
