@@ -51,7 +51,6 @@
 }
 
 .add-problemset-course-input-container {
-  position: relative;
   width: 608px;
 }
 
@@ -67,12 +66,7 @@
 .add-problemset-course-info {
   font-size: 0.75rem; /* text-xs */
   color: #6b7280; /* text-gray-500 */
-  position: absolute;
-  bottom: 0.25rem;
-  left: 0.25rem;
-  right: auto;
-  margin: 0;
-  padding: 0;
+  margin-top: 0.25rem;
 }
 
 .add-problemset-button {

@@ -1189,6 +1189,7 @@
   margin-top: 0; /* 移除顶部间距 */
   border: 1px solid #e5e7eb; /* 添加边框 */
   border-top: none; /* 移除顶部边框 */
+  transform:translateY(-0.6rem);
 }
 
 .user-list-pagination-button {

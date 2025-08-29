@@ -32,7 +32,25 @@ const fetchProblemSets = async () => {
 onMounted(fetchProblemSets);
 watch(() => userStore.currentCourseId, fetchProblemSets);
 
-const goDetail = (id) => router.push(`/problemsets/${id}`);
+const goDetail = (id) => {
+  // 检查用户是否是学生
+  if (userStore.usertype === 'student') {
+    // 找到对应的题单
+    const problemset = problemsets.value.find(ps => ps.id === id);
+    if (problemset) {
+      const now = new Date();
+      const startTime = new Date(problemset.start_time);
+      const endTime = new Date(problemset.end_time);
+      
+      // 如果题单未开始或已结束，则禁止学生点击
+      if ((problemset.start_time && now < startTime) || (problemset.end_time && now > endTime)) {
+        alert('该题单当前不可访问');
+        return;
+      }
+    }
+  }
+  router.push(`/problemsets/${id}`);
+};
 const goEdit = (id) => router.push(`/problemsets/${id}/edit`);
 
 const deleteOne = async (id) => {
@@ -137,7 +155,7 @@ const formatTime = (time) => {
         :class="showSelect && selected.includes(ps.id) ? 'selected' : ''"
         @click="handleSelect(ps.id)">
         <div class="problemset-list-item-content">
-          <h3 @click.stop="goDetail(ps.id)" class="problemset-list-item-title">{{ ps.title }}</h3>
+          <h3 @click.stop="goDetail(ps.id)" class="problemset-list-item-title" :class="{ 'disabled': userStore.usertype === 'student' && ((ps.start_time && new Date() < new Date(ps.start_time)) || (ps.end_time && new Date() > new Date(ps.end_time))) }">{{ ps.title }}</h3>
           <p class="problemset-list-item-description">{{ ps.description }}</p>
           <p class="problemset-list-item-meta">
             课程: {{ ps.course?.title || '无' }} | 题目数: {{ ps.num_problems }}
@@ -168,3 +186,10 @@ const formatTime = (time) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+</style>
