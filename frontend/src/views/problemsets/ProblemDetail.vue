@@ -57,6 +57,10 @@ const runSelfCheck = async () => {
       source_code: solution.value.code,
       test_cases: cases.value
     })
+    submissionStatus.value = {
+      status: 'Pending',
+      score: 0,
+    }
     const subId = res.data.submission_id
     pollSelfCheck(subId)
   } catch (err) {
@@ -70,9 +74,9 @@ const pollSelfCheck = (id) => {
   pollTimer = setInterval(async () => {
     try {
       const res = await axios.get(`/api/submissions/self_check/${id}`)
+      submissionStatus.value = res.data
+      submitting.value = false
       if (res.data.status && !['Pending', 'Judging'].includes(res.data.status)) {
-        submissionStatus.value = res.data
-        submitting.value = false
         clearInterval(pollTimer)
       }
     } catch (err) {
@@ -97,6 +101,11 @@ const submitAnswer = async () => {
         problem_set_id: psid || undefined
       })
       submissionId.value = res.data.submission_id
+      
+      submissionStatus.value = {
+        status: 'Pending',
+        score: 0,
+      }
       pollSubmission(submissionId.value)
     } else {
       const res = await axios.post(`/api/submissions/${problemId}`, {
@@ -117,9 +126,9 @@ const pollSubmission = (id) => {
   pollTimer = setInterval(async () => {
     try {
       const res = await axios.get(`/api/submissions/${id}/status`)
+      submissionStatus.value = res.data
+      submitting.value = false
       if (res.data.status && !['Pending', 'Judging'].includes(res.data.status)) {
-        submissionStatus.value = res.data
-        submitting.value = false
         clearInterval(pollTimer)
       }
     } catch (err) {
