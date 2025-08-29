@@ -132,15 +132,15 @@ const formatTime = (time) => {
 
       <!-- 右侧操作按钮 -->
       <div class="flex items-center space-x-2">
-        <button @click="router.push('/problemsets/add')"
+        <button v-if="userStore.usertype !== 'student'" @click="router.push('/problemsets/add')"
           class="problemset-list-button problemset-list-primary-button-green">
           新建题单
         </button>
-        <button @click="showSelect = !showSelect; selected = []"
+        <button v-if="userStore.usertype !== 'student'" @click="showSelect = !showSelect; selected = []"
           class="problemset-list-button problemset-list-secondary-button">
           {{ showSelect ? "取消选择" : "选择" }}
         </button>
-        <button v-if="showSelect && selected.length > 0" @click="deleteBatch"
+        <button v-if="userStore.usertype !== 'student' && showSelect && selected.length > 0" @click="deleteBatch"
           class="problemset-list-button problemset-list-danger-button">
           删除选中
         </button>
@@ -165,9 +165,9 @@ const formatTime = (time) => {
           </p>
         </div>
         <div class="problemset-list-item-actions">
-          <input v-if="showSelect" type="checkbox" v-model="selected" :value="ps.id" @click.stop class="problemset-list-item-checkbox" />
-          <button @click.stop="goEdit(ps.id)" class="problemset-list-edit-button">编辑</button>
-          <button @click.stop="deleteOne(ps.id)" class="problemset-list-delete-button">删除</button>
+          <input v-if="userStore.usertype !== 'student' && showSelect" type="checkbox" v-model="selected" :value="ps.id" @click.stop class="problemset-list-item-checkbox" />
+          <button v-if="userStore.usertype !== 'student'" @click.stop="goEdit(ps.id)" class="problemset-list-edit-button">编辑</button>
+          <button v-if="userStore.usertype !== 'student'" @click.stop="deleteOne(ps.id)" class="problemset-list-delete-button">删除</button>
         </div>
       </div>
     </div>

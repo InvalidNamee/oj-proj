@@ -90,7 +90,7 @@ onMounted(() => {
 
     <div>
       <label class="user-import-label">选择组</label>
-      <select v-model="selectedGroupId" class="user-import-input">
+      <select v-model="selectedGroupId" class="user-import-input user-import-select">
         <option value="">不分配组</option>
         <option v-for="group in groups" :key="group.id" :value="group.id">
           {{ group.name }}

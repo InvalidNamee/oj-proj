@@ -27,8 +27,26 @@ onMounted(async () => {
   }
 })
 
-const downloadRanklist = () => {
-  window.open(`/api/problemsets/${psid}/ranklist/download`, '_blank')
+const downloadRanklist = async () => {
+  try {
+    const response = await axios.get(`/api/problemsets/${psid}/ranklist/download`, {
+      responseType: 'blob'
+    });
+    
+    // 创建下载链接
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `ranklist_${psid}.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    
+    // 清理
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert(err.response?.data?.error || "下载失败");
+  }
 }
 </script>
 

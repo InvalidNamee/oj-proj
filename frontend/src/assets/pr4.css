@@ -6,6 +6,7 @@
   padding: 1.5rem; /* p-6 */
   border: 1px solid #ffffff; /* white border */
   background-color: #ffffff; /* white background */
+  border-radius: 0.75rem; /* 添加圆角 */
 }
 
 .problem-list-title {
