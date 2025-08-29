@@ -65,7 +65,7 @@ onMounted(fetchSubmission)
     <div class="submission-detail-container">
     <div class="submission-detail-header">
       <h2 class="submission-detail-title">提交详情</h2>
-      <button class="rejudge-btn">重判</button>
+      <button class="rejudge-btn" @click="rejudge">重判</button>
     </div>
 
       <div class="submission-detail-grid">
