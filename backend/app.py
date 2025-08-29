@@ -1,7 +1,7 @@
 from flask import Flask
 from exts import db, jwt
 from flask_migrate import Migrate
-import config # 配置文件
+import config
 from flask_cors import  CORS
 from api import register_blueprints
 # from datetime import timedelta

@@ -10,7 +10,7 @@ bp = Blueprint("course", __name__, url_prefix="/api/courses")
 @role_required()
 def list_courses():
     """
-    获取课程列表（分页）
+    获取课程列表
     - 管理员：可查看所有课程
     - 教师/学生：只能查看与自己相关的课程
     """
@@ -143,7 +143,6 @@ def delete_course(course_id):
 def delete_courses():
     """
     批量删除课程（管理员）
-    body: { "courses": [1, 2, 3] }
     """
     course_ids = request.get_json().get('course_ids', [])
     success, fail, fail_list = 0, 0, []

@@ -259,7 +259,7 @@ def rejudge_problem(problem_id):
         limitations = problem.limitations
 
         if not language or not source_code:
-            continue  # 跳过无效记录
+            continue
 
         # 入库
         submission.status = "Pending"
@@ -351,7 +351,6 @@ def judge_callback(submission_id):
     max_time = data.get("max_time")
     max_memory = data.get("max_memory")
     detail = data.get("detail")
-    # finished_at = data.get("finished_at")
 
     if new_status:
         s.status = new_status
@@ -362,7 +361,6 @@ def judge_callback(submission_id):
     if isinstance(new_score, (int, float)):
         s.score = float(new_score)
     if detail is not None:
-        # 建议把 detail 存成 JSON 字符串
         try:
             s.extra = detail
         except Exception:

@@ -65,7 +65,6 @@ def worker_loop(worker_idx: int):
                     test_cases=test_cases
                 )
         except Exception as e:
-            print(str(e))
             result = {
                 "status": "IE",
                 "score": 0,

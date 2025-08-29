@@ -1,6 +1,6 @@
 import os
 
-JWT_SECRET_KEY = "your-secretkey"
+JWT_SECRET_KEY = "qwq"
 # 这里是数据的相关配置
 HOSTNAME = "127.0.0.1"
 PORT = 3306
@@ -15,7 +15,7 @@ PUBLIC_BASE_URL = "http://127.0.0.1:5000/api"
 
 # JUDGE_SERVER = "http://121.249.151.214:8000"  # 判题机地址
 # PUBLIC_BASE_URL = "http://172.24.61.145:5001/api"
-CALLBACK_SECRET = os.getenv("JUDGE_CALLBACK_SECRET", "change-me")
+CALLBACK_SECRET = os.getenv("JUDGE_CALLBACK_SECRET", "qwq")
 
 # 这里是 openai
 OPENAI_API_KEY = os.getenv("GEMINI_API_KEY")

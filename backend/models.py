@@ -159,7 +159,7 @@ class SubmissionModel(db.Model):
     problemset = db.relationship("ProblemSetModel", backref=db.backref("submissions", lazy=True))
 
 
-# 题集和题目的多对多
+# 题单和题目的多对多
 problemset_problem = db.Table(
     "problemset_problem",
     db.Column("problemset_id", db.Integer, db.ForeignKey("problemset.id"), primary_key=True),

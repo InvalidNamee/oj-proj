@@ -60,7 +60,6 @@ def create_submission(submission_id):
 
 @app.post("/judger/self_test")
 def self_test():
-    print("wahaha")
     data = request.get_json(silent=True) or {}
     language = data.get("language")
     source_code = data.get("source_code")

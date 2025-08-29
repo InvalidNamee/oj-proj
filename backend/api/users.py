@@ -59,7 +59,6 @@ def register_user(login_type, info, commit=True):
             # 管理员可以选择任意课程
             available_courses = CourseModel.query.filter(CourseModel.id.in_(course_list)).all()
 
-        # 并集处理（避免重复）
         user.courses = list(set(user.courses + available_courses))
     
     if gid and user.usertype == 'student':
@@ -97,7 +96,7 @@ def import_users():
             "uid": str,
             "username": str,
             "usertype": str,
-            "password": str,   # 关键：强制密码列为 str
+            "password": str,
             "school": str,
             "profession": str
         }
@@ -352,24 +351,18 @@ def get_users():
     - 管理员（没有绑定课程但有全局权限的角色）：可以看到所有用户
     - 可以通过传入 course_id 筛选某个课程下的用户（前提是有权限）
     """
-    # 分页参数
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
-    # 当前登录用户
     user_id = get_jwt_identity()
     user = UserModel.query.get(user_id)
 
-    # 当前用户关联的课程 id 列表
     course_ids = [course.id for course in user.courses]
 
-    # 基础查询
     query = UserModel.query
 
-    # 是否筛选特定课程
     course_id = request.args.get('course_id', type=int)
     if course_id:
-        # 权限检查：普通用户必须属于该课程
         if course_id not in course_ids and user.usertype != 'admin':
             return jsonify({'error': 'No permission to view this course users'}), 403
         query = query.join(UserModel.courses).filter(CourseModel.id == course_id)

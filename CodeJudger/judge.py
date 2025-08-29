@@ -170,7 +170,6 @@ def judge_submission(
         )
         if code != 0:
             _cleanup_box(box_id)
-            print(code, meta, out, err)
             return {"status": "CE", "score": 0, "cases": [], "message": err or out}
         run_cmd = ["./main"]
     elif language == "java":
@@ -186,7 +185,6 @@ def judge_submission(
             mem_limit_mb=1024
         )
         if code != 0:
-            print(code, meta, out, err)
             _cleanup_box(box_id)
             return {"status": "CE", "score": 0, "cases": [], "message": err or out}
 

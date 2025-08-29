@@ -33,7 +33,6 @@ def generate_problem_from_llm(user_request: str, model: str="gemini-2.5-flash-li
         temperature=0.7
     )
     raw_output = response.choices[0].message.content
-    print(raw_output)
     cleaned = clean_json_output(raw_output)
     try:
         return json.loads(cleaned)

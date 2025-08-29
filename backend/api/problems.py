@@ -242,7 +242,6 @@ def get_problems():
     elif not is_admin():
         return jsonify({'error': 'Permission denied'}), 403
 
-    # 标题关键词过滤
     if keyword:
         query = query.filter(ProblemModel.title.ilike(f'%{keyword}%'))
 
@@ -298,7 +297,6 @@ def download_test_cases(pid):
 def delete_test_cases(pid):
     """
     批量删除题目的测试用例
-    请求体 JSON: {"cases": [{"in": "...", "out": "...", "name": "..."}]}
     """
     data = request.get_json()
     cases = data.get('cases', [])

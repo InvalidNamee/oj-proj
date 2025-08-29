@@ -3,8 +3,6 @@ import io
 import zipfile
 import shutil
 
-import os
-
 def process_json_data(pid: str, test_cases: list):
     """
     pid: 测试数据标识

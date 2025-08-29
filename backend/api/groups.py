@@ -142,7 +142,6 @@ def get_groups():
             return jsonify({"error": "Permission denied"}), 403
         query = query.filter(GroupModel.course_id == course_id)
 
-    # 按组名筛选（模糊查询）
     if keyword:
         query = query.filter(GroupModel.group_name.ilike(f"%{keyword}%"))
 
