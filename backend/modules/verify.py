@@ -20,3 +20,11 @@ def can_access_problemset(user, problemset):
               (problemset.end_time is None or now <= problemset.end_time)
 
     return in_group and in_time
+
+def can_submit(user, problem_set):
+    if user.usertype != 'student':
+        return True
+    elif not problem_set:
+        return False
+    else:
+        return can_access_problemset(user, problem_set)

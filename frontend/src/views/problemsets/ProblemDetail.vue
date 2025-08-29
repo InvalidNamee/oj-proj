@@ -172,7 +172,7 @@ const rejudgeProblem = async () => {
   <div class="problem-detail-container">
     <div class="problem-detail-header">
       <h1 class="problem-detail-title">{{ problem?.title || '加载中...' }}</h1>
-      <div class="button-group" v-if="problem?.type === 'coding'">
+      <div class="button-group" v-if="problem?.type === 'coding' && userStore.usertype !== 'student'">
         <button 
           @click="rejudgeProblem" 
           class="rejudge-btn"

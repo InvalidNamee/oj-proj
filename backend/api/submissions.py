@@ -3,8 +3,9 @@ import uuid
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from exts import db
-from models import ProblemModel, SubmissionModel
+from models import ProblemModel, SubmissionModel, UserModel, ProblemSetModel
 from decorators import role_required, ROLE_TEACHER
+from modules.verify import can_submit
 
 bp = Blueprint('submissions', __name__, url_prefix='/api/submissions')
 
@@ -186,10 +187,14 @@ def get_self_check(submission_id):
 
 
 @bp.post("/<int:problem_id>")
-@role_required(ROLE_TEACHER)
+@role_required()
 def submit_problem(problem_id):
+    user = UserModel.query.get_or_404(get_jwt_identity())
     problem = ProblemModel.query.get_or_404(problem_id)
     data = request.get_json() or {}
+    problem_set = ProblemSetModel.query.get_or_404(data.get("psid"))
+    if not can_submit(user, problem_set):
+        return jsonify({'error', 'Permission denied'}), 403
     if problem.type == "coding":
         return submit_coding(problem, data)
     else:

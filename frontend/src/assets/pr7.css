@@ -40,12 +40,10 @@
 }
 
 .add-coding-problem-right-section {
-  width: 400px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background-color: #ffffff;
-  /* padding: 2rem; */
+  background-color: #fafafa;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
