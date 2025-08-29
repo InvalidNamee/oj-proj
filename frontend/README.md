@@ -1,16 +1,36 @@
-{created_at: "2025-08-29T11:24:35.736881",…}
-created_at
+items
 : 
-"2025-08-29T11:24:35.736881"
-result
+[{language: "cpp", max_memory: null, max_time: null, problem_id: 38, problem_set_id: 38,…},…]
+0
 : 
-[{diff: "Line 1:↵ Expected: 8↵ Actual: 7", memory: 3544, message: "", name: 1, status: "WA",…},…]
+{language: "cpp", max_memory: null, max_time: null, problem_id: 38, problem_set_id: 38,…}
+language
+: 
+"cpp"
+max_memory
+: 
+null
+max_time
+: 
+null
+problem_id
+: 
+38
+problem_set_id
+: 
+38
+problem_type
+: 
+"coding"
 score
 : 
-66.67
+0
 status
 : 
-"WA"
+"CE"
 submission_id
 : 
-"selftest_7d54e7907c724326813d1970ac4acdf4"
+289
+time_stamp
+: 
+"2025-08-29 13:33:44"

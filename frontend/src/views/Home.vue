@@ -9,6 +9,7 @@ const stats = ref({
   registeredUsers: 0,
   courses: 0,
   problemTypeDistribution: [], // 题目类型分布数据
+  submissionStatusDistribution: [], // 提交状态分布数据
   announcements: [
     {
       id: 1,
@@ -50,6 +51,9 @@ const fetchStats = async () => {
     
     // 获取题目类型分布数据
     await fetchProblemTypeDistribution();
+    
+    // 获取提交状态分布数据
+    await fetchSubmissionStatusDistribution();
   } catch (err) {
     console.error('获取统计数据失败', err);
   }
@@ -135,6 +139,39 @@ const fetchProblemTypeDistribution = async () => {
   }
 };
 
+// 获取提交状态分布数据
+const fetchSubmissionStatusDistribution = async () => {
+  try {
+    // 获取所有提交数据
+    const res = await axios.get('/api/submissions/', { params: { per_page: 1000 } });
+    const submissions = res.data.items;
+    
+    // 统计各状态的提交数量
+    const statusCount = {};
+    submissions.forEach(submission => {
+      const status = submission.status;
+      if (statusCount[status]) {
+        statusCount[status]++;
+      } else {
+        statusCount[status] = 1;
+      }
+    });
+    
+    // 转换为图表需要的格式
+    const statusDistribution = [];
+    for (const status in statusCount) {
+      statusDistribution.push({
+        status,
+        count: statusCount[status]
+      });
+    }
+    
+    stats.value.submissionStatusDistribution = statusDistribution;
+  } catch (err) {
+    console.error('获取提交状态分布数据失败', err);
+  }
+};
+
 // 计算折线图的点坐标
 const getLinePoints = () => {
   if (userGrowthData.value.length === 0) return '';
@@ -168,6 +205,54 @@ const getCircleY = (count, maxCount = getMaxCount()) => {
 const getMaxCount = () => {
   if (userGrowthData.value.length === 0) return 0;
   return Math.max(...userGrowthData.value.map(item => item.count));
+};
+
+// 获取最大提交数
+const getMaxSubmissionCount = () => {
+  if (stats.value.submissionStatusDistribution.length === 0) return 0;
+  // 为了Y轴显示美观，返回一个略大于实际最大值的数值
+  const max = Math.max(...stats.value.submissionStatusDistribution.map(item => item.count));
+  // 如果最大值小于5，则返回5，否则返回一个略大的值
+  if (max <= 5) return 5;
+  // 计算一个略大于最大值的数值，用于Y轴显示
+  const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
+  const normalized = Math.ceil(max / magnitude);
+  return normalized * magnitude;
+};
+
+// 状态映射函数
+const getStatusDisplayName = (status) => {
+  const statusMap = {
+    'AC': '通过',
+    'WA': '错误',
+    'CE': '编译错误',
+    'TLE': '超时',
+    'MLE': '内存超限',
+    'RE': '运行错误',
+    'PE': '格式错误',
+    'OLE': '输出超限',
+    'QUE': '队列中',
+    'PAC': '部分通过',
+    'IE': '内部错误'
+  };
+  return statusMap[status] || status;
+};
+
+// 状态颜色映射函数
+const getStatusColor = (status) => {
+  const colorMap = {
+    'AC': '#10b981',
+    'WA': '#ef4444',
+    'CE': '#f59e0b',
+    'TLE': '#8b5cf6',
+    'MLE': '#3b82f6',
+    'RE': '#ec4899',
+    'PE': '#14b8a6',
+    'OLE': '#f97316',
+    'QUE': '#94a3b8',
+    'PAC': '#a855f7'
+  };
+  return colorMap[status] || '#cccccc';
 };
 
 // 获取X轴标签
@@ -391,36 +476,36 @@ onMounted(() => {
           <div class="bar-chart">
             <div class="chart-container">
               <div class="y-axis">
-                <span>80</span>
-                <span>60</span>
-                <span>40</span>
-                <span>20</span>
+                <span>{{ getMaxSubmissionCount() }}</span>
+                <span>{{ Math.floor(getMaxSubmissionCount() * 0.75) }}</span>
+                <span>{{ Math.floor(getMaxSubmissionCount() * 0.5) }}</span>
+                <span>{{ Math.floor(getMaxSubmissionCount() * 0.25) }}</span>
                 <span>0</span>
               </div>
               <div class="chart-content">
                 <div class="bars">
-                  <div class="bar-group">
-                    <div class="bar" style="height: 162px; background-color: #10b981;"></div>
-                    <span class="bar-label">通过</span>
-                  </div>
-                  <div class="bar-group">
-                    <div class="bar" style="height: 50px; background-color: #ef4444;"></div>
-                    <span class="bar-label">错误</span>
-                  </div>
-                  <div class="bar-group">
-                    <div class="bar" style="height: 25px; background-color: #f59e0b;"></div>
-                    <span class="bar-label">编译错误</span>
-                  </div>
-                  <div class="bar-group">
-                    <div class="bar" style="height: 12px; background-color: #8b5cf6;"></div>
-                    <span class="bar-label">超时</span>
+                  <div 
+                    v-for="(item, index) in stats.submissionStatusDistribution" 
+                    :key="index" 
+                    class="bar-group"
+                  >
+                    <div 
+                      class="bar" 
+                      :style="{ 
+                        height: (item.count / getMaxSubmissionCount() * 180 + 20) + 'px', 
+                        backgroundColor: getStatusColor(item.status) 
+                      }"
+                    ></div>
+                    <span class="bar-label">{{ getStatusDisplayName(item.status) }}</span>
                   </div>
                 </div>
                 <div class="x-axis">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  <span></span>
+                  <span 
+                    v-for="(item, index) in stats.submissionStatusDistribution" 
+                    :key="index"
+                  >
+                    <!-- 移除了具体数目的显示 -->
+                  </span>
                 </div>
               </div>
             </div>
@@ -621,6 +706,7 @@ onMounted(() => {
 
 .chart-content {
   flex: 1;
+  transform: translateY(0.5rem); /* 下移10像素 */
 }
 
 .x-axis {

@@ -709,7 +709,7 @@
 
 .add-legacy-problem-input,
 .add-legacy-problem-textarea {
-  width: 100%; /* w-full */
+  width: 36.5rem; /* w-full */
   border: 1px solid #d1d5db; /* border-gray-300 */
   border-radius: 0.25rem; /* rounded */
   padding: 0.5rem; /* px-2 py-2 */
@@ -757,7 +757,7 @@
 }
 
 .add-legacy-problem-course-input {
-  width: 100%; /* w-full */
+  width: 36.5rem; /* w-full */
   border: 1px solid #d1d5db; /* border-gray-300 */
   border-radius: 0.25rem; /* rounded */
   padding: 0.5rem; /* px-2 py-2 */

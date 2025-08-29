@@ -8,7 +8,14 @@ const router = createRouter({
     {
       path: '/',
       name: 'Home',
-      component: () => import('@/views/Home.vue'),
+      component: () => {
+        const userStore = useUserStore();
+        if (userStore.usertype === 'admin') {
+          return import('@/views/Home.vue');
+        } else {
+          return import('@/views/NewHome.vue');
+        }
+      },
       meta: { title: '首页', requiresAuth: true }
     },
     {
