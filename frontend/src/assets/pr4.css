@@ -31,54 +31,136 @@
 }
 
 .problem-list-toolbar {
-  display: flex; /* flex */
-  justify-content: space-between; /* justify-between */
-  align-items: center; /* items-center */
-  margin-bottom: 1rem; /* mb-4 */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between; /* 居右对齐 */
+  gap: 1rem; /* gap-4 */
+  padding: 1.25rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #f9fafb 0%, #fff 100%); /* 渐变背景 */
+  border-radius: 0.75rem 0.75rem 0 0; /* 只在顶部保留圆角 */
+  /* 移除阴影和底部边框 */
+  margin-bottom: 0; /* 移除底部外边距 */
 }
 
 .problem-list-search-container {
-  display: flex; /* flex */
-  align-items: center; /* items-center */
-  gap: 0.5rem; /* space-x-2 */
+  display: flex;
+  gap: 1rem; /* gap-4 */
+  align-items: center;
 }
 
 .problem-list-search-input {
-  border: 1px solid #6b7280; /* border-gray-500 */
-  border-radius: 0.25rem; /* rounded */
-  padding: 0.25rem 0.75rem; /* px-3 py-1 */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem 1rem; /* 增加内边距 */
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem; /* text-sm */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* subtle shadow */
+}
+
+.problem-list-search-input:focus {
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* focus:ring */
+  transform: translateY(-1px); /* 轻微上移效果 */
 }
 
 .problem-list-button {
-  padding: 0.25rem 1rem; /* px-4 py-1 */
-  border: none; /* remove border */
-  border-radius: 0.25rem; /* rounded */
-  color: #ffffff; /* text-white */
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  font-size: 0.875rem; /* text-sm */
   cursor: pointer; /* cursor-pointer */
 }
 
 .problem-list-primary-button {
-  background-color: #3b82f6; /* bg-blue-500 */
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* 渐变背景 */
+  color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); /* shadow */
 }
 
 .problem-list-primary-button:hover {
-  background-color: #2563eb; /* hover:bg-blue-600 */
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* hover:bg-blue-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4); /* 更明显的阴影 */
+}
+
+.problem-list-primary-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.3); /* 阴影变小 */
+}
+
+/* 绿色版本的主按钮 */
+.problem-list-primary-button-green {
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  font-size: 0.875rem; /* text-sm */
+  cursor: pointer; /* cursor-pointer */
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* 绿色渐变背景 */
+  color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); /* 绿色阴影 */
+}
+
+.problem-list-primary-button-green:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%); /* hover状态的绿色渐变 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.4); /* 更明显的阴影 */
+}
+
+.problem-list-primary-button-green:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(16, 185, 129, 0.3); /* 阴影变小 */
 }
 
 .problem-list-secondary-button {
-  background-color: #6b7280; /* bg-gray-500 */
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); /* 灰色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
 }
 
 .problem-list-secondary-button:hover {
-  background-color: #4b5563; /* hover:bg-gray-600 */
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%); /* hover:bg-gray-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(107, 114, 128, 0.4); /* 更明显的阴影 */
+}
+
+.problem-list-secondary-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(107, 114, 128, 0.3); /* 阴影变小 */
 }
 
 .problem-list-danger-button {
-  background-color: #ef4444; /* bg-red-500 */
+  padding: 0.75rem 1.25rem; /* 调整内边距 */
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); /* 红色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
 }
 
 .problem-list-danger-button:hover {
-  background-color: #dc2626; /* hover:bg-red-600 */
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); /* hover:bg-red-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4); /* 更明显的阴影 */
+}
+
+.problem-list-danger-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(239, 68, 68, 0.3); /* 阴影变小 */
 }
 
 /* Problem List Table styles */

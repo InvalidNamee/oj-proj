@@ -4,7 +4,8 @@
 .login-container {
   display: flex;
   justify-content: center;
-  margin-top: 4rem; /* mt-16 */
+  margin-top: 8rem; /* mt-20 */
+  background-color: #e5e7eb;
 }
 
 .login-form-container {
@@ -704,7 +705,7 @@
   width: 430px; /* w-full */
   border: 1px solid #d1d5db; /* border border-gray-300 */
   border-radius: 0.25rem; /* rounded */
-  padding: 0.5rem 0.5rem; /* px-2 py-2 */
+  padding: 0.75rem 0.5rem; /* 增加垂直内边距以提高输入框高度 */
   color: #374151; /* text-gray-700 */
 }
 
@@ -718,7 +719,7 @@
   width: 100%; /* w-full */
   border: 1px solid #d1d5db; /* border border-gray-300 */
   border-radius: 0.25rem; /* rounded */
-  padding: 0.5rem 0.5rem; /* px-2 py-2 */
+  padding: 0.75rem 0.5rem; /* 增加垂直内边距以提高选择框高度 */
   color: #374151; /* text-gray-700 */
 }
 

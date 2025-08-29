@@ -42,8 +42,14 @@
 .submissions-filter-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem; /* gap-3 */
-  margin-bottom: 1rem; /* mb-4 */
+  align-items: center;
+  gap: 1rem; /* gap-4 */
+  padding: 1.25rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #f9fafb 0%, #fff 100%); /* 渐变背景 */
+  border-radius: 0.75rem 0.75rem 0 0; /* 只在顶部保留圆角 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 更明显的阴影 */
+  border-bottom: none; /* 移除底部边框 */
+  margin-bottom: 0; /* 移除底部外边距 */
 }
 
 .submissions-user-filter {
@@ -58,29 +64,116 @@
 }
 
 .submissions-filter-input {
-  border: 1px solid #6b7280; /* border border-gray-500 */
-  padding: 0.25rem 0.5rem; /* px-2 py-1 */
-  border-radius: 0.25rem; /* rounded */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem 1rem; /* 增加内边距 */
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem; /* text-sm */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* subtle shadow */
   width: 6rem; /* w-24 */
 }
 
-.submissions-select-user-button,
-.submissions-select-course-button,
-.submissions-select-problem-set-button,
-.submissions-search-button {
-  padding: 0.25rem 0.5rem; /* px-2 py-1 */
-  background-color: #3b82f6; /* bg-blue-500 */
+.submissions-select-user-button {
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* 绿色渐变 */
   color: #fff;
-  border-radius: 0.25rem; /* rounded */
-  border: none;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
   cursor: pointer;
 }
 
-.submissions-select-user-button:hover,
-.submissions-select-course-button:hover,
-.submissions-select-problem-set-button:hover,
+.submissions-select-user-button:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%); /* hover:bg-green-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.4); /* 更明显的阴影 */
+}
+
+.submissions-select-user-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(16, 185, 129, 0.3); /* 阴影变小 */
+}
+
+.submissions-select-course-button {
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); /* 紫色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+  cursor: pointer;
+}
+
+.submissions-select-course-button:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); /* hover:bg-purple-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(139, 92, 246, 0.4); /* 更明显的阴影 */
+}
+
+.submissions-select-course-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(139, 92, 246, 0.3); /* 阴影变小 */
+}
+
+.submissions-select-problem-set-button {
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); /* 琥珀色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+  cursor: pointer;
+}
+
+.submissions-select-problem-set-button:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%); /* hover:bg-amber-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(245, 158, 11, 0.4); /* 更明显的阴影 */
+}
+
+.submissions-select-problem-set-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(245, 158, 11, 0.3); /* 阴影变小 */
+}
+
+.submissions-search-button {
+  padding: 0.75rem 1.5rem; /* 增加内边距 */
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* 蓝色渐变 */
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  border: none; /* 移除边框 */
+  font-weight: 600; /* font-semibold */
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); /* shadow */
+  font-size: 0.875rem; /* text-sm */
+  cursor: pointer;
+}
+
 .submissions-search-button:hover {
-  background-color: #2563eb; /* hover:bg-blue-600 */
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* hover:bg-blue-700 */
+  transform: translateY(-2px); /* 上移效果 */
+  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4); /* 更明显的阴影 */
+}
+
+.submissions-search-button:active {
+  transform: translateY(0); /* 点击时回到原位 */
+  box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.3); /* 阴影变小 */
+}
+
+.submissions-action-buttons {
+  margin-left: auto; /* ml-auto */
+  display: flex;
+  gap: 0.75rem; /* gap-3 */
 }
 
 .submissions-table-container {

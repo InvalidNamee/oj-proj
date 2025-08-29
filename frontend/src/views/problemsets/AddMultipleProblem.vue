@@ -67,10 +67,10 @@ const handleProblemTypeChange = () => {
 
 <template>
   <div class="add-legacy-problem-container">
-    <div class="add-problem-header">
+    <div class="add-problem-header" style="transform: translateY(-10px);">
       <h2 class="add-problem-title">新建题目</h2>
       <!-- 题目类型选择器 -->
-      <div>
+      <div style="transform: translateX(-20px);">
         <label>题目类型:</label>
         <select v-model="problemType" @change="handleProblemTypeChange">
           <option value="single">单选题</option>
@@ -82,7 +82,7 @@ const handleProblemTypeChange = () => {
       </div>
     </div>
     <!-- 标题 -->
-    <div>
+    <div style="margin-top: -50px;">
       <input v-model="title" placeholder="请输入题目标题"
         class="add-legacy-problem-input" />
     </div>

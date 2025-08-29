@@ -113,7 +113,9 @@ onMounted(fetchSubmissions)
       <input v-model="filters.problem_set_id" placeholder="题单ID" class="submissions-filter-input" />
       <button @click="showProblemSetSelectModal = true" class="submissions-select-problem-set-button">选择题单</button>
     </div>
-    <button @click="doSearch" class="submissions-search-button">搜索</button>
+    <div class="submissions-action-buttons">
+      <button @click="doSearch" class="submissions-search-button">搜索</button>
+    </div>
     
     <!-- 课程选择弹窗 -->
     <CourseSelectModal 

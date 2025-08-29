@@ -63,14 +63,14 @@ function removeCase(index) {
       <div>
         <label class="block text-xs text-gray-500 mb-1">输入</label>
         <pre
-          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300"
+          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300 sample-pre"
         >{{ tc.input }}</pre>
       </div>
 
       <div>
         <label class="block text-xs text-gray-500 mb-1">期望输出</label>
         <pre
-          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300"
+          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300 sample-pre"
         >{{ tc.output }}</pre>
       </div>
       
@@ -80,7 +80,7 @@ function removeCase(index) {
     </div>
 
     <button @click="addCase" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-      添加自测样例{{ title }}
+      添加{{ title }}
     </button>
   </div>
 </template>

@@ -173,7 +173,15 @@ const router = createRouter({
           path: 'add',
           name: 'AddProblem',
           component: () => import('@/views/problemsets/AddProblem.vue'),
-          meta: { title: '新增题目', requiresAuth: true, requiresTeacher: true }
+          meta: { title: '新增题目', requiresAuth: true, requiresTeacher: true },
+          children: [
+            {
+              path: ':type',
+              name: 'AddProblemByType',
+              component: () => import('@/views/problemsets/AddProblem.vue'),
+              meta: { title: '新增题目', requiresAuth: true, requiresTeacher: true }
+            }
+          ]
         },
         {
           path: ':id/edit',

@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import LegacyEditor from "@/components/LegacyEditor.vue";
 
 const props = defineProps({
   problemType: { type: String, required: true },
@@ -22,11 +21,6 @@ const courseName = computed(() => {
 
 const title = ref("");
 const description = ref("");
-const testCases = ref({});
-
-function updateTestCases(val) {
-  testCases.value = val;
-}
 
 const submitting = ref(false);
 async function submit() {
@@ -38,7 +32,6 @@ async function submit() {
     title: title.value,
     description: description.value,
     type: problemType.value,
-    test_cases: testCases.value,
   };
 
   try {
@@ -67,10 +60,10 @@ const handleProblemTypeChange = () => {
 
 <template>
   <div class="add-legacy-problem-container">
-    <div class="add-problem-header">
+    <div class="add-problem-header" style="transform: translateY(-10px);">
       <h2 class="add-problem-title">新建题目</h2>
       <!-- 题目类型选择器 -->
-      <div>
+      <div style="transform: translateX(-20px);">
         <label>题目类型:</label>
         <select v-model="problemType" @change="handleProblemTypeChange">
           <option value="single">单选题</option>
@@ -82,7 +75,7 @@ const handleProblemTypeChange = () => {
       </div>
     </div>
     <!-- 标题 -->
-    <div>
+    <div style="margin-top: -50px;">
       <input v-model="title" placeholder="请输入题目标题"
         class="add-legacy-problem-input" />
     </div>
@@ -92,9 +85,6 @@ const handleProblemTypeChange = () => {
       <textarea v-model="description" rows="6" placeholder="请输入题目描述"
         class="add-legacy-problem-textarea"></textarea>
     </div>
-
-    <!-- 子组件 -->
-    <LegacyEditor :problemType="props.problemType" @update:testCases="updateTestCases" />
 
     <!-- 所属课程 -->
     <div>

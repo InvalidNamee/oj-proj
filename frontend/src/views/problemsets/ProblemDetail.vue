@@ -140,19 +140,43 @@ const copyToClipboard = async (text) => {
     alert('复制失败')
   }
 }
+
+// 重判功能
+const rejudgeProblem = async () => {
+  if (!confirm('确定要重判此题的所有提交记录吗？')) return
+  
+  try {
+    const res = await axios.patch(`/api/submissions/problem/${problemId}`)
+    if (res.data.ok) {
+      alert(`重判成功，共处理了 ${res.data.rejudged} 条提交记录`)
+    } else {
+      alert('重判失败')
+    }
+  } catch (err) {
+    console.error('重判失败', err)
+    alert('重判失败')
+  }
+}
 </script>
 
 <template>
   <div class="problem-detail-container">
     <div class="problem-detail-header">
       <h1 class="problem-detail-title">{{ problem?.title || '加载中...' }}</h1>
-      <router-link 
-        v-if="problem?.type === 'coding'" 
-        :to="`/problems/${problemId}/edit/testcases`" 
-        class="manage-test-cases-btn"
-      >
-        管理测试用例
-      </router-link>
+      <div class="button-group" v-if="problem?.type === 'coding'">
+        <button 
+          @click="rejudgeProblem" 
+          class="rejudge-btn"
+        >
+          重判
+        </button>
+        <router-link 
+          :to="`/problems/${problemId}/edit/testcases`" 
+          class="manage-test-cases-btn"
+        >
+          管理测试用例
+        </router-link>
+      </div>
     </div>
 
     <div v-if="problem?.limitations" class="problem-detail-limitations">
@@ -175,21 +199,19 @@ const copyToClipboard = async (text) => {
       <div v-if="problem.description.samples?.length">
         <h3>样例</h3>
         <div v-for="sample in problem.description.samples" :key="sample.id"
-          class="sample-block border p-2 mb-2 rounded">
+          >
           <h4>样例 {{ sample.id }}</h4>
           <div class="flex gap-2 items-start">
             <div class="flex-1">
-              <strong>输入：</strong>
-              <pre>{{ sample.input }}</pre>
+              <strong>输入：<button class="btn copy-input-button inline" @click="copyToClipboard(sample.input)">复制</button></strong>
+              <pre class="sample-pre">{{ sample.input }}</pre>
             </div>
-            <button class="btn copy-input-button" @click="copyToClipboard(sample.input)">复制输入</button>
           </div>
           <div class="flex gap-2 items-start mt-1">
             <div class="flex-1">
-              <strong>输出：</strong>
-              <pre>{{ sample.output }}</pre>
+              <strong>输出：<button class="btn copy-output-button inline" @click="copyToClipboard(sample.output)">复制</button></strong>
+              <pre class="sample-pre">{{ sample.output }}</pre>
             </div>
-            <button class="btn copy-output-button" @click="copyToClipboard(sample.output)">复制输出</button>
           </div>
         </div>
       </div>
@@ -209,41 +231,44 @@ const copyToClipboard = async (text) => {
 
       <template v-if="problem?.type === 'coding'">
         <MonacoEditor v-model="solution" />
-        <button class="problem-detail-submit-button" :disabled="submitting" @click="submitAnswer">
-          {{ submitting ? '提交中...' : '提交' }}
-        </button>
-        <div v-if="submissionStatus" class="problem-detail-status mt-4" :class="submissionStatus.status">
-        {{ submissionStatus.status }}
-        <template
-          v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(submissionStatus.status) && submissionStatus.score !== null">
-          得分: {{ submissionStatus.score }}
-        </template>
-      </div>
-        <div class="self-test-section">
-          <h3 class="self-test-title">代码自测区</h3>
-          <p class="self-test-description">自测代码能否通过测试样例</p>
-          <EditableTestCases v-model="cases" />
+        <div class="flex gap-2">
+          <button class="problem-detail-submit-button" :disabled="submitting" @click="submitAnswer">
+            {{ submitting ? '提交中...' : '提交' }}
+          </button>
           <button class="self-test-button" :disabled="submitting" @click="runSelfCheck">
             {{ submitting ? '运行中...' : '自测' }}
           </button>
+        </div>
+        <div v-if="submissionStatus" class="problem-detail-status mt-4" :class="submissionStatus.status">
+          {{ submissionStatus.status }}
+          <template
+            v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(submissionStatus.status) && submissionStatus.score !== null">
+            得分: {{ submissionStatus.score }}
+          </template>
+        </div>
+        <div class="self-test-section">
+          <h3 class="self-test-title">代码自测区</h3>
+          <p class="self-test-description">自测代码能否通过样例</p>
+          <EditableTestCases v-model="cases" />
         </div>
       </template>
 
 
       <template v-else>
         <LegacyAnswerArea v-if="problem" :problem-data="problem" v-model="sourceCode" />
-        <button class="btn mt-2" :disabled="submitting" @click="submitAnswer">
+        <button class="problem-detail-submit-button" :disabled="submitting" @click="submitAnswer">
           {{ submitting ? '提交中...' : '提交' }}
         </button>
+        <div v-if="submissionStatus" class="problem-detail-status mt-4" :class="submissionStatus.status">
+          {{ submissionStatus.status }}
+          <template
+            v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(submissionStatus.status) && submissionStatus.score !== null">
+            得分: {{ submissionStatus.score }}
+          </template>
+        </div>
       </template>
 
-      <div v-if="submissionStatus" class="problem-detail-status mt-4" :class="submissionStatus.status">
-        {{ submissionStatus.status }}
-        <template
-          v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(submissionStatus.status) && submissionStatus.score !== null">
-          得分: {{ submissionStatus.score }}
-        </template>
-      </div>
+      
     </div>
   </div>
 </template>
@@ -254,6 +279,11 @@ const copyToClipboard = async (text) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
 }
 
 .problem-detail-title {
@@ -272,5 +302,84 @@ const copyToClipboard = async (text) => {
 
 .manage-test-cases-btn:hover {
   background-color: #359c6d;
+}
+
+.rejudge-btn {
+  background-color: #f59e0b; /* 橙色 */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin-right: 10px; /* 与右侧按钮保持间距 */
+  border: none;
+  cursor: pointer;
+}
+
+.rejudge-btn:hover {
+  background-color: #d97706; /* 深橙色 */
+}
+
+/* 样例区pre标签样式 */
+pre.sample-pre {
+  border: 1px solid #d1d5db !important; /* 浅灰色边框 */
+  padding: 0.5rem !important; /* 内边距 */
+  border-radius: 0.25rem !important; /* 圆角 */
+  background-color: #f9fafb !important; /* 背景色 */
+  overflow-x: auto; /* 允许水平滚动 */
+  min-width: 600px; /* 最小宽度 */
+  width: 100%; /* 宽度占满容器 */
+  max-width: 100%; /* 最大宽度 */
+}
+
+/* 样例区复制按钮样式 */
+.copy-input-button, .copy-output-button {
+  width: auto;
+  min-width: 60px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+.problem-detail-submit-button {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+}
+
+.problem-detail-submit-button:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.problem-detail-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.self-test-button {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+}
+
+.self-test-button:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.self-test-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

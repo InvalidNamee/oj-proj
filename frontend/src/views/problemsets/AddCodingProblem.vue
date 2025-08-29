@@ -12,7 +12,13 @@ import "@/assets/pr7.css";
 const router = useRouter();
 const userStore = useUserStore();
 
-const props = defineProps({ courseId: { type: Number, required: true } });
+const props = defineProps({ 
+  courseId: { type: Number, required: true },
+  problemType: { type: String, default: "coding" }
+});
+
+// 题目类型
+const problemType = ref(props.problemType);
 
 // 基本信息
 const title = ref("");
@@ -143,11 +149,33 @@ const updateReferenceSolution = (rs) => {
     referenceSolution.value = { ...rs };
   }
 };
+
+// 处理题目类型变更
+const handleProblemTypeChange = () => {
+  if (problemType.value !== 'coding') {
+    // 跳转到对应的题目创建页面
+    router.push(`/problems/add/${problemType.value}`);
+  }
+};
 </script>
 
 <template>
-  <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+  <div style="display: flex; gap: 1.5rem; align-items: center; width: 100%;">
     <div class="add-coding-problem-container">
+      <div class="add-problem-header">
+        <h2 class="add-problem-title">新建题目</h2>
+        <!-- 题目类型选择器（只在外层） -->
+        <div>
+          <label>题目类型:</label>
+          <select v-model="problemType" @change="handleProblemTypeChange">
+            <option value="coding">编程题</option>
+            <option value="single">单选题</option>
+            <option value="multiple">多选题</option>
+            <option value="fill">填空题</option>
+            <option value="subjective">主观题</option>
+          </select>
+        </div>
+      </div>
       <div class="add-coding-problem-main-content">
         <!-- 左侧表单区域 -->
         <div class="add-coding-problem-form-section">
@@ -166,12 +194,12 @@ const updateReferenceSolution = (rs) => {
         <div class="add-coding-problem-grid">
           <div class="add-coding-problem-form-group">
             <label class="add-coding-problem-form-group-label">输入格式</label>
-            <input v-model="inputFormat" placeholder="请输入输入格式" class="add-coding-problem-input" />
+            <textarea v-model="inputFormat" placeholder="请输入输入格式" class="add-coding-problem-textarea format-input" rows="4" />
           </div>
           
           <div class="add-coding-problem-form-group">
             <label class="add-coding-problem-form-group-label">输出格式</label>
-            <input v-model="outputFormat" placeholder="请输入输出格式" class="add-coding-problem-input" />
+            <textarea v-model="outputFormat" placeholder="请输入输出格式" class="add-coding-problem-textarea format-input" rows="4" />
           </div>
         </div>
         
@@ -179,6 +207,19 @@ const updateReferenceSolution = (rs) => {
           <label class="add-coding-problem-form-group-label">说明 / Notes</label>
           <textarea v-model="notes" rows="3" placeholder="请输入说明或备注"
             class="add-coding-problem-textarea" />
+        </div>
+        
+        <!-- 时间限制和空间限制 -->
+        <div class="add-coding-problem-grid">
+          <div class="add-coding-problem-form-group">
+            <label class="add-coding-problem-form-group-label">时间限制 (s)</label>
+            <input v-model="maxTime" type="number" placeholder="请输入时间限制" class="add-coding-problem-input" />
+          </div>
+          
+          <div class="add-coding-problem-form-group">
+            <label class="add-coding-problem-form-group-label">空间限制 (MB)</label>
+            <input v-model="maxMemory" type="number" placeholder="请输入空间限制" class="add-coding-problem-input" />
+          </div>
         </div>
 
         <!-- 样例和测试用例 -->
@@ -190,15 +231,11 @@ const updateReferenceSolution = (rs) => {
           <MonacoEditor v-model="referenceSolution" />
         </div>
         
-        <!-- 提交按钮 -->
-        <div class="add-coding-problem-button-group">
+        <!-- 提交和自测按钮 -->
+        <div class="add-coding-problem-buttons-container">
           <button class="add-coding-problem-submit-button" @click="submit" :disabled="submitting">
             {{ submitting ? '提交中…' : '提交题目' }}
           </button>
-        </div>
-        
-        <!-- 运行自测按钮 -->
-        <div class="add-coding-problem-button-group">
           <button class="add-coding-problem-submit-button" @click="runSelfCheck" :disabled="submitting">
             {{ submitting ? '自测中…' : '运行自测' }}
           </button>

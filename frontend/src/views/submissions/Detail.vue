@@ -28,7 +28,10 @@ onMounted(async () => {
 <template>
   <div class="submissions-list-wrapper">
     <div class="submission-detail-container">
-    <h2 class="submission-detail-title">提交详情</h2>
+    <div class="submission-detail-header">
+      <h2 class="submission-detail-title">提交详情</h2>
+      <button class="rejudge-btn">重判</button>
+    </div>
 
     <!-- 上方详细信息 -->
     <div class="submission-detail-grid">
@@ -88,3 +91,35 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.submission-detail-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.submission-detail-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.rejudge-btn {
+  position: absolute;
+  right: 0;
+}
+
+.rejudge-btn {
+  background-color: #f59e0b; /* 橙色 */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.rejudge-btn:hover {
+  background-color: #d97706; /* 深橙色 */
+}
+</style>

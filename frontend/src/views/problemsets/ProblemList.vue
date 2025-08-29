@@ -123,7 +123,7 @@ onMounted(fetchProblems);
       <!-- 右侧操作按钮 -->
       <div class="problem-list-search-container">
         <button @click="$router.push('/problems/add')"
-          class="problem-list-button problem-list-primary-button">
+          class="problem-list-button problem-list-primary-button-green">
           新建题目
         </button>
         <button v-if="!selectMode" @click="selectMode = true"
