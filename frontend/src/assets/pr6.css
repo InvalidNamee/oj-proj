@@ -91,7 +91,7 @@
 
 /* Edit Problem Set styles */
 .edit-problem-set-container {
-  max-width: 42rem; /* max-w-2xl */
+  max-width: 39rem; /* max-w-2xl */
   margin-left: auto; /* mx-auto */
   margin-right: auto; /* mx-auto */
   margin-top: 3rem; /* mt-12 */

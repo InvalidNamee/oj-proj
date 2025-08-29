@@ -113,3 +113,10 @@ const handleProblemTypeChange = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.add-problem-header {
+  background-color: transparent;
+  border: none;
+}
+</style>

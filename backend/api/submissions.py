@@ -192,9 +192,11 @@ def submit_problem(problem_id):
     user = UserModel.query.get_or_404(get_jwt_identity())
     problem = ProblemModel.query.get_or_404(problem_id)
     data = request.get_json() or {}
-    problem_set = ProblemSetModel.query.get_or_404(data.get("psid"))
+    problem_set = None
+    if data.get("problem_set_id"):
+        problem_set = ProblemSetModel.query.get_or_404(data.get("problem_set_id"))
     if not can_submit(user, problem_set):
-        return jsonify({'error', 'Permission denied'}), 403
+        return jsonify({'error': 'Permission denied'}), 403
     if problem.type == "coding":
         return submit_coding(problem, data)
     else:

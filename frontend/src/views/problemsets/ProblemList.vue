@@ -1,23 +1,34 @@
 <script setup>
 import "@/assets/pr4.css";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
-
 
 const userStore = useUserStore();
 const router = useRouter();
-const problems = ref([]);
-const selected = ref([]); // 选中的 pid
-const selectMode = ref(false); // 是否进入选择模式
+const route = useRoute();
 
-// 搜索 & 分页
-const keyword = ref("");
-const page = ref(1);
-const perPage = ref(10);
+const problems = ref([]);
+const selected = ref([]);
+const selectMode = ref(false);
+
+// 搜索 & 分页 —— 初始值从路由取
+const keyword = ref(route.query.keyword || "");
+const page = ref(Number(route.query.page) || 1);
+const perPage = ref(Number(route.query.per_page) || 10);
 const total = ref(0);
 const pages = ref(1);
+
+const syncQueryToRouter = () => {
+  router.replace({
+    query: {
+      page: page.value,
+      per_page: perPage.value,
+      keyword: keyword.value || undefined,
+    },
+  });
+};
 
 const fetchProblems = async () => {
   try {
@@ -43,40 +54,31 @@ const goDetail = (id) => {
 const goEdit = (id) => router.push(`/problems/${id}/edit`);
 const goEditTestCases = (id) => router.push(`/problems/${id}/edit/testcases`);
 
-// 单个删除
 const deleteOne = async (id) => {
   if (!confirm("确认删除该题目吗？")) return;
   try {
-    await axios.delete("/api/problems/", {
-      data: { pids: [id] },
-    });
+    await axios.delete("/api/problems/", { data: { pids: [id] } });
     fetchProblems();
   } catch (err) {
-    console.error(err);
     alert(err.response?.data?.error || "删除失败");
   }
 };
 
-// 批量删除
 const deleteBatch = async () => {
-  if (selected.value.length === 0) {
+  if (!selected.value.length) {
     alert("请先选择要删除的题目");
     return;
   }
   if (!confirm(`确认删除选中的 ${selected.value.length} 个题目吗？`)) return;
   try {
-    await axios.delete("/api/problems/", {
-      data: { pids: selected.value },
-    });
+    await axios.delete("/api/problems/", { data: { pids: selected.value } });
     selected.value = [];
     fetchProblems();
   } catch (err) {
-    console.error(err);
     alert(err.response?.data?.error || "批量删除失败");
   }
 };
 
-// 点击行选择
 const toggleSelect = (id) => {
   if (!selectMode.value) return;
   const idx = selected.value.indexOf(id);
@@ -86,12 +88,10 @@ const toggleSelect = (id) => {
 
 const changePage = (p) => {
   if (p >= 1 && p <= pages.value) {
-    page.value = p;
-    fetchProblems();
+    page.value = p; // 触发 watch
   }
 };
 
-// 类型映射函数
 const getTypeDisplayName = (type) => {
   const typeMap = {
     'single': '单选题',
@@ -104,7 +104,17 @@ const getTypeDisplayName = (type) => {
 };
 
 onMounted(fetchProblems);
+
+// 监听课程切换
+watch(() => userStore.currentCourseId, fetchProblems);
+
+// 监听分页/搜索，更新路由 + 请求数据
+watch([page, perPage, keyword], () => {
+  syncQueryToRouter();
+  fetchProblems();
+});
 </script>
+
 
 <template>
   <div class="problem-list-container">

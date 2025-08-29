@@ -1,19 +1,31 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import axios from "axios";
 
 const userStore = useUserStore();
 const router = useRouter();
+const route = useRoute();
+
 const problemsets = ref([]);
 const selected = ref([]);
-const page = ref(1);
-const perPage = ref(10);
+const page = ref(Number(route.query.page) || 1);   // 从路由取初始值
+const perPage = ref(Number(route.query.per_page) || 10);
 const total = ref(0);
 const pages = ref(1);
 const showSelect = ref(false);
-const keyword = ref(""); // 题单标题筛选
+const keyword = ref(route.query.keyword || "");   // 从路由取初始值
+
+const syncQueryToRouter = () => {
+  router.replace({
+    query: {
+      page: page.value,
+      per_page: perPage.value,
+      keyword: keyword.value || undefined,
+    },
+  });
+};
 
 const fetchProblemSets = async () => {
   const res = await axios.get("/api/problemsets/", {
@@ -29,20 +41,25 @@ const fetchProblemSets = async () => {
   pages.value = res.data.total_pages;
 };
 
+// 生命周期
 onMounted(fetchProblemSets);
+
+// 监听课程切换
 watch(() => userStore.currentCourseId, fetchProblemSets);
 
+// 监听 page/perPage/keyword，更新路由和数据
+watch([page, perPage, keyword], () => {
+  syncQueryToRouter();
+  fetchProblemSets();
+});
+
 const goDetail = (id) => {
-  // 检查用户是否是学生
   if (userStore.usertype === 'student') {
-    // 找到对应的题单
     const problemset = problemsets.value.find(ps => ps.id === id);
     if (problemset) {
       const now = new Date();
       const startTime = new Date(problemset.start_time);
       const endTime = new Date(problemset.end_time);
-      
-      // 如果题单未开始或已结束，则禁止学生点击
       if ((problemset.start_time && now < startTime) || (problemset.end_time && now > endTime)) {
         alert('该题单当前不可访问');
         return;
@@ -59,13 +76,12 @@ const deleteOne = async (id) => {
     await axios.delete("/api/problemsets/", { data: { ids: [id] } });
     fetchProblemSets();
   } catch (err) {
-    console.error(err);
     alert(err.response?.data?.error || "删除失败");
   }
 };
 
 const deleteBatch = async () => {
-  if (selected.value.length === 0) {
+  if (!selected.value.length) {
     alert("请先选择题单");
     return;
   }
@@ -75,7 +91,6 @@ const deleteBatch = async () => {
     selected.value = [];
     fetchProblemSets();
   } catch (err) {
-    console.error(err);
     alert(err.response?.data?.error || "批量删除失败");
   }
 };
@@ -95,12 +110,10 @@ const handleSelect = (id) => {
 
 const changePage = (p) => {
   if (p >= 1 && p <= pages.value) {
-    page.value = p;
-    fetchProblemSets();
+    page.value = p;  // 会触发 watch 自动更新路由 + 重新请求
   }
 };
 
-// 格式化时间显示
 const formatTime = (time) => {
   if (!time) return '无';
   return new Date(time).toLocaleString('zh-CN', {
@@ -113,6 +126,7 @@ const formatTime = (time) => {
   });
 };
 </script>
+
 
 <template>
   <div class="problemset-list-container">

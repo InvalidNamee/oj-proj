@@ -12,7 +12,7 @@ import "@/assets/pr7.css";
 const router = useRouter();
 const userStore = useUserStore();
 
-const props = defineProps({ 
+const props = defineProps({
   courseId: { type: Number, required: true },
   problemType: { type: String, default: "coding" }
 });
@@ -179,93 +179,172 @@ const handleProblemTypeChange = () => {
       <div class="add-coding-problem-main-content">
         <!-- 左侧表单区域 -->
         <div class="add-coding-problem-form-section">
-        <!-- 标题 & 描述 -->
-        <div class="add-coding-problem-form-group">
-          <label class="add-coding-problem-form-group-label">标题</label>
-          <input v-model="title" placeholder="请输入题目标题" class="add-coding-problem-input" />
-        </div>
-        
-        <div class="add-coding-problem-form-group">
-          <label class="add-coding-problem-form-group-label">题目描述</label>
-          <textarea v-model="description" rows="6" placeholder="请输入题目描述"
-            class="add-coding-problem-textarea" />
-        </div>
-        
-        <div class="add-coding-problem-grid">
+          <!-- 标题 & 描述 -->
           <div class="add-coding-problem-form-group">
-            <label class="add-coding-problem-form-group-label">输入格式</label>
-            <textarea v-model="inputFormat" placeholder="请输入输入格式" class="add-coding-problem-textarea format-input" rows="4" />
+            <label class="add-coding-problem-form-group-label">标题</label>
+            <input v-model="title" placeholder="请输入题目标题" class="add-coding-problem-input" />
           </div>
-          
-          <div class="add-coding-problem-form-group">
-            <label class="add-coding-problem-form-group-label">输出格式</label>
-            <textarea v-model="outputFormat" placeholder="请输入输出格式" class="add-coding-problem-textarea format-input" rows="4" />
-          </div>
-        </div>
-        
-        <div class="add-coding-problem-form-group">
-          <label class="add-coding-problem-form-group-label">说明 / Notes</label>
-          <textarea v-model="notes" rows="3" placeholder="请输入说明或备注"
-            class="add-coding-problem-textarea" />
-        </div>
-        
-        <!-- 时间限制和空间限制 -->
-        <div class="add-coding-problem-grid">
-          <div class="add-coding-problem-form-group">
-            <label class="add-coding-problem-form-group-label">时间限制 (s)</label>
-            <input v-model="maxTime" type="number" placeholder="请输入时间限制" class="add-coding-problem-input" />
-          </div>
-          
-          <div class="add-coding-problem-form-group">
-            <label class="add-coding-problem-form-group-label">空间限制 (MB)</label>
-            <input v-model="maxMemory" type="number" placeholder="请输入空间限制" class="add-coding-problem-input" />
-          </div>
-        </div>
 
-        <!-- 样例和测试用例 -->
-        <EditableTestCases v-model="samples" title="样例" />
-        <EditableTestCases v-model="testCases" title="测试用例" />
-        
-        <!-- 标程 -->
-        <div class="monaco-editor-container">
-          <MonacoEditor v-model="referenceSolution" />
-        </div>
-        
-        <!-- 提交和自测按钮 -->
-        <div class="add-coding-problem-buttons-container">
-          <button class="add-coding-problem-submit-button" @click="submit" :disabled="submitting">
-            {{ submitting ? '提交中…' : '提交题目' }}
-          </button>
-          <button class="add-coding-problem-submit-button" @click="runSelfCheck" :disabled="submitting">
-            {{ submitting ? '自测中…' : '运行自测' }}
-          </button>
-        </div>
-      </div>
-      </div>
-      
-      <!-- 自测结果 -->
-      <div v-if="selfCheckResult" class="self-check-result">
-        <h4>自测结果: {{ selfCheckResult.status }}</h4>
-        <p v-if="selfCheckResult.score !== undefined">得分: {{ selfCheckResult.score }}</p>
-        <div v-for="r in selfCheckResult.result || []" :key="r.name" class="self-check-result-item">
-          <p>用例 {{ r.name }} - {{ r.status }}</p>
-          <p v-if="r.diff" class="text-red-500 whitespace-pre-line">{{ r.diff }}</p>
-          <p v-if="r.time">时间: {{ r.time }} ms</p>
-          <p v-if="r.memory">内存: {{ r.memory }} KB</p>
+          <div class="add-coding-problem-form-group">
+            <label class="add-coding-problem-form-group-label">题目描述</label>
+            <textarea v-model="description" rows="6" placeholder="请输入题目描述" class="add-coding-problem-textarea" />
+          </div>
+
+          <div class="add-coding-problem-grid">
+            <div class="add-coding-problem-form-group">
+              <label class="add-coding-problem-form-group-label">输入格式</label>
+              <textarea v-model="inputFormat" placeholder="请输入输入格式" class="add-coding-problem-textarea format-input"
+                rows="4" />
+            </div>
+
+            <div class="add-coding-problem-form-group">
+              <label class="add-coding-problem-form-group-label">输出格式</label>
+              <textarea v-model="outputFormat" placeholder="请输入输出格式" class="add-coding-problem-textarea format-input"
+                rows="4" />
+            </div>
+          </div>
+
+          <div class="add-coding-problem-form-group">
+            <label class="add-coding-problem-form-group-label">说明 / Notes</label>
+            <textarea v-model="notes" rows="3" placeholder="请输入说明或备注" class="add-coding-problem-textarea" />
+          </div>
+
+          <!-- 时间限制和空间限制 -->
+          <div class="add-coding-problem-grid">
+            <div class="add-coding-problem-form-group">
+              <label class="add-coding-problem-form-group-label">时间限制 (s)</label>
+              <input v-model="maxTime" type="number" placeholder="请输入时间限制" class="add-coding-problem-input" />
+            </div>
+
+            <div class="add-coding-problem-form-group">
+              <label class="add-coding-problem-form-group-label">空间限制 (MB)</label>
+              <input v-model="maxMemory" type="number" placeholder="请输入空间限制" class="add-coding-problem-input" />
+            </div>
+          </div>
+
+          <!-- 样例和测试用例 -->
+          <EditableTestCases v-model="samples" title="样例" />
+          <EditableTestCases v-model="testCases" title="测试用例" />
+
+          <!-- 标程 -->
+          <div class="monaco-editor-container">
+            <MonacoEditor v-model="referenceSolution" />
+          </div>
+
+          <!-- 提交和自测按钮 -->
+          <div class="add-coding-problem-buttons-container">
+            <button class="add-coding-problem-submit-button" @click="submit" :disabled="submitting">
+              {{ submitting ? '提交中…' : '提交题目' }}
+            </button>
+            <button class="add-coding-problem-submit-button" @click="runSelfCheck" :disabled="submitting">
+              {{ submitting ? '自测中…' : '运行自测' }}
+            </button>
+          </div>
+
+
+          <!-- 自测结果 -->
+          <div v-if="selfCheckResult" class="problem-detail-status mt-4" :class="selfCheckResult.status">
+            {{ selfCheckResult.status }}
+            <template
+              v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(selfCheckResult.status) && selfCheckResult.score !== null">
+              得分: {{ selfCheckResult.score }}
+            </template>
+            <!-- 显示具体测试点错误信息 -->
+            <div v-if="selfCheckResult.result && selfCheckResult.result.length > 0" class="test-case-details">
+              <div v-for="(test, index) in selfCheckResult.result" :key="index" class="test-case-item"
+                :class="test.status">
+                <div class="test-case-header">
+                  <span class="test-case-name">测试点 {{ test.name }}: {{ test.status }}</span>
+                  <span v-if="test.memory" class="test-case-memory">内存: {{ test.memory }} KB</span>
+                  <span v-if="test.time" class="test-case-time">时间: {{ test.time }} ms</span>
+                </div>
+                <div v-if="test.diff" class="test-case-diff">
+                  <pre>{{ test.diff }}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    
+
     <!-- 右侧Gemini生成题目部分 -->
     <div class="add-coding-problem-right-section">
       <!-- GeminiPrompt -->
       <div class="gemini-container">
-        <GeminiPrompt
-          @update:problem="updateProblem"
-          @update:test_cases="updateTestCases"
-          @update:reference_solution="updateReferenceSolution"
-        />
+        <GeminiPrompt @update:problem="updateProblem" @update:test_cases="updateTestCases"
+          @update:reference_solution="updateReferenceSolution" />
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.test-case-details {
+  margin-top: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.test-case-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.test-case-item:last-child {
+  border-bottom: none;
+}
+
+.test-case-item.AC {
+  background-color: #f0fff0;
+  color: green;
+}
+
+.test-case-item.WA {
+  background-color: #fff0f0;
+}
+
+.test-case-item.TLE,
+.test-case-item.MLE {
+  background-color: #fff8f0;
+}
+
+.test-case-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-weight: bold;
+}
+
+.test-case-name {
+  flex: 1;
+}
+
+.test-case-memory,
+.test-case-time {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.test-case-diff {
+  margin-top: 5px;
+  padding: 8px;
+  background-color: #f8f8f8;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.test-case-diff pre {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+</style>

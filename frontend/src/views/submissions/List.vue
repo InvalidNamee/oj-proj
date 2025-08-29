@@ -2,7 +2,7 @@
 import '@/assets/submissions.css';
 import { ref, onMounted, watch } from "vue"
 import axios from "axios"
-import { useRouter } from "vue-router"
+import { useRouter, useRoute } from "vue-router"
 import StatusBadge from "@/components/StatusBadge.vue"
 import UserSelectModal from "@/components/UserSelectModal.vue"
 import CourseSelectModal from "@/components/CourseSelectModal.vue"
@@ -11,29 +11,41 @@ import { useUserStore } from "@/stores/user"
 
 const submissions = ref([])
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()  // 当前用户信息
 
-// 筛选条件
+// 筛选条件 —— 从 URL query 初始化
 const filters = ref({
-  user_id: "",
-  problem_id: "",
-  problem_set_id: "",
+  user_id: route.query.user_id || "",
+  problem_id: route.query.problem_id || "",
+  problem_set_id: route.query.problem_set_id || "",
 })
 
-// 课程选择弹窗控制
+// 弹窗控制
 const showCourseSelectModal = ref(false)
-
-// 用户选择弹窗控制
 const showUserSelectModal = ref(false)
-
-// 题单选择弹窗控制
 const showProblemSetSelectModal = ref(false)
 
-// 分页
-const page = ref(1)
-const perPage = ref(20)
+// 分页 —— 从 URL query 初始化
+const page = ref(Number(route.query.page) || 1)
+const perPage = ref(Number(route.query.per_page) || 20)
 const total = ref(0)
 const pages = ref(1)
+
+// 同步 query 到 URL
+const syncQueryToRouter = () => {
+  router.replace({
+    query: {
+      ...filters.value,
+      page: page.value,
+      per_page: perPage.value,
+      // 不存在的值不要带上
+      user_id: filters.value.user_id || undefined,
+      problem_id: filters.value.problem_id || undefined,
+      problem_set_id: filters.value.problem_set_id || undefined
+    }
+  })
+}
 
 // 获取数据
 const fetchSubmissions = async () => {
@@ -53,7 +65,21 @@ const fetchSubmissions = async () => {
   }
 }
 
-// 点击跳转到提交详情
+// 搜索按钮
+const doSearch = () => {
+  page.value = 1
+  syncQueryToRouter()
+  fetchSubmissions()
+}
+
+// 改变页码
+const changePage = (p) => {
+  if (p >= 1 && p <= pages.value) {
+    page.value = p
+  }
+}
+
+// 点击跳转
 const goDetail = (submission) => {
   if (userStore.usertype === 'student' && submission.user.id !== userStore.id) {
     alert("学生只能查看自己的提交详情")
@@ -61,38 +87,23 @@ const goDetail = (submission) => {
   }
   router.push(`/submissions/${submission.submission_id}`)
 }
-
-// 点击跳转到用户详情
-const goUser = (submission) => {
-  router.push(`/users/${submission.user.id}`)
-}
-
+const goUser = (submission) => router.push(`/users/${submission.user.id}`)
 const goProblem = (submission) => {
   router.push(`/problems/${submission.problem_id}?${submission.problem_set_id ? `psid=${submission.problem_set_id}` : ''}`)
 }
-
 const goProblemSet = (submission) => {
-  if (submission.problem_set_id) {
-    router.push(`/problemsets/${submission.problem_set_id}`)
-  }
-}
-
-// 改变页码
-const changePage = (p) => {
-  if (p >= 1 && p <= pages.value) {
-    page.value = p
-    fetchSubmissions()
-  }
-}
-
-// 搜索按钮
-const doSearch = () => {
-  page.value = 1
-  fetchSubmissions()
+  if (submission.problem_set_id) router.push(`/problemsets/${submission.problem_set_id}`)
 }
 
 onMounted(fetchSubmissions)
+
+// 监听分页、筛选变化，自动更新 URL 并拉数据
+watch([page, perPage, () => filters.value.user_id, () => filters.value.problem_id, () => filters.value.problem_set_id], () => {
+  syncQueryToRouter()
+  fetchSubmissions()
+})
 </script>
+
 
 <template>
   <div class="submissions-list-wrapper">
