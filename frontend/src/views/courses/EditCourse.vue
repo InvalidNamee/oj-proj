@@ -62,7 +62,7 @@ const saveCourse = async () => {
 </script>
 
 <template>
-  <div class="course-edit-container">
+  <div class="course-add-container">
     <h2 class="course-edit-title">编辑课程</h2>
 
     <div class="mb-4">

@@ -329,7 +329,7 @@
 
 /* Course add styles */
 .course-add-container {
-  max-width: 32rem; /* Reduced from 32rem */
+  max-width: 34rem; /* Reduced from 32rem */
   margin: 2rem auto; /* Reduced from 3rem */
   padding: 1.5rem; /* p-6 */
   background-color: #fff; /* bg-white */
@@ -422,7 +422,8 @@
 /* Course edit styles */
 .course-edit-container {
   padding: 1.5rem; /* p-6 */
-  max-width: 36rem; /* max-w-xl */
+  width: 30rem;
+  /* max-width: 36rem; max-w-xl */
   margin-left: auto; /* mx-auto */
   margin-right: auto; /* mx-auto */
   border: 1px solid #ffffff; /* white border */

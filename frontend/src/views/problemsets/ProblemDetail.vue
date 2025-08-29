@@ -204,7 +204,7 @@ const rejudgeProblem = async () => {
       <h3>输出格式</h3>
       <MarkdownArea :model-value="problem.description.output_format" />
 
-      <h3>说明</h3>
+      <h3>数据范围与提示</h3>
       <!-- <p v-html="problem.description.notes.replace(/\n/g, '<br/>')"></p> -->
       <MarkdownArea :model-value="problem.description.notes" />
 

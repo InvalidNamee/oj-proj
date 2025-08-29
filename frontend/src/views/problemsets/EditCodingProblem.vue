@@ -72,38 +72,49 @@ const submit = async () => {
 <template>
   <div class="edit-coding-problem-container">
     <!-- 标题 -->
-    <input v-model="title" placeholder="标题"
-      class="edit-coding-problem-input" />
+    <div class="add-coding-problem-form-group">
+      <label class="add-coding-problem-form-group-label">标题</label>
+      <input v-model="title" placeholder="请输入题目标题" class="add-coding-problem-input" />
+    </div>
 
-    <!-- 题目描述各个部分 -->
-    <textarea v-model="description.notes" rows="4" placeholder="Notes"
-      class="edit-coding-problem-textarea"></textarea>
-    <textarea v-model="description.description" rows="6" placeholder="题目描述"
-      class="edit-coding-problem-textarea"></textarea>
-    <textarea v-model="description.input_format" rows="4" placeholder="输入格式"
-      class="edit-coding-problem-textarea"></textarea>
-    <textarea v-model="description.output_format" rows="4" placeholder="输出格式"
-      class="edit-coding-problem-textarea"></textarea>
+    <div class="add-coding-problem-form-group">
+      <label class="add-coding-problem-form-group-label">题目描述</label>
+      <textarea v-model="description.description" rows="6" placeholder="请输入题目描述" class="add-coding-problem-textarea" />
+    </div>
+
+    <div class="add-coding-problem-grid">
+      <div class="add-coding-problem-form-group">
+        <label class="add-coding-problem-form-group-label">输入格式</label>
+        <textarea v-model="description.input_format" placeholder="请输入输入格式" class="add-coding-problem-textarea format-input"
+          rows="4" />
+      </div>
+
+      <div class="add-coding-problem-form-group">
+        <label class="add-coding-problem-form-group-label">输出格式</label>
+        <textarea v-model="description.output_format" placeholder="请输入输出格式" class="add-coding-problem-textarea format-input"
+          rows="4" />
+      </div>
+    </div>
+
+    <div class="add-coding-problem-form-group">
+      <label class="add-coding-problem-form-group-label">数据范围与提示</label>
+      <textarea v-model="description.notes" rows="3" placeholder="请输入数据范围与提示" class="add-coding-problem-textarea" />
+    </div>
 
     <!-- 样例 -->
     <EditableTestCases v-model="description.samples" title="样例" />
-    <!-- <div class="samples-editor">
-      <div v-for="(sample, index) in description.samples" :key="index" class="sample-item">
-        <input v-model="sample.input" placeholder="输入" class="edit-coding-problem-input" />
-        <input v-model="sample.output" placeholder="输出" class="edit-coding-problem-input" />
-      </div>
-      <button @click="description.samples.push({ input: '', output: '' })"
-        class="edit-coding-problem-button">
-        添加样例
-      </button>
-    </div> -->
 
     <!-- 限制 -->
-    <div class="edit-coding-problem-grid">
-      <input v-model="maxTime" type="number" placeholder="时间限制 (s)"
-        class="edit-coding-problem-input" />
-      <input v-model="maxMemory" type="number" placeholder="内存限制 (MB)"
-        class="edit-coding-problem-input" />
+    <div class="add-coding-problem-grid">
+      <div class="add-coding-problem-form-group">
+        <label class="add-coding-problem-form-group-label">时间限制 (s)</label>
+        <input v-model="maxTime" type="number" placeholder="请输入时间限制" class="add-coding-problem-input" />
+      </div>
+
+      <div class="add-coding-problem-form-group">
+        <label class="add-coding-problem-form-group-label">空间限制 (MB)</label>
+        <input v-model="maxMemory" type="number" placeholder="请输入空间限制" class="add-coding-problem-input" />
+      </div>
     </div>
 
     <!-- 课程选择 -->
@@ -112,8 +123,7 @@ const submit = async () => {
     </select>
 
     <!-- 提交按钮 -->
-    <button @click="submit" :disabled="submitting"
-      class="edit-coding-problem-button">
+    <button @click="submit" :disabled="submitting" class="edit-coding-problem-button">
       {{ submitting ? "提交中…" : "提交修改" }}
     </button>
   </div>

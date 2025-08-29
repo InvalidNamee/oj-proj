@@ -205,8 +205,8 @@ const handleProblemTypeChange = () => {
           </div>
 
           <div class="add-coding-problem-form-group">
-            <label class="add-coding-problem-form-group-label">说明 / Notes</label>
-            <textarea v-model="notes" rows="3" placeholder="请输入说明或备注" class="add-coding-problem-textarea" />
+            <label class="add-coding-problem-form-group-label">数据范围与提示</label>
+            <textarea v-model="notes" rows="3" placeholder="请输入数据范围与提示" class="add-coding-problem-textarea" />
           </div>
 
           <!-- 时间限制和空间限制 -->

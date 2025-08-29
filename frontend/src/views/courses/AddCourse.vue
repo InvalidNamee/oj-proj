@@ -53,12 +53,12 @@ const submitCourse = async () => {
 
     <div class="mb-4">
       <label class="course-add-label">课程名称</label>
-      <input v-model="courseName" class="course-add-input" placeholder="请输入课程名称" />
+      <input v-model="courseName" class="course-edit-input" placeholder="请输入课程名称" />
     </div>
 
     <div class="mb-4">
       <label class="course-add-label">课程描述</label>
-      <textarea v-model="courseDescription" class="course-add-textarea" placeholder="请输入课程描述"></textarea>
+      <textarea v-model="courseDescription" class="course-edit-textarea" placeholder="请输入课程描述"></textarea>
     </div>
 
     <TeacherSelector v-model="selectedTeacherIds" :teachers="teachers" class="mb-4" />
