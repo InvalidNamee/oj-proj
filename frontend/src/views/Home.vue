@@ -8,6 +8,7 @@ const userStore = useUserStore();
 const stats = ref({
   registeredUsers: 0,
   courses: 0,
+  problemTypeDistribution: [], // 题目类型分布数据
   announcements: [
     {
       id: 1,
@@ -30,6 +31,9 @@ const stats = ref({
   ]
 });
 
+// 用户增长数据
+const userGrowthData = ref([]);
+
 // 获取真实数据
 const fetchStats = async () => {
   try {
@@ -40,9 +44,162 @@ const fetchStats = async () => {
     // 获取课程总数
     const courseRes = await axios.get('/api/courses', { params: { per_page: 1 } });
     stats.value.courses = courseRes.data.total;
+    
+    // 获取用户增长趋势数据
+    await fetchUserGrowthData();
+    
+    // 获取题目类型分布数据
+    await fetchProblemTypeDistribution();
   } catch (err) {
     console.error('获取统计数据失败', err);
   }
+};
+
+// 获取用户增长趋势数据
+const fetchUserGrowthData = async () => {
+  try {
+    // 获取所有用户数据
+    const userRes = await axios.get('/api/users', { params: { per_page: 1000 } });
+    const users = userRes.data.users;
+    
+    // 按天统计用户注册数量
+    const growthData = {};
+    
+    // 获取最近30天的日期
+    const dates = [];
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      dates.push(dateStr);
+      growthData[dateStr] = 0;
+    }
+    
+    // 统计每天的注册用户数
+    users.forEach(user => {
+      const registerDate = new Date(user.timestamp);
+      const dateStr = registerDate.toISOString().split('T')[0];
+      if (growthData[dateStr] !== undefined) {
+        growthData[dateStr]++;
+      }
+    });
+    
+    // 计算累计用户数
+    let cumulativeCount = 0;
+    const cumulativeData = {};
+    dates.forEach(date => {
+      cumulativeCount += growthData[date];
+      cumulativeData[date] = cumulativeCount;
+    });
+    
+    // 转换为图表需要的格式
+    userGrowthData.value = dates.map(date => ({
+      date,
+      count: cumulativeData[date]
+    }));
+  } catch (err) {
+    console.error('获取用户增长数据失败', err);
+  }
+};
+
+// 获取题目类型分布数据
+const fetchProblemTypeDistribution = async () => {
+  try {
+    // 获取所有题目数据
+    const res = await axios.get('/api/problems/', { params: { per_page: 1000 } });
+    const problems = res.data.problems;
+    
+    // 统计各类型题目的数量
+    const typeCount = {};
+    problems.forEach(problem => {
+      const type = problem.type;
+      if (typeCount[type]) {
+        typeCount[type]++;
+      } else {
+        typeCount[type] = 1;
+      }
+    });
+    
+    // 转换为图表需要的格式
+    const typeDistribution = [];
+    for (const type in typeCount) {
+      typeDistribution.push({
+        type,
+        count: typeCount[type]
+      });
+    }
+    
+    stats.value.problemTypeDistribution = typeDistribution;
+  } catch (err) {
+    console.error('获取题目类型分布数据失败', err);
+  }
+};
+
+// 计算折线图的点坐标
+const getLinePoints = () => {
+  if (userGrowthData.value.length === 0) return '';
+  
+  const maxCount = getMaxCount();
+  const points = [];
+  
+  userGrowthData.value.forEach((item, index) => {
+    const x = getCircleX(index);
+    const y = getCircleY(item.count, maxCount);
+    points.push(`${x},${y}`);
+  });
+  
+  return points.join(' ');
+};
+
+// 计算数据点的X坐标
+const getCircleX = (index) => {
+  const totalPoints = userGrowthData.value.length;
+  if (totalPoints <= 1) return 200;
+  return 20 + (index * (360 / (totalPoints - 1)));
+};
+
+// 计算数据点的Y坐标
+const getCircleY = (count, maxCount = getMaxCount()) => {
+  if (maxCount === 0) return 200;
+  return 200 - (count / maxCount) * 200;
+};
+
+// 获取最大用户数
+const getMaxCount = () => {
+  if (userGrowthData.value.length === 0) return 0;
+  return Math.max(...userGrowthData.value.map(item => item.count));
+};
+
+// 获取X轴标签
+const getXAxisLabels = () => {
+  if (userGrowthData.value.length === 0) return [];
+  
+  const labels = [];
+  const totalPoints = userGrowthData.value.length;
+  
+  // 只显示部分标签以避免重叠
+  const step = Math.ceil(totalPoints / 6);
+  
+  for (let i = 0; i < totalPoints; i += step) {
+    const date = userGrowthData.value[i].date;
+    const dateObj = new Date(date);
+    const month = dateObj.getMonth() + 1;
+    const day = dateObj.getDate();
+    labels.push(`${month}/${day}`);
+  }
+  
+  return labels;
+};
+
+// 计算标签的X坐标
+const getLabelX = (index) => {
+  const labels = getXAxisLabels();
+  const totalPoints = userGrowthData.value.length;
+  if (totalPoints <= 1) return 200;
+  
+  const step = Math.ceil(totalPoints / 6);
+  const actualIndex = index * step;
+  return 20 + (actualIndex * (360 / (totalPoints - 1)));
 };
 
 const quickLinks = ref([
@@ -51,6 +208,84 @@ const quickLinks = ref([
   { name: '提交记录', path: '/submissions' },
   { name: '个人中心', path: `/users/${userStore.id}` }
 ]);
+
+// 类型映射函数
+const getTypeDisplayName = (type) => {
+  const typeMap = {
+    'single': '单选题',
+    'multiple': '多选题',
+    'fill': '填空题',
+    'subjective': '主观题',
+    'coding': '编程题'
+  };
+  return typeMap[type] || type;
+};
+
+// 获取饼图数据
+const getPieChartData = () => {
+  if (stats.value.problemTypeDistribution.length === 0) return [];
+  
+  // 计算总数
+  const total = stats.value.problemTypeDistribution.reduce((sum, item) => sum + item.count, 0);
+  
+  // 类型颜色映射
+  const colorMap = {
+    'coding': '#3b82f6',
+    'single': '#10b981',
+    'multiple': '#8b5cf6',
+    'fill': '#f59e0b',
+    'subjective': '#ef4444'
+  };
+  
+  // 计算每个扇形的角度
+  let startAngle = 0;
+  const pieData = [];
+  
+  stats.value.problemTypeDistribution.forEach(item => {
+    const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
+    const angle = (percentage / 100) * 360;
+    
+    // 计算扇形路径
+    const path = describeArc(100, 100, 80, startAngle, startAngle + angle);
+    
+    pieData.push({
+      type: item.type,
+      count: item.count,
+      percentage,
+      angle,
+      path,
+      color: colorMap[item.type] || '#cccccc'
+    });
+    
+    startAngle += angle;
+  });
+  
+  return pieData;
+};
+
+// 计算扇形路径的辅助函数
+function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+  return {
+    x: centerX + (radius * Math.cos(angleInRadians)),
+    y: centerY + (radius * Math.sin(angleInRadians))
+  };
+}
+
+function describeArc(x, y, radius, startAngle, endAngle) {
+  const start = polarToCartesian(x, y, radius, endAngle);
+  const end = polarToCartesian(x, y, radius, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+  
+  const d = [
+    "M", start.x, start.y,
+    "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+    "L", x, y,
+    "Z"
+  ].join(" ");
+  
+  return d;
+}
 
 onMounted(() => {
   fetchStats();
@@ -92,35 +327,35 @@ onMounted(() => {
           <div class="line-chart">
             <div class="chart-container">
               <div class="y-axis">
-                <span>1200</span>
-                <span>800</span>
-                <span>400</span>
+                <span>{{ getMaxCount() }}</span>
+                <span>{{ Math.floor(getMaxCount() * 0.75) }}</span>
+                <span>{{ Math.floor(getMaxCount() * 0.5) }}</span>
+                <span>{{ Math.floor(getMaxCount() * 0.25) }}</span>
                 <span>0</span>
               </div>
               <div class="chart-content">
                 <div class="line-graph">
                   <svg width="100%" height="200" viewBox="0 0 400 200">
                     <polyline
+                      v-if="userGrowthData.length > 0"
                       fill="none"
                       stroke="#3b82f6"
-                      stroke-width="3"
-                      points="0,150 80,100 160,80 240,50 320,30 400,20"
+                      stroke-width="2"
+                      :points="getLinePoints()"
                     />
-                    <circle cx="0" cy="150" r="4" fill="#3b82f6" />
-                    <circle cx="80" cy="100" r="4" fill="#3b82f6" />
-                    <circle cx="160" cy="80" r="4" fill="#3b82f6" />
-                    <circle cx="240" cy="50" r="4" fill="#3b82f6" />
-                    <circle cx="320" cy="30" r="4" fill="#3b82f6" />
-                    <circle cx="400" cy="20" r="4" fill="#3b82f6" />
+                    <!-- 数据点 -->
+                    <circle 
+                      v-for="(item, index) in userGrowthData" 
+                      :key="index" 
+                      :cx="getCircleX(index)" 
+                      :cy="getCircleY(item.count)" 
+                      r="4" 
+                      fill="#3b82f6" 
+                    />
                   </svg>
                 </div>
                 <div class="x-axis">
-                  <span>1月</span>
-                  <span>2月</span>
-                  <span>3月</span>
-                  <span>4月</span>
-                  <span>5月</span>
-                  <span>6月</span>
+                  <span v-for="(label, index) in getXAxisLabels()" :key="index">{{ label }}</span>
                 </div>
               </div>
             </div>
@@ -133,33 +368,17 @@ onMounted(() => {
           <div class="pie-chart">
             <div class="chart-container">
               <svg width="200" height="200" viewBox="0 0 200 200">
-                <!-- 编程题 - 45% (162度) -->
-                <path d="M100,100 L100,20 A80,80 0 1,1 35.8,155.8 Z" fill="#3b82f6" />
-                <!-- 选择题 - 30% (108度) -->
-                <path d="M100,100 L35.8,155.8 A80,80 0 1,1 144.2,155.8 Z" fill="#10b981" />
-                <!-- 填空题 - 20% (72度) -->
-                <path d="M100,100 L144.2,155.8 A80,80 0 1,1 176.6,76.6 Z" fill="#f59e0b" />
-                <!-- 主观题 - 15% (54度) -->
-                <path d="M100,100 L176.6,76.6 A80,80 0 1,1 100,20 Z" fill="#ef4444" />
+                <!-- 动态生成饼图扇形 -->
+                <template v-for="(item, index) in getPieChartData()" :key="index">
+                  <path :d="item.path" :fill="item.color" />
+                </template>
                 <!-- 中心圆 -->
                 <circle cx="100" cy="100" r="30" fill="white" />
               </svg>
               <div class="legend">
-                <div class="legend-item">
-                  <div class="legend-color" style="background-color: #3b82f6;"></div>
-                  <span>编程题 (45%)</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-color" style="background-color: #10b981;"></div>
-                  <span>选择题 (30%)</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-color" style="background-color: #f59e0b;"></div>
-                  <span>填空题 (20%)</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-color" style="background-color: #ef4444;"></div>
-                  <span>主观题 (15%)</span>
+                <div class="legend-item" v-for="(item, index) in getPieChartData()" :key="index">
+                  <div class="legend-color" :style="{ backgroundColor: item.color }"></div>
+                  <span>{{ getTypeDisplayName(item.type) }} ({{ item.percentage }}%)</span>
                 </div>
               </div>
             </div>
@@ -365,11 +584,39 @@ onMounted(() => {
 .y-axis {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   height: 200px;
   margin-right: 10px;
   color: #6b7280;
   font-size: 0.8rem;
+  position: relative;
+  top: -30px; /* 向上移动10像素 */
+}
+
+.y-axis span {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.y-axis span:nth-child(1) {
+  top: 0%;
+}
+
+.y-axis span:nth-child(2) {
+  top: 25%;
+}
+
+.y-axis span:nth-child(3) {
+  top: 50%;
+}
+
+.y-axis span:nth-child(4) {
+  top: 75%;
+}
+
+.y-axis span:nth-child(5) {
+  top: 100%;
 }
 
 .chart-content {
