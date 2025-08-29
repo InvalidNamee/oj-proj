@@ -62,13 +62,11 @@ onMounted(fetchSubmission)
 
 <template>
   <div class="submissions-list-wrapper">
-    <div class="submission-detail-container relative">
-      <button @click="rejudge" :disabled="submission?.status === 'Pending'"
-        class="submissions-search-button absolute top-2 right-2">
-        重判
-      </button>
-
+    <div class="submission-detail-container">
+    <div class="submission-detail-header">
       <h2 class="submission-detail-title">提交详情</h2>
+      <button class="rejudge-btn">重判</button>
+    </div>
 
       <div class="submission-detail-grid">
         <div class="submission-detail-info-item"><b>提交编号：</b>{{ submission?.submission_id }}</div>
@@ -162,5 +160,37 @@ onMounted(fetchSubmission)
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-all;
+}
+</style>
+
+<style scoped>
+.submission-detail-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.submission-detail-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.rejudge-btn {
+  position: absolute;
+  right: 0;
+}
+
+.rejudge-btn {
+  background-color: #f59e0b; /* 橙色 */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.rejudge-btn:hover {
+  background-color: #d97706; /* 深橙色 */
 }
 </style>

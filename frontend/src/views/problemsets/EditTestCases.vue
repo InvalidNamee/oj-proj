@@ -200,11 +200,14 @@ onMounted(fetchProblem);
   background-color: #e53e3e;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 12px 40px;
   border-radius: 6px;
   cursor: pointer;
   margin-top: 10px;
   transition: background-color 0.3s ease;
+  font-size: 16px;
+  text-align: center;
+  display: inline-block;
 }
 
 .edit-test-cases-delete-button:hover {
@@ -236,6 +239,8 @@ onMounted(fetchProblem);
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  text-align: center;
+  display: inline-block;
 }
 
 .edit-test-cases-upload-button:disabled {

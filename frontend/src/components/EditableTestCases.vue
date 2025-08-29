@@ -55,9 +55,9 @@ function removeCase(index) {
   <div class="space-y-4">
     <h3 v-if="title" class="text-base font-semibold text-gray-700">{{ title }}</h3>
 
-    <div v-for="(tc, index) in localCases" :key="tc.id" class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50">
+    <div v-for="(tc, index) in localCases" :key="tc.id" class="space-y-2 p-3 bg-gray-50">
       <div class="flex justify-between items-center text-sm text-gray-600">
-        <span class="font-medium">{{ title }} {{ index + 1 }}</span>
+        <span class="font-medium">{{ title }} #{{ index + 1 }}</span>
       </div>
 
       <div>
@@ -65,7 +65,7 @@ function removeCase(index) {
         <textarea
           v-model="tc.input"
           @input="updateCase(index, 'input', $event.target.value)"
-          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300"
+          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300 custom-textarea-width"
           rows="2"
         ></textarea>
       </div>
@@ -75,7 +75,7 @@ function removeCase(index) {
         <textarea
           v-model="tc.output"
           @input="updateCase(index, 'output', $event.target.value)"
-          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300"
+          class="w-full rounded-md p-1.5 text-sm focus:outline-none bg-white border border-gray-300 custom-textarea-width"
           rows="2"
         ></textarea>
       </div>
@@ -86,7 +86,7 @@ function removeCase(index) {
     </div>
 
     <button @click="addCase" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-      添加自测样例{{ title }}
+      添加{{ title }}
     </button>
   </div>
 </template>

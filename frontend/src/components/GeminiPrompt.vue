@@ -77,7 +77,6 @@ const generateProblem = async () => {
   max-width: 600px;
   margin: 0 auto;
   padding: 16px;
-  border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #fafafa;
 }

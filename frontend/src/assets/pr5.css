@@ -36,10 +36,10 @@
 }
 
 .edit-coding-problem-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); /* grid-cols-2 */
-  gap: 78px; /* 减小间距 */
-  width:500px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 500px;
 }
 
 .edit-coding-problem-select {

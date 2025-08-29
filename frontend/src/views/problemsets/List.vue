@@ -115,7 +115,7 @@ const formatTime = (time) => {
       <!-- 右侧操作按钮 -->
       <div class="flex items-center space-x-2">
         <button @click="router.push('/problemsets/add')"
-          class="problemset-list-button problemset-list-primary-button">
+          class="problemset-list-button problemset-list-primary-button-green">
           新建题单
         </button>
         <button @click="showSelect = !showSelect; selected = []"

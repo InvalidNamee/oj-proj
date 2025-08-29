@@ -12,6 +12,19 @@ const router = useRouter()
 const id = route.params.id
 const problemset = ref({})
 
+// 格式化时间显示
+const formatTime = (time) => {
+  if (!time) return '无';
+  return new Date(time).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
+
 async function fetchProblemset() {
   const res = await axios.get(`/api/problemsets/${id}`)
   problemset.value = res.data
@@ -37,6 +50,12 @@ onMounted(fetchProblemset)
       <span>创建时间：{{ problemset.timestamp }}</span>
       <button class="problemset-detail-ranklist-button" @click="router.push(`/problemsets/${id}/ranklist`)">排行榜</button>
     </p>
+
+    <!-- 起止时间 -->
+    <div class="problemset-detail-times">
+      <p><strong>开始时间：</strong>{{ formatTime(problemset.start_time) }}</p>
+      <p><strong>结束时间：</strong>{{ formatTime(problemset.end_time) }}</p>
+    </div>
 
     <!-- 描述 markdown-it 渲染 -->
     <MarkdownArea :model-value="problemset.description" />
@@ -78,5 +97,18 @@ onMounted(fetchProblemset)
 <style scoped>
 .prose {
   line-height: 1.7;
+}
+
+.problemset-detail-times {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.problemset-detail-times p {
+  margin: 5px 0;
+  font-size: 16px;
 }
 </style>
