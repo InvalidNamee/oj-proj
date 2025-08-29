@@ -72,15 +72,17 @@ const submit = async () => {
       <!-- 课程显示 -->
       <div>
         <label class="add-problemset-label">所属课程</label>
-        <input
-          type="text"
-          :value="courseName"
-          disabled
-          class="add-problemset-course-input"
-        />
-        <p class="text-xs text-gray-500 mt-1">
-          题单必须绑定课程，如需更改，请先切换当前课程。
-        </p>
+        <div class="add-problemset-course-input-container">
+          <input
+            type="text"
+            :value="courseName"
+            disabled
+            class="add-problemset-course-input"
+          />
+          <p class="add-problemset-course-info">
+            题单必须绑定课程，如需更改，请先切换当前课程。
+          </p>
+        </div>
       </div>
 
       <!-- 题目选择器 -->

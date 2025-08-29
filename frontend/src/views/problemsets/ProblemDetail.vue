@@ -204,6 +204,10 @@ const rejudgeProblem = async () => {
       <h3>输出格式</h3>
       <MarkdownArea :model-value="problem.description.output_format" />
 
+      <h3>说明</h3>
+      <!-- <p v-html="problem.description.notes.replace(/\n/g, '<br/>')"></p> -->
+      <MarkdownArea :model-value="problem.description.notes" />
+
       <!-- 样例 -->
       <div v-if="problem.description.samples?.length">
         <h3>样例</h3>
@@ -224,10 +228,6 @@ const rejudgeProblem = async () => {
           </div>
         </div>
       </div>
-
-      <h3>说明</h3>
-      <!-- <p v-html="problem.description.notes.replace(/\n/g, '<br/>')"></p> -->
-      <MarkdownArea :model-value="problem.description.notes" />
     </div>
     </div>
     <div v-else>
@@ -254,6 +254,21 @@ const rejudgeProblem = async () => {
             v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(submissionStatus.status) && submissionStatus.score !== null">
             得分: {{ submissionStatus.score }}
           </template>
+          <!-- 显示具体测试点错误信息 -->
+          <div v-if="submissionStatus.result && submissionStatus.result.length > 0" class="test-case-details">
+            <div v-for="(test, index) in submissionStatus.result" :key="index" 
+                 class="test-case-item" 
+                 :class="test.status">
+              <div class="test-case-header">
+                <span class="test-case-name">测试点 {{ test.name }}: {{ test.status }}</span>
+                <span v-if="test.memory" class="test-case-memory">内存: {{ test.memory }} KB</span>
+                <span v-if="test.time" class="test-case-time">时间: {{ test.time }} ms</span>
+              </div>
+              <div v-if="test.diff" class="test-case-diff">
+                <pre>{{ test.diff }}</pre>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="self-test-section">
           <h3 class="self-test-title">代码自测区</h3>
@@ -274,6 +289,21 @@ const rejudgeProblem = async () => {
             v-if="['WA', 'TLE', 'MLE', 'OLE', 'RE'].includes(submissionStatus.status) && submissionStatus.score !== null">
             得分: {{ submissionStatus.score }}
           </template>
+          <!-- 显示具体测试点错误信息 -->
+          <div v-if="submissionStatus.result && submissionStatus.result.length > 0" class="test-case-details">
+            <div v-for="(test, index) in submissionStatus.result" :key="index" 
+                 class="test-case-item" 
+                 :class="test.status">
+              <div class="test-case-header">
+                <span class="test-case-name">测试点 {{ test.name }}: {{ test.status }}</span>
+                <span v-if="test.memory" class="test-case-memory">内存: {{ test.memory }} KB</span>
+                <span v-if="test.time" class="test-case-time">时间: {{ test.time }} ms</span>
+              </div>
+              <div v-if="test.diff" class="test-case-diff">
+                <pre>{{ test.diff }}</pre>
+              </div>
+            </div>
+          </div>
         </div>
       </template>
 
@@ -390,5 +420,72 @@ pre.sample-pre {
 .self-test-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* 测试点详细信息样式 */
+.test-case-details {
+  margin-top: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.test-case-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.test-case-item:last-child {
+  border-bottom: none;
+}
+
+.test-case-item.AC {
+  background-color: #f0fff0;
+  color: green;
+}
+
+.test-case-item.WA {
+  background-color: #fff0f0;
+}
+
+.test-case-item.TLE, .test-case-item.MLE {
+  background-color: #fff8f0;
+}
+
+.test-case-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-weight: bold;
+}
+
+.test-case-name {
+  flex: 1;
+}
+
+.test-case-memory, .test-case-time {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.test-case-diff {
+  margin-top: 5px;
+  padding: 8px;
+  background-color: #f8f8f8;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.test-case-diff pre {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 </style>

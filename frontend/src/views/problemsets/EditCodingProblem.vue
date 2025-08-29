@@ -3,7 +3,7 @@ import { ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { useUserStore } from "@/stores/user";
-import TestCases from "@/components/TestCases.vue";
+import EditableTestCases from "@/components/EditableTestCases.vue";
 import "@/assets/problemsets.css";
 import "@/assets/pr5.css";
 
@@ -86,7 +86,7 @@ const submit = async () => {
       class="edit-coding-problem-textarea"></textarea>
 
     <!-- 样例 -->
-    <TestCases v-model="description.samples" />
+    <EditableTestCases v-model="description.samples" title="样例" />
     <!-- <div class="samples-editor">
       <div v-for="(sample, index) in description.samples" :key="index" class="sample-item">
         <input v-model="sample.input" placeholder="输入" class="edit-coding-problem-input" />
