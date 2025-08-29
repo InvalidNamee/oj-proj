@@ -34,7 +34,7 @@ const downloadRanklist = () => {
 
 <template>
   <div class="ranklist-container">
-    <h2 class="ranklist-title">题单排行榜</h2>
+    <h2 class="ranklist-title">排行榜</h2>
     <button
       v-if="userStore.usertype !== 'student'"
       @click="downloadRanklist"

@@ -138,25 +138,6 @@ onMounted(fetchSubmission)
 </template>
 
 <style scoped>
-/* .submission-detail-tests-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-  background: #fff;
-}
-.submission-detail-tests-th, .submission-detail-tests-td {
-  border: 1px solid #e5e7eb;
-  padding: 8px 12px;
-  text-align: left;
-  font-size: 14px;
-}
-.submission-detail-tests-th {
-  background: #f3f4f6;
-  font-weight: 600;
-}
-.submission-detail-tests-tbody-tr {
-  background: #fff;
-} */
 .diff-toggle-btn {
   margin-left: 8px;
   color: #2563eb;

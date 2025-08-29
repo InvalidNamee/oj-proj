@@ -70,7 +70,7 @@ onMounted(() => {
     <h2 class="user-import-title">批量导入用户</h2>
 
     <div class="user-import-instructions">
-      <p>Excel文件第一行必须是：<br><strong class="user-import-field-names">username gender profession 班级 uid password school usertype</strong></p>
+      <p>Excel 必须包含列名<br><strong class="user-import-field-names">username profession uid password school usertype</strong></p>
       <p>然后就可以在下方相应填写信息。</p>
       <p><strong>注意：</strong></p>
       <ul>
