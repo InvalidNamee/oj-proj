@@ -146,7 +146,7 @@ watch(() => userStore.currentCourseId, fetchProblemSets);
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  min-height:35rem;
+  min-height:60rem;
 }
 
 .problemset-title {
@@ -183,6 +183,7 @@ watch(() => userStore.currentCourseId, fetchProblemSets);
 .problemset-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-auto-rows: 1fr;
   gap: 25px;
 }
 
@@ -196,6 +197,9 @@ watch(() => userStore.currentCourseId, fetchProblemSets);
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
 }
 
 .problemset-item:hover {
