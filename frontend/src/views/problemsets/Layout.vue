@@ -9,7 +9,7 @@ const userStore = useUserStore();
 const views = ref([
     { name: '题单列表', path: '/problemsets'},
     { name: '题目列表', path: '/problems' },
-    { name: '创建题单', path: '/problemsets/add'},
+    { name: '新建题单', path: '/problemsets/add'},
     { name: '新建题目', path: '/problems/add' },
 ])
 </script>

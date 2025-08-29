@@ -93,7 +93,7 @@ const submit = async () => {
         @click="submit"
         class="add-problemset-button"
       >
-        创建题单
+        新建题单
       </button>
     </div>
   </div>
