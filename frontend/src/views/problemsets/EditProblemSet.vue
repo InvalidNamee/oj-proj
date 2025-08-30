@@ -99,7 +99,7 @@ onMounted(fetchProblemSet);
 
       <!-- Coding 题目选择器 -->
       <div>
-        <label class="edit-problem-set-label">选择代码题</label>
+        <label class="edit-problem-set-label">选题</label>
         <ProblemSelector v-model="Selected" />
       </div>
 

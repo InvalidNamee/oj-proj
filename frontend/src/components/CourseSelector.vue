@@ -1,25 +1,18 @@
 <script setup>
 import '@/assets/components.css'
-import { defineProps, defineEmits, watch, ref } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps({
-  courses: { type: Array, default: () => [] },        // 可选课程列表 [{id, name}, ...]
-  modelValue: { type: Array, default: () => [] }     // 初始选中的课程 id 列表
+  courses: { type: Array, default: () => [] },
+  modelValue: { type: Array, default: () => [] }
 });
 
 const emits = defineEmits(['update:modelValue']);
 
-// 本地选中状态
-const selected = ref([...props.modelValue]);
-
-// 当本地选中改变时通知父组件
-watch(selected, (val) => {
-  emits('update:modelValue', val);
-});
-
-// 当父组件传入的modelValue改变时，更新本地选中状态
-watch(() => props.modelValue, (newVal) => {
-  selected.value = [...newVal];
+// computed 代理，避免双向 watch 循环
+const selected = computed({
+  get: () => props.modelValue,
+  set: (val) => emits('update:modelValue', val)
 });
 </script>
 

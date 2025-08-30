@@ -87,7 +87,7 @@ const submit = async () => {
 
       <!-- 题目选择器 -->
       <div>
-        <label class="add-problemset-label">选择代码题</label>
+        <label class="add-problemset-label">选题</label>
         <ProblemSelector v-model="Selected" />
       </div>
 
